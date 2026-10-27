@@ -35,16 +35,30 @@
 
   function getSlug() {
 
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const requestedSlug =
+    params.get(PREVIEW_PARAMETER);
+
+  if (requestedSlug) {
 
     return String(
-      params.get(PREVIEW_PARAMETER) || ""
+      requestedSlug
     ).trim();
 
   }
+
+  /*
+   * Club affiché par défaut
+   * sur le site de test.
+   */
+
+  return "eah-club-demo-1793054157740";
+
+}
 
 
   function getPublicKey() {
