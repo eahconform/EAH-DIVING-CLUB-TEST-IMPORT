@@ -2,7 +2,51 @@
 <html lang="fr" class="eah-images-loading">
 
 <head>
+<!-- =====================================================
+     EAH DIVING CLUB — CHARGEMENT PERSONNALISÉ V1
+     Uniquement pour le site de test
+===================================================== -->
 
+<script>
+(function () {
+  "use strict";
+
+  const DEFAULT_CLUB =
+    "eah-club-demo-1793054157740";
+
+  const params =
+    new URLSearchParams(window.location.search);
+
+  const requestedClub =
+    params.get("eah_club_preview");
+
+  const clubSlug =
+    requestedClub || DEFAULT_CLUB;
+
+  if (clubSlug) {
+    document.documentElement.classList.add(
+      "eah-club-loading"
+    );
+  }
+})();
+</script>
+
+<style id="eah-club-loading-style">
+
+  html.eah-club-loading body {
+    visibility: hidden !important;
+  }
+
+  html.eah-club-loading
+  #eah-club-preview-root-v1 {
+    visibility: visible !important;
+  }
+
+  html.eah-club-loading {
+    background: #03131f !important;
+  }
+
+</style>
 <style id="eah-club-visibility-guard">
 
   html:not(.eah-page-club) #eah-club-pro,
