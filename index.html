@@ -33,6 +33,10 @@
 
 <style id="eah-club-loading-style">
 
+  html.eah-club-loading {
+    background: #03131f !important;
+  }
+
   html.eah-club-loading body {
     visibility: hidden !important;
   }
@@ -42,8 +46,30 @@
     visibility: visible !important;
   }
 
-  html.eah-club-loading {
-    background: #03131f !important;
+  html.eah-club-loading
+  #eah-club-preview-root-v1 * {
+    visibility: visible !important;
+  }
+
+  html.eah-club-loading body::before {
+    content: "EAH DIVING";
+    position: fixed;
+    inset: 0;
+    z-index: 2147482999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #03131f;
+    color: #35caff;
+    font: bold 28px Arial, sans-serif;
+    letter-spacing: 3px;
+    visibility: visible !important;
+  }
+
+  html.eah-club-loading:has(
+    #eah-club-preview-root-v1
+  ) body::before {
+    display: none;
   }
 
 </style>
