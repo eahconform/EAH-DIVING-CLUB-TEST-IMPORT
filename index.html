@@ -2,6 +2,27 @@
 <html lang="fr" class="eah-images-loading">
 
 <head>
+<!-- EAH DIVING CLUB — OUVERTURE DIRECTE V2 -->
+<script id="eah-club-v2-entry">
+(function () {
+  "use strict";
+
+  const destination = new URL(
+    "./club.html",
+    window.location.href
+  );
+
+  // Conserve le club demandé dans l'URL.
+  destination.search = window.location.search;
+
+  // Conserve l'ancre éventuelle.
+  destination.hash = window.location.hash;
+
+  // Remplace l'ancienne page sans créer
+  // une étape supplémentaire dans l'historique.
+  window.location.replace(destination.href);
+})();
+</script>     
 <!-- =====================================================
      EAH DIVING CLUB — CHARGEMENT PERSONNALISÉ V1
      Uniquement pour le site de test
