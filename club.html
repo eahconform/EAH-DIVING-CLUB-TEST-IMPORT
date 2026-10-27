@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<meta
+  name="theme-color"
+  content="#03131f"
+>
+
+<title>EAH Diving — Club</title>
+
+<!-- ============================================
+     EAH DIVING CLUB
+     SITE INDEPENDANT V1
+
+     Aucun chargement de l'ancien site.
+     Aucun chargement des modules NFC.
+     Aucun chargement des anciens styles.
+============================================ -->
+
+<style>
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: #03131f;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  #eah-club-loading {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 25px;
+    text-align: center;
+  }
+
+  .eah-loading-content {
+    max-width: 500px;
+  }
+
+  .eah-loading-logo {
+    color: #35caff;
+    font-size: clamp(25px, 6vw, 42px);
+    font-weight: 900;
+    letter-spacing: 3px;
+  }
+
+  .eah-loading-text {
+    margin-top: 20px;
+    color: #b7cfe2;
+    font-size: 16px;
+  }
+
+  .eah-loading-spinner {
+    width: 45px;
+    height: 45px;
+    margin: 30px auto;
+
+    border: 4px solid rgba(255,255,255,.15);
+    border-top-color: #35caff;
+    border-radius: 50%;
+
+    animation: eah-spin 1s linear infinite;
+  }
+
+  @keyframes eah-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+</style>
+
+<!-- ============================================
+     CONFIGURATION PUBLIQUE SUPABASE
+
+     Clé publique uniquement.
+     Ne jamais utiliser service_role ici.
+============================================ -->
+
+<script>
+
+window.EAH_CONFIG = {
+
+  APP_NAME:
+    "EAH DIVING CLUB",
+
+  VERSION:
+    "8.0.0",
+
+  SUPABASE_URL:
+    "https://limyeqpdzjjwsdximehp.supabase.co",
+
+  SUPABASE_PUBLISHABLE_KEY:
+    "sb_publishable_K9iUm_0Qhea65P1Zt6rbXQ_BXQCzJ9w"
+
+};
+
+</script>
+
+<!-- ============================================
+     MODULE DE PERSONNALISATION
+
+     Le script existant lit :
+     - le club
+     - sa configuration
+     - ses pages
+     - ses blazons
+============================================ -->
+
+<script
+  defer
+  src="eah-club-preview-v1.js?v=3"
+></script>
+
+</head>
+
+<body>
+
+<div
+  id="eah-club-loading"
+  role="status"
+>
+
+  <div class="eah-loading-content">
+
+    <div class="eah-loading-logo">
+      EAH DIVING
+    </div>
+
+    <div class="eah-loading-spinner"></div>
+
+    <div class="eah-loading-text">
+      Chargement de votre club...
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+
+</html>
