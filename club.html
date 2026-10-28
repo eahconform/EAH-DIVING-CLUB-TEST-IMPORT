@@ -508,7 +508,75 @@ function renderBadges(section){
 
   section.appendChild(grid);
 }
+/* ==========================================
+   EAH — AFFICHAGE DES DISCIPLINES
+========================================== */
 
+function EAH_RENDER_DISCIPLINES(page, section) {
+
+  const disciplines =
+    page.settings?.disciplines || [];
+
+  if (!Array.isArray(disciplines)) return;
+
+  if (!disciplines.length) {
+    section.appendChild(
+      element(
+        "p",
+        "muted",
+        "Aucune discipline renseignée."
+      )
+    );
+    return;
+  }
+
+  const grid = element("div", "cards");
+
+  disciplines.forEach(discipline => {
+
+    const card = element("article", "card");
+
+    const nom = element(
+      "h3",
+      "",
+      discipline.nom || "Discipline"
+    );
+
+    card.appendChild(nom);
+
+    if (discipline.description) {
+      card.appendChild(
+        element(
+          "p",
+          "muted",
+          discipline.description
+        )
+      );
+    }
+
+    const imageUrl = safeImage(
+      discipline.image_url
+    );
+
+    if (imageUrl) {
+
+      const img = element("img");
+
+      img.src = imageUrl;
+      img.alt = discipline.nom || "Discipline";
+      img.loading = "lazy";
+
+      card.prepend(img);
+
+    }
+
+    grid.appendChild(card);
+
+  });
+
+  section.appendChild(grid);
+
+}
 function renderStandardPage(page,section){
   if(page.description){
     section.appendChild(
@@ -546,7 +614,9 @@ function renderStandardPage(page,section){
     v.preload="metadata";
     section.appendChild(v);
   }
-
+if (page.slug === "disciplines") {
+  EAH_RENDER_DISCIPLINES(page, section);
+}
   if(page.slug==="blazons")
     renderBadges(section);
 
