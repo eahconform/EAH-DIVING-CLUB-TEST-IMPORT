@@ -917,8 +917,259 @@ function renderEspaceClub(section){
 /* =========================================
    TABLEAU DE BORD RESPONSABLE
 ========================================= */
+/* =====================================================
+   EAH DIVING — IMPORT LOGO CLUB
+   Supabase Storage
+   Réservé aux responsables connectés
+===================================================== */
 
+function EAH_LOGO_RENDER_UPLOAD(container) {
+
+  if (!isManager()) return;
+
+  const box = document.createElement("div");
+
+  box.className = "panel";
+
+  box.style.marginTop = "20px";
+
+  const title = document.createElement("h3");
+  title.textContent = "Personnaliser mon club";
+
+  const description = document.createElement("p");
+
+  description.textContent =
+    "Importez votre logo JPG, PNG ou WebP " +
+    "(maximum 3 Mo).";
+
+  const input = document.createElement("input");
+
+  input.type = "file";
+
+  input.accept = "image/png,image/jpeg,image/webp";
+
+  const preview = document.createElement("img");
+
+  preview.alt = "Aperçu du logo";
+
+  preview.style.maxWidth = "180px";
+  preview.style.maxHeight = "180px";
+  preview.style.objectFit = "contain";
+  preview.style.display = "none";
+  preview.style.margin = "15px 0";
+
+  const save = document.createElement("button");
+
+  save.type = "button";
+  save.className = "primary-button";
+  save.textContent = "Enregistrer mon logo";
+
+  const feedback = document.createElement("p");
+
+  let previewUrl = "";
+
+  input.addEventListener("change", () => {
+
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      previewUrl = "";
+    }
+
+    const file = input.files[0];
+
+    preview.style.display = "none";
+
+    if (!file) return;
+
+    if (![
+      "image/png",
+      "image/jpeg",
+      "image/webp"
+    ].includes(file.type)) {
+
+      feedback.textContent =
+        "Format non accepté.";
+
+      input.value = "";
+      return;
+    }
+
+    if (file.size > 3 * 1024 * 1024) {
+
+      feedback.textContent =
+        "Image trop volumineuse. Maximum 3 Mo.";
+
+      input.value = "";
+      return;
+    }
+
+    previewUrl = URL.createObjectURL(file);
+
+    preview.src = previewUrl;
+    preview.style.display = "block";
+
+    feedback.textContent = "";
+
+  });
+
+  save.addEventListener("click", async () => {
+
+    const file = input.files[0];
+
+    if (!file) {
+
+      feedback.textContent =
+        "Sélectionnez d'abord une image.";
+
+      return;
+    }
+
+    if (![
+      "image/png",
+      "image/jpeg",
+      "image/webp"
+    ].includes(file.type)) {
+
+      feedback.textContent =
+        "Format non accepté.";
+
+      return;
+    }
+
+    if (file.size > 3 * 1024 * 1024) {
+
+      feedback.textContent =
+        "Image trop volumineuse.";
+
+      return;
+    }
+
+    save.disabled = true;
+
+    feedback.textContent =
+      "Enregistrement en cours...";
+
+    try {
+
+      await refreshMember();
+
+      if (!isManager()) {
+
+        throw new Error(
+          "Vous n'êtes pas autorisé à modifier ce club."
+        );
+
+      }
+
+      const clubId = state.club.id;
+
+      const extension = {
+        "image/png": "png",
+        "image/jpeg": "jpg",
+        "image/webp": "webp"
+      }[file.type];
+
+      // Nouveau nom à chaque import pour éviter
+      // les problèmes de cache navigateur.
+      const fileName =
+        clubId +
+        "/logo-" +
+        crypto.randomUUID() +
+        "." +
+        extension;
+
+      const upload = await sb.storage
+        .from("eah-club-logos")
+        .upload(fileName, file, {
+          contentType: file.type,
+          cacheControl: "3600",
+          upsert: false
+        });
+
+      if (upload.error) {
+        throw upload.error;
+      }
+
+      const publicResult = sb.storage
+        .from("eah-club-logos")
+        .getPublicUrl(fileName);
+
+      const logoUrl =
+        publicResult.data.publicUrl;
+
+      const update = await sb
+        .from("eah_club_site_config")
+        .update({
+          logo_url: logoUrl
+        })
+        .eq("club_id", clubId)
+        .select("club_id,logo_url");
+
+      if (update.error) {
+        throw update.error;
+      }
+
+      if (!update.data || update.data.length !== 1) {
+
+        throw new Error(
+          "Configuration du club non mise à jour. " +
+          "Vérifiez les autorisations Supabase."
+        );
+
+      }
+
+      state.config.logo_url = logoUrl;
+
+      const headerLogo =
+        document.getElementById("club-logo");
+
+      if (headerLogo) {
+
+        headerLogo.src = logoUrl;
+        headerLogo.hidden = false;
+
+        headerLogo.onerror = () => {
+          headerLogo.hidden = true;
+          feedback.textContent =
+            "Logo enregistré, mais image inaccessible.";
+        };
+
+      }
+
+      feedback.textContent =
+        "Logo enregistré avec succès !";
+
+    } catch (error) {
+
+      console.error(
+        "EAH LOGO :",
+        error
+      );
+
+      feedback.textContent =
+        "Erreur : " +
+        (error.message || "Enregistrement impossible");
+
+    } finally {
+
+      save.disabled = false;
+
+    }
+
+  });
+
+  box.appendChild(title);
+  box.appendChild(description);
+  box.appendChild(input);
+  box.appendChild(preview);
+  box.appendChild(save);
+  box.appendChild(feedback);
+
+  container.appendChild(box);
+
+}
 function renderManager(section){
+  EAH_LOGO_RENDER_UPLOAD(section);
   const panel=element("div","panel");
   panel.style.marginTop="20px";
 
