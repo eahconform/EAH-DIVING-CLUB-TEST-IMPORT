@@ -305,13 +305,44 @@ function element(tag,className,text){
   return e;
 }
 
-function safeImage(value){
-  if(!value)return "";
-  try{
-    const u=new URL(String(value),location.href);
-    if(["https:","http:"].includes(u.protocol))
+function safeImage(value) {
+
+  if (!value) return "";
+
+  const raw = String(value).trim();
+
+  // Reconnaissance des liens Google Drive
+  const match = raw.match(
+    /(?:drive\.google\.com\/file\/d\/|drive\.google\.com\/open\?id=|drive\.google\.com\/uc\?(?:[^#]*&)?id=)([a-zA-Z0-9_-]{20,})/
+  );
+
+  if (match) {
+    return (
+      "https://drive.google.com/thumbnail?id=" +
+      encodeURIComponent(match[1]) +
+      "&sz=w1000"
+    );
+  }
+
+  // Reconnaissance d'un identifiant Drive seul
+  if (/^[a-zA-Z0-9_-]{20,}$/.test(raw)) {
+    return (
+      "https://drive.google.com/thumbnail?id=" +
+      encodeURIComponent(raw) +
+      "&sz=w1000"
+    );
+  }
+
+  // URL classique
+  try {
+    const u = new URL(raw, location.href);
+
+    if (["https:", "http:"].includes(u.protocol)) {
       return u.href;
-  }catch(e){}
+    }
+
+  } catch (e) {}
+
   return "";
 }
 
