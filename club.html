@@ -440,40 +440,118 @@ async function loadClub(){
   state.products=results[3]||[];
 }
 
-function renderHeader(){
-  const c=state.club;
-  const cfg=state.config;
 
-  const title=cfg.site_title||c.name||"EAH Diving Club";
+function renderHeader() {
+  const c = state.club;
+  const cfg = state.config || {};
+  const s = cfg.settings || {};
 
-  document.title=title;
+  const title = cfg.site_title || c.name || "EAH Diving Club";
+  const heroTitle = s.HERO_TITLE || title;
 
-  ["club-brand","hero-title","footer-name"]
-    .forEach(id=>$(id).textContent=title);
+  document.title = title;
 
-  $("hero-tagline").textContent=
-    cfg.tagline||c.welcome_text||"";
+  $("club-brand").textContent = title;
+  $("hero-title").textContent = heroTitle;
+  $("footer-name").textContent = title;
 
-  document.documentElement.style.setProperty(
-    "--primary",
-    safeColor(cfg.primary_color||c.primary_color,"#0b6bff")
+  $("hero-tagline").textContent =
+    cfg.tagline || c.welcome_text || "";
+
+  const root = document.documentElement;
+
+  const primary = safeColor(
+    cfg.primary_color || c.primary_color,
+    "#0B6BFF"
   );
 
-  document.documentElement.style.setProperty(
-    "--secondary",
-    safeColor(cfg.secondary_color||c.secondary_color,"#03131f")
+  const background = safeColor(
+    s.BACKGROUND_COLOR || cfg.secondary_color,
+    "#03131F"
   );
 
-  const logo=safeImage(cfg.logo_url||c.logo_url);
-  if(logo){
-    $("club-logo").src=logo;
-    $("club-logo").hidden=false;
+  root.style.setProperty("--primary", primary);
+  root.style.setProperty("--secondary", background);
+  root.style.setProperty(
+    "--text", safeColor(s.TEXT_COLOR, "#FFFFFF")
+  );
+
+  document.body.style.backgroundColor = background;
+
+  const header = document.querySelector("header");
+  if (header) {
+    header.style.backgroundColor =
+      safeColor(s.HEADER_COLOR, "#061827");
   }
 
-  const hero=safeImage(cfg.hero_url);
-  if(hero){
-    $("hero").style.backgroundImage=
-      "url("+JSON.stringify(hero)+")";
+  const titleColor = safeColor(s.TITLE_COLOR, "#FFFFFF");
+
+  const styleId = "eah-club-custom-style";
+  let customStyle = document.getElementById(styleId);
+
+  if (!customStyle) {
+    customStyle = document.createElement("style");
+    customStyle.id = styleId;
+    document.head.appendChild(customStyle);
+  }
+
+  const cardColor = safeColor(s.CARD_COLOR, "#102B42");
+
+  customStyle.textContent = `
+    .hero h1, .page h2, .card h3 {
+      color: ${titleColor};
+    }
+    .card, .panel {
+      background-color: ${cardColor};
+    }
+  `;
+
+  const logo = safeImage(cfg.logo_url || c.logo_url);
+  const logoElement = $("club-logo");
+
+  if (logo) {
+    logoElement.src = logo;
+    logoElement.hidden = false;
+  } else {
+    logoElement.hidden = true;
+  }
+
+  const heroElement = $("hero");
+
+  const heroImage = safeImage(cfg.hero_url);
+  const backgroundImage = safeImage(s.BACKGROUND_IMAGE_URL);
+
+  heroElement.style.backgroundImage =
+    heroImage ? `url("${heroImage}")` : "none";
+
+  if (backgroundImage) {
+    document.body.style.backgroundImage =
+      `url("${backgroundImage}")`;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundAttachment = "fixed";
+  } else {
+    document.body.style.backgroundImage = "none";
+  }
+
+  const height = Number(s.HERO_HEIGHT);
+  if (Number.isFinite(height) && height >= 200 && height <= 1000) {
+    heroElement.style.minHeight = height + "px";
+  }
+
+  const overlay = Number(s.HERO_OVERLAY);
+  if (Number.isFinite(overlay) && overlay >= 0 && overlay <= 1) {
+    customStyle.textContent += `
+      .hero::before {
+        background: rgba(0, 12, 24, ${overlay});
+      }
+    `;
+  }
+
+  const footerText = document.querySelector("footer p");
+  if (footerText) {
+    footerText.textContent =
+      s.FOOTER_TEXT || "Propulsé par EAH Diving";
   }
 }
 
