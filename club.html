@@ -197,6 +197,66 @@ footer{
   nav button{padding:10px;font-size:14px}
   .hero{min-height:290px}
 }
+  
+/* EAH — BOUTIQUE : CARTES COMPACTES */
+
+.cards {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fill, minmax(min(100%, 240px), 280px));
+  gap: 20px;
+  align-items: start;
+}
+
+.card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+}
+
+.card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 280px;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+
+.card h3,
+.card .price {
+  margin: 4px 0;
+}
+
+.card .muted {
+  margin: 4px 0;
+}
+
+.card button {
+  align-self: flex-start;
+}
+
+.hero::before {
+  display: none !important;
+}
+
+@media (max-width: 620px) {
+  .cards {
+    grid-template-columns:
+      repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .card img {
+    max-height: 220px;
+  }
+}
+
 </style>
 </head>
 
@@ -242,14 +302,6 @@ footer{
 <script>
 (function(){
 "use strict";
-  .hero::before {
-  display: none !important;
-}
-
-.hero {
-  background-position: center;
-  background-size: cover;
-}
 
 /* =========================================
    EAH DIVING CLUB V3
@@ -1546,25 +1598,49 @@ async function loadManagerOrders(container){
    MENU DYNAMIQUE
 ========================================= */
 
-function showPage(slug){
-  state.currentPage=slug;
-renderHeader();
-  document.querySelectorAll(".page").forEach(page=>{
-    page.classList.toggle(
+
+function showPage(slug) {
+  const target = String(slug || "").toLowerCase();
+
+  const page = state.pages.find(
+    p => String(p.slug).toLowerCase() === target
+  );
+
+  if (!page) {
+    console.warn("Page introuvable :", target);
+    return;
+  }
+
+  state.currentPage = target;
+
+  document.querySelectorAll(".page").forEach(el => {
+    el.classList.toggle(
       "active",
-      page.dataset.slug===slug
+      el.dataset.slug === target
     );
   });
 
-  document.querySelectorAll("#menu button").forEach(b=>{
-    b.classList.toggle(
+  document.querySelectorAll("#menu button").forEach(btn => {
+    btn.classList.toggle(
       "active",
-      b.dataset.slug===slug
+      btn.dataset.slug === target
     );
   });
 
-  window.scrollTo({top:0,behavior:"smooth"});
+  renderHeader();
+
+  const hash = "#" + encodeURIComponent(target);
+
+  if (location.hash !== hash) {
+    history.replaceState(null, "", hash);
+  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 }
+
 
 function renderPages(preferredSlug){
   const menu=$("menu");
