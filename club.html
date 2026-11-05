@@ -242,6 +242,14 @@ footer{
 <script>
 (function(){
 "use strict";
+  .hero::before {
+  display: none !important;
+}
+
+.hero {
+  background-position: center;
+  background-size: cover;
+}
 
 /* =========================================
    EAH DIVING CLUB V3
@@ -518,7 +526,13 @@ function renderHeader() {
 
   const heroElement = $("hero");
 
-  const heroImage = safeImage(cfg.hero_url);
+  const currentPage = state.pages.find(
+  page => page.slug === state.currentPage
+);
+
+const heroImage = safeImage(
+  currentPage?.image_url || cfg.hero_url
+);
   const backgroundImage = safeImage(s.BACKGROUND_IMAGE_URL);
 
   heroElement.style.backgroundImage =
@@ -555,37 +569,104 @@ function renderHeader() {
   }
 }
 
-function renderBadges(section){
-  if(!state.badges.length){
+function renderBadges(section) {
+  const grid = element("div", "cards");
+
+  const page = state.pages.find(
+    p => p.slug === "blazons"
+  );
+
+  const settings = page?.settings || {};
+
+  const details = Array.isArray(
+    settings.blazons_details
+  ) ? settings.blazons_details : [];
+
+  const criteres = Array.isArray(
+    settings.criteres_blazons
+  ) ? settings.criteres_blazons : [];
+
+  if (!state.badges.length) {
     section.appendChild(
-      element("p","empty","Aucun blazon disponible.")
+      element("p", "empty", "Aucun blazon disponible.")
     );
     return;
   }
 
-  const grid=element("div","cards");
+  state.badges.forEach(badge => {
+    const card = element("article", "card");
 
-  state.badges.forEach(badge=>{
-    const card=element("article","card");
-    const url=safeImage(badge.image_url);
+    const detail = details.find(
+      b => String(b.id) === String(badge.badge_key)
+    );
 
-    if(url){
-      const img=element("img");
-      img.src=url;
-      img.alt=badge.name||"Blazon";
-      img.loading="lazy";
+    const imageUrl = safeImage(badge.image_url);
+
+    if (imageUrl) {
+      const img = element("img");
+      img.src = imageUrl;
+      img.alt = badge.name || "Blazon";
+      img.loading = "lazy";
       card.appendChild(img);
     }
 
     card.appendChild(
-      element("h3","",badge.name||badge.badge_key)
+      element("h3", "", badge.name)
     );
 
+    const action = button("Voir les critères", () => {
+      const existing = card.querySelector(
+        ".eah-badge-details"
+      );
+
+      if (existing) {
+        existing.remove();
+        return;
+      }
+
+      const panel = element(
+        "div",
+        "eah-badge-details panel"
+      );
+
+      if (detail?.description) {
+        panel.appendChild(
+          element("p", "", detail.description)
+        );
+      }
+
+      const items = criteres.filter(
+        c =>
+          String(c.blazon_id) ===
+          String(badge.badge_key) &&
+          c.active !== false
+      );
+
+      if (!items.length) {
+        panel.appendChild(
+          element("p", "muted", "Aucun critère renseigné.")
+        );
+      }
+
+      items.forEach(item => {
+        const text = item.description +
+          (item.valeur ? " : " + item.valeur : "");
+
+        panel.appendChild(
+          element("p", "", "✓ " + text)
+        );
+      });
+
+      card.appendChild(panel);
+    }, true);
+
+    card.appendChild(action);
     grid.appendChild(card);
   });
 
   section.appendChild(grid);
 }
+
 /* ==========================================
    EAH — AFFICHAGE DES DISCIPLINES
 ========================================== */
@@ -793,6 +874,55 @@ function renderBoutique(section){
       );
 
       add.disabled=Number(product.stock)<=0;
+
+const detailsButton = button("Détails", () => {
+  const existing = card.querySelector(
+    ".eah-product-details"
+  );
+
+  if (existing) {
+    existing.remove();
+    return;
+  }
+
+  const details = element(
+    "div",
+    "eah-product-details panel"
+  );
+
+  details.style.marginTop = "15px";
+
+  details.appendChild(
+    element("h3", "", product.name)
+  );
+
+  details.appendChild(
+    element(
+      "p",
+      "muted",
+      product.description ||
+      "Aucune description disponible."
+    )
+  );
+
+  details.appendChild(
+    element("p", "price", money(product.price))
+  );
+
+  const videoUrl = safeImage(product.video_url);
+
+  if (videoUrl) {
+    const video = element("video", "page-video");
+    video.src = videoUrl;
+    video.controls = true;
+    video.preload = "metadata";
+    details.appendChild(video);
+  }
+
+  card.appendChild(details);
+});
+
+card.appendChild(detailsButton);
 
       card.appendChild(add);
       grid.appendChild(card);
@@ -1418,7 +1548,7 @@ async function loadManagerOrders(container){
 
 function showPage(slug){
   state.currentPage=slug;
-
+renderHeader();
   document.querySelectorAll(".page").forEach(page=>{
     page.classList.toggle(
       "active",
@@ -1445,6 +1575,7 @@ function renderPages(preferredSlug){
 
   state.pages.forEach(page=>{
     const slug=String(page.slug||"").toLowerCase();
+    renderHeader();
 
     const nav=button(
       page.title||slug,
@@ -1520,6 +1651,57 @@ async function start(){
     );
   }
 }
+
+/* EAH V20 — Actualisation des données publiques */
+
+let EAH_REFRESH_BUSY = false;
+
+async function EAH_REFRESH_PUBLIC() {
+  if (EAH_REFRESH_BUSY || !state.club) return;
+
+  // Ne pas interrompre un panier ou un formulaire.
+  if (
+    state.cart.length ||
+    document.activeElement?.matches(
+      "input, textarea, select"
+    )
+  ) return;
+
+  EAH_REFRESH_BUSY = true;
+
+  try {
+    const previousPage = state.currentPage;
+
+    await loadClub();
+
+    renderHeader();
+    renderPages(previousPage);
+
+    console.info(
+      "EAH : données du club actualisées"
+    );
+  } catch (error) {
+    console.error(
+      "EAH : actualisation impossible",
+      error
+    );
+  } finally {
+    EAH_REFRESH_BUSY = false;
+  }
+}
+
+// Actualisation toutes les 15 secondes.
+setInterval(EAH_REFRESH_PUBLIC, 15000);
+
+// Actualisation au retour sur l'onglet.
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if (!document.hidden) {
+      EAH_REFRESH_PUBLIC();
+    }
+  }
+);
 
 start();
 
