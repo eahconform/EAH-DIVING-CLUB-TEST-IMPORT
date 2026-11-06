@@ -1766,8 +1766,10 @@ async function EAH_REFRESH_PUBLIC() {
   }
 }
 
-// Actualisation toutes les 15 secondes.
-setInterval(EAH_REFRESH_PUBLIC, 15000);
+// Actualisation toutes les 5 secondes
+  
+setInterval(() => EAH_REFRESH_PUBLIC(), 5000);
+
 
 // Actualisation au retour sur l'onglet.
 document.addEventListener(
@@ -1778,6 +1780,70 @@ document.addEventListener(
     }
   }
 );
+
+/* EAH V21 - COULEURS PERSONNALISEES */
+
+const EAH21_COLORS = {
+  "bleu": "#0B6BFF",
+  "bleu marine": "#102040",
+  "bleu clair": "#70C8FF",
+  "orange": "#FF9800",
+  "vert": "#23A455",
+  "rouge": "#E53935",
+  "blanc": "#FFFFFF",
+  "noir": "#000000",
+  "gris": "#808080",
+  "jaune": "#FFD600",
+  "rose": "#FF69B4",
+  "violet": "#9333EA"
+};
+
+function EAH21_COLOR(value, fallback) {
+  const v = String(value || "").trim();
+  if (!v) return fallback;
+
+  const normalized = v.toLowerCase();
+
+  if (EAH21_COLORS[normalized]) {
+    return EAH21_COLORS[normalized];
+  }
+
+  if (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(v)) {
+    return v;
+  }
+
+  return fallback;
+}
+
+function EAH21_APPLY_THEME(config) {
+  if (!config) return;
+
+  const settings = config.settings || {};
+
+  const primary = EAH21_COLOR(
+    settings.PRIMARY_COLOR || config.primary_color,
+    "#0B6BFF"
+  );
+
+  const background = EAH21_COLOR(
+    settings.BACKGROUND_COLOR,
+    "#03131F"
+  );
+
+  const text = EAH21_COLOR(
+    settings.TEXT_COLOR,
+    "#FFFFFF"
+  );
+
+  const root = document.documentElement;
+
+  root.style.setProperty("--eah-primary", primary);
+  root.style.setProperty("--eah-background", background);
+  root.style.setProperty("--eah-text", text);
+
+  document.body.style.backgroundColor = background;
+  document.body.style.color = text;
+}
 
 start();
 
