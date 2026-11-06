@@ -932,7 +932,13 @@ function renderBadges(section) {
       b => String(b.id) === String(badge.badge_key)
     );
 
-    const imageUrl = safeImage(badge.image_url);
+    const imageUrl = safeImage(
+  badge.image_url ||
+  detail?.photo_illustration_url ||
+  detail?.image_url ||
+  detail?.PHOTO_ILLUSTRATION_URL ||
+  ""
+);
 
     if (imageUrl) {
       const img = element("img");
@@ -1003,20 +1009,13 @@ function renderBadges(section) {
    EAH — AFFICHAGE DES DISCIPLINES
 ========================================== */
 
+
 function EAH_RENDER_DISCIPLINES(page, section) {
+  const disciplines = page.settings?.disciplines || [];
 
-  const disciplines =
-    page.settings?.disciplines || [];
-
-  if (!Array.isArray(disciplines)) return;
-
-  if (!disciplines.length) {
+  if (!Array.isArray(disciplines) || !disciplines.length) {
     section.appendChild(
-      element(
-        "p",
-        "muted",
-        "Aucune discipline renseignée."
-      )
+      element("p", "muted", "Aucune discipline disponible.")
     );
     return;
   }
@@ -1024,50 +1023,168 @@ function EAH_RENDER_DISCIPLINES(page, section) {
   const grid = element("div", "cards");
 
   disciplines.forEach(discipline => {
+    if (discipline.active === false) return;
 
     const card = element("article", "card");
+    const nom = discipline.nom || discipline.name || "Discipline";
 
-    const nom = element(
-      "h3",
-      "",
-      discipline.nom || "Discipline"
+    const imageUrl = safeImage(
+      discipline.image_url ||
+      discipline.photo_illustration_url ||
+      discipline.photo_url ||
+      ""
     );
 
-    card.appendChild(nom);
+    if (imageUrl) {
+      const img = element("img");
+      img.src = imageUrl;
+      img.alt = nom;
+      img.loading = "lazy";
+      card.appendChild(img);
+    }
+
+    card.appendChild(element("h3", "", nom));
 
     if (discipline.description) {
       card.appendChild(
+        element("p", "muted", discipline.description)
+      );
+    }
+
+    const details = element("div", "panel");
+    details.hidden = true;
+
+    if (discipline.description_longue) {
+      details.appendChild(
+        element("p", "", discipline.description_longue)
+      );
+    }
+
+    if (discipline.tarif || discipline.prix) {
+      details.appendChild(
         element(
           "p",
-          "muted",
-          discipline.description
+          "price",
+          "Tarif : " + (discipline.tarif || discipline.prix)
         )
       );
     }
 
-    const imageUrl = safeImage(
-      discipline.image_url
-    );
+    const video = safeImage(discipline.video_url || "");
 
-    if (imageUrl) {
-
-      const img = element("img");
-
-      img.src = imageUrl;
-      img.alt = discipline.nom || "Discipline";
-      img.loading = "lazy";
-
-      card.prepend(img);
-
+    if (video) {
+      const lien = element("a", "", "Voir la vidéo");
+      lien.href = video;
+      lien.target = "_blank";
+      lien.rel = "noopener noreferrer";
+      details.appendChild(lien);
     }
 
-    grid.appendChild(card);
+    const action = button("Découvrir la discipline", () => {
+      details.hidden = !details.hidden;
+    }, true);
 
+    card.appendChild(action);
+    card.appendChild(details);
+    grid.appendChild(card);
   });
 
   section.appendChild(grid);
-
 }
+
+function EAH_RENDER_ACTUALITES(page, section) {
+  const actualites =
+    page.settings?.actualites ||
+    page.settings?.articles ||
+    [];
+
+  if (!Array.isArray(actualites) || !actualites.length) {
+    section.appendChild(
+      element("p", "muted", "Aucune actualité disponible.")
+    );
+    return;
+  }
+
+  const grid = element("div", "cards");
+
+  actualites.forEach(article => {
+    if (article.active === false) return;
+
+    const card = element("article", "card");
+
+    const titre =
+      article.titre ||
+      article.title ||
+      article.nom ||
+      "Actualité";
+
+    const imageUrl = safeImage(
+      article.image_url ||
+      article.photo_url ||
+      article.photo_illustration_url ||
+      ""
+    );
+
+    if (imageUrl) {
+      const img = element("img");
+      img.src = imageUrl;
+      img.alt = titre;
+      img.loading = "lazy";
+      card.appendChild(img);
+    }
+
+    card.appendChild(element("h3", "", titre));
+
+    if (article.date) {
+      card.appendChild(
+        element("p", "muted", String(article.date))
+      );
+    }
+
+    if (article.description) {
+      card.appendChild(
+        element("p", "muted", article.description)
+      );
+    }
+
+    const contenu = element("div", "panel");
+    contenu.hidden = true;
+
+    const texte =
+      article.contenu ||
+      article.texte ||
+      article.description_longue ||
+      "";
+
+    if (texte) {
+      const p = element("p", "", texte);
+      p.style.whiteSpace = "pre-wrap";
+      contenu.appendChild(p);
+    }
+
+    const video = safeImage(article.video_url || "");
+
+    if (video) {
+      const lien = element("a", "", "Voir la vidéo");
+      lien.href = video;
+      lien.target = "_blank";
+      lien.rel = "noopener noreferrer";
+      contenu.appendChild(lien);
+    }
+
+    card.appendChild(
+      button("Lire l'article", () => {
+        contenu.hidden = !contenu.hidden;
+      }, true)
+    );
+
+    card.appendChild(contenu);
+    grid.appendChild(card);
+  });
+
+  section.appendChild(grid);
+}
+
 function renderStandardPage(page,section){
   if(page.description){
     section.appendChild(
@@ -1107,6 +1224,9 @@ function renderStandardPage(page,section){
   }
 if (page.slug === "disciplines") {
   EAH_RENDER_DISCIPLINES(page, section);
+}
+  if (page.slug === "actualites") {
+  EAH_RENDER_ACTUALITES(page, section);
 }
   if(page.slug==="blazons")
     renderBadges(section);
@@ -2048,7 +2168,13 @@ async function EAH_REFRESH_PUBLIC() {
 
 // Actualisation toutes les 5 secondes
   
-setInterval(() => EAH_REFRESH_PUBLIC(), 5000);
+// Actualisation automatique toutes les 60 secondes.
+// Evite de reconstruire le site toutes les 5 secondes.
+setInterval(() => {
+  if (!document.hidden) {
+    EAH_REFRESH_PUBLIC();
+  }
+}, 60000);
 
 
 // Actualisation au retour sur l'onglet.
