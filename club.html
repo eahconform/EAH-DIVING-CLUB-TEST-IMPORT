@@ -257,6 +257,100 @@ footer{
   }
 }
 
+/* EAH V23 - PERSONNALISATION PREMIUM */
+
+body {
+  background-color: var(--eah-background, #071725);
+  color: var(--eah-text, #E8F2FF);
+  font-family: var(--eah-font, Arial, sans-serif);
+  font-size: var(--eah-text-size, 16px);
+}
+
+h1, h2, h3 {
+  color: var(--eah-title, #FFFFFF);
+}
+
+h1 {
+  font-size: var(--eah-title-size, 38px);
+}
+
+header, .site-header {
+  background-color: var(--eah-header, #10243A);
+}
+
+.card, .eah-card {
+  background-color: var(--eah-card, #15324C);
+  border-radius: var(--eah-radius, 14px);
+}
+
+.card h3, .eah-card h3 {
+  font-size: var(--eah-card-title-size, 23px);
+}
+
+button.active,
+.nav-btn.active,
+.btn-primary {
+  background-color: var(--eah-primary, #1478FF);
+}
+
+/* TITRE SUR PHOTO DE COUVERTURE */
+
+.eah-hero-premium {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+  padding: 56px 24px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.eah-hero-premium::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, .72),
+    rgba(0, 0, 0, .34),
+    rgba(0, 0, 0, .72)
+  );
+}
+
+.eah-hero-premium h1 {
+  color: #FFFFFF;
+  font-size: clamp(
+    30px,
+    5vw,
+    var(--eah-hero-size, 52px)
+  );
+  line-height: 1.12;
+  font-weight: 800;
+  max-width: 950px;
+  margin: 0 auto;
+  text-shadow: 0 3px 18px rgba(0,0,0,.75);
+  overflow-wrap: anywhere;
+}
+
+.eah-hero-premium p {
+  color: #FFFFFF;
+  font-size: clamp(15px, 2vw, 20px);
+  max-width: 720px;
+  margin: 18px auto 0;
+  line-height: 1.6;
+  text-shadow: 0 2px 12px rgba(0,0,0,.85);
+}
+
+@media (max-width: 600px) {
+  .eah-hero-premium {
+    min-height: 300px;
+    padding: 40px 18px;
+  }
+}
+
 </style>
 </head>
 
@@ -406,11 +500,35 @@ function safeImage(value) {
   return "";
 }
 
-function safeColor(value,fallback){
-  return /^#[0-9a-f]{6}$/i.test(String(value||""))
-    ? value
-    : fallback;
+
+function safeColor(value, fallback) {
+  const colors = {
+    "bleu": "#0B6BFF",
+    "bleu marine": "#102040",
+    "bleu clair": "#70C8FF",
+    "orange": "#FF9800",
+    "vert": "#23A455",
+    "rouge": "#E53935",
+    "blanc": "#FFFFFF",
+    "noir": "#000000",
+    "gris": "#808080",
+    "jaune": "#FFD600",
+    "rose": "#FF69B4",
+    "violet": "#9333EA"
+  };
+
+  const valueText = String(value ?? "").trim();
+  const key = valueText.toLowerCase();
+
+  if (colors[key]) return colors[key];
+
+  if (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(valueText)) {
+    return valueText;
+  }
+
+  return fallback;
 }
+
 
 function money(value){
   return Number(value||0).toLocaleString(
@@ -521,7 +639,7 @@ function renderHeader() {
   const root = document.documentElement;
 
   const primary = safeColor(
-    cfg.primary_color || c.primary_color,
+    s.PRIMARY_COLOR || cfg.primary_color || c.primary_color,
     "#0B6BFF"
   );
 
@@ -555,9 +673,81 @@ function renderHeader() {
     document.head.appendChild(customStyle);
   }
 
+const EAH_FONTS = {
+  "Arial": "Arial, Helvetica, sans-serif",
+  "Roboto": "Roboto, Arial, sans-serif",
+  "Verdana": "Verdana, sans-serif",
+  "Georgia": "Georgia, serif",
+  "Tahoma": "Tahoma, sans-serif",
+  "Times New Roman": "Times New Roman, serif"
+};
+
+const selectedFont = String(
+  s.FONT_FAMILY || "Arial"
+).trim();
+
+const fontFamily =
+  EAH_FONTS[selectedFont] || EAH_FONTS.Arial;
+
+function EAH_FONT_SIZE(value, fallback, min, max) {
+  if (value === "" || value == null) return fallback;
+
+  const number = Number(value);
+
+  return Number.isFinite(number) &&
+    number >= min &&
+    number <= max
+      ? number
+      : fallback;
+}
+
+const textSize = EAH_FONT_SIZE(s.TEXT_SIZE, 16, 10, 32);
+const titleSize = EAH_FONT_SIZE(s.TITLE_SIZE, 36, 18, 72);
+const heroTitleSize = EAH_FONT_SIZE(
+  s.HERO_TITLE_SIZE, 56, 24, 100
+);
+const cardTitleSize = EAH_FONT_SIZE(
+  s.CARD_TITLE_SIZE, 20, 12, 42
+);
+
+root.style.setProperty("--eah-font", fontFamily);
+root.style.setProperty("--eah-text-size", textSize + "px");
+root.style.setProperty("--eah-title-size", titleSize + "px");
+root.style.setProperty(
+  "--eah-hero-title-size",
+  heroTitleSize + "px"
+);
+root.style.setProperty(
+  "--eah-card-title-size",
+  cardTitleSize + "px"
+);
+
   const cardColor = safeColor(s.CARD_COLOR, "#102B42");
 
   customStyle.textContent = `
+  
+body, button, input, select, textarea {
+  font-family: var(--eah-font);
+}
+
+body {
+  font-size: var(--eah-text-size);
+}
+
+.hero h1 {
+  font-size: var(--eah-hero-title-size);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.page h2 {
+  font-size: var(--eah-title-size);
+}
+
+.card h3 {
+  font-size: var(--eah-card-title-size);
+}
+
     .hero h1, .page h2, .card h3 {
       color: ${titleColor};
     }
@@ -1843,6 +2033,115 @@ function EAH21_APPLY_THEME(config) {
 
   document.body.style.backgroundColor = background;
   document.body.style.color = text;
+}
+
+/* ==========================================
+   EAH V23 - THEMES PREMIUM
+========================================== */
+
+const EAH23_THEMES = {
+  1: {
+    primary: "#1478FF",
+    secondary: "#10243A",
+    background: "#071725",
+    header: "#10243A",
+    text: "#E8F2FF",
+    title: "#FFFFFF",
+    card: "#15324C",
+    font: "Arial, sans-serif",
+    textSize: 16,
+    titleSize: 38,
+    heroSize: 52,
+    cardTitleSize: 23,
+    radius: 14
+  },
+  2: {
+    primary: "#C7A466",
+    secondary: "#171717",
+    background: "#101010",
+    header: "#171717",
+    text: "#EDE5D7",
+    title: "#F1D394",
+    card: "#24211C",
+    font: "Georgia, serif",
+    textSize: 17,
+    titleSize: 40,
+    heroSize: 56,
+    cardTitleSize: 24,
+    radius: 8
+  },
+  3: {
+    primary: "#087E8B",
+    secondary: "#183044",
+    background: "#F3F6F8",
+    header: "#FFFFFF",
+    text: "#263746",
+    title: "#183044",
+    card: "#FFFFFF",
+    font: "Helvetica, Arial, sans-serif",
+    textSize: 16,
+    titleSize: 36,
+    heroSize: 48,
+    cardTitleSize: 21,
+    radius: 18
+  },
+  4: {
+    primary: "#A855F7",
+    secondary: "#21152F",
+    background: "#140D1F",
+    header: "#21152F",
+    text: "#F5EFFF",
+    title: "#FFFFFF",
+    card: "#302041",
+    font: "'Trebuchet MS', Arial, sans-serif",
+    textSize: 17,
+    titleSize: 42,
+    heroSize: 58,
+    cardTitleSize: 24,
+    radius: 20
+  },
+  5: {
+    primary: "#7BC99C",
+    secondary: "#102C28",
+    background: "#0D211E",
+    header: "#102C28",
+    text: "#E6F5E9",
+    title: "#FFFFFF",
+    card: "#193B34",
+    font: "Verdana, sans-serif",
+    textSize: 16,
+    titleSize: 38,
+    heroSize: 50,
+    cardTitleSize: 22,
+    radius: 12
+  }
+};
+
+function EAH23_APPLIQUER_THEME(numero, overrides = {}) {
+  const theme = EAH23_THEMES[numero] || EAH23_THEMES[1];
+  const t = {...theme, ...overrides};
+
+  const root = document.documentElement;
+
+  const variables = {
+    "--eah-primary": t.primary,
+    "--eah-secondary": t.secondary,
+    "--eah-background": t.background,
+    "--eah-header": t.header,
+    "--eah-text": t.text,
+    "--eah-title": t.title,
+    "--eah-card": t.card,
+    "--eah-font": t.font,
+    "--eah-text-size": t.textSize + "px",
+    "--eah-title-size": t.titleSize + "px",
+    "--eah-hero-size": t.heroSize + "px",
+    "--eah-card-title-size": t.cardTitleSize + "px",
+    "--eah-radius": t.radius + "px"
+  };
+
+  Object.entries(variables).forEach(([key, value]) => {
+    root.style.setProperty(key, value);
+  });
 }
 
 start();
