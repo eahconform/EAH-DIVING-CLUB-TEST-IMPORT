@@ -351,6 +351,96 @@ button.active,
   }
 }
 
+/* EAH V24 — THÈMES AUTOMATIQUES */
+
+body {
+  background: var(--eah-background, #071725);
+  color: var(--eah-text, #FFFFFF);
+  font-family: var(--eah-font, Arial, sans-serif);
+  font-size: var(--eah-text-size, 16px);
+}
+
+h1, h2, h3 {
+  color: var(--eah-title, #FFFFFF);
+}
+
+button.active,
+.nav-btn.active,
+.btn-primary {
+  background-color: var(--eah-primary, #1478FF);
+}
+
+.eah-hero-premium {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 50px 24px;
+}
+
+.eah-hero-premium::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(
+    0, 0, 0,
+    var(--eah-overlay, .58)
+  );
+}
+
+.eah-hero-premium h1 {
+  color: #FFFFFF;
+  font-size: clamp(
+    30px, 5vw,
+    var(--eah-hero-size, 52px)
+  );
+  font-weight: 800;
+  line-height: 1.15;
+  max-width: 950px;
+  margin: 0 auto;
+  text-shadow: 0 4px 20px rgba(0,0,0,.85);
+}
+
+.eah-hero-premium p {
+  color: #FFFFFF;
+  font-size: clamp(
+    15px, 2vw,
+    var(--eah-hero-subtitle-size, 20px)
+  );
+  max-width: 720px;
+  margin: 20px auto 0;
+  line-height: 1.6;
+  text-shadow: 0 3px 14px rgba(0,0,0,.9);
+}
+
+/* Style 2 : Prestige */
+html[data-eah-style="2"] .eah-hero-premium h1 {
+  font-weight: 600;
+  letter-spacing: 1.5px;
+}
+
+/* Style 3 : Élégance Moderne */
+html[data-eah-style="3"] .eah-hero-premium h1 {
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+/* Style 4 : Énergie */
+html[data-eah-style="4"] .eah-hero-premium h1 {
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+/* Style 5 : Nature et Performance */
+html[data-eah-style="5"] .eah-hero-premium h1 {
+  font-weight: 700;
+  letter-spacing: .5px;
+}
+
 </style>
 </head>
 
@@ -2142,6 +2232,42 @@ function EAH23_APPLIQUER_THEME(numero, overrides = {}) {
   Object.entries(variables).forEach(([key, value]) => {
     root.style.setProperty(key, value);
   });
+}
+
+/* ==========================================
+   EAH V24 - APPLICATION DU THEME
+========================================== */
+
+function EAH24_APPLIQUER_SITE(cfg) {
+  const s = cfg?.settings || {};
+  const numero = Number(s.STYLE_NUMERO || 1);
+
+  const root = document.documentElement;
+
+  const variables = {
+    "--eah-primary": cfg.primary_color,
+    "--eah-secondary": cfg.secondary_color,
+    "--eah-background": s.BACKGROUND_COLOR,
+    "--eah-header": s.HEADER_COLOR,
+    "--eah-text": s.TEXT_COLOR,
+    "--eah-title": s.TITLE_COLOR,
+    "--eah-card": s.CARD_COLOR,
+    "--eah-font": s.TEXT_FONT,
+    "--eah-text-size": s.TEXT_SIZE + "px",
+    "--eah-title-size": s.TITLE_SIZE + "px",
+    "--eah-hero-size": s.COVER_TEXT_SIZE + "px",
+    "--eah-hero-subtitle-size":
+      s.COVER_SUBTITLE_SIZE + "px",
+    "--eah-overlay": s.HERO_OVERLAY
+  };
+
+  Object.entries(variables).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      root.style.setProperty(key, value);
+    }
+  });
+
+  root.dataset.eahStyle = String(numero);
 }
 
 start();
