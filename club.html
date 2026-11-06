@@ -932,11 +932,14 @@ function renderBadges(section) {
       b => String(b.id) === String(badge.badge_key)
     );
 
-    const imageUrl = safeImage(
+    const blazonV21 = (
+  settings.blazons_v21 || []
+).find(b => String(b.id) === String(badge.badge_key));
+
+const imageUrl = safeImage(
   badge.image_url ||
-  detail?.photo_illustration_url ||
   detail?.image_url ||
-  detail?.PHOTO_ILLUSTRATION_URL ||
+  blazonV21?.image_url ||
   ""
 );
 
@@ -1081,8 +1084,13 @@ function EAH_RENDER_DISCIPLINES(page, section) {
     }
 
     const action = button("Découvrir la discipline", () => {
-      details.hidden = !details.hidden;
-    }, true);
+  details.hidden = !details.hidden;
+
+  action.textContent = details.hidden
+    ? "Découvrir la discipline"
+    : "Masquer les détails";
+
+}, true);
 
     card.appendChild(action);
     card.appendChild(details);
@@ -1094,9 +1102,10 @@ function EAH_RENDER_DISCIPLINES(page, section) {
 
 function EAH_RENDER_ACTUALITES(page, section) {
   const actualites =
-    page.settings?.actualites ||
-    page.settings?.articles ||
-    [];
+  page.settings?.items_v21 ||
+  page.settings?.actualites ||
+  page.settings?.articles ||
+  [];
 
   if (!Array.isArray(actualites) || !actualites.length) {
     section.appendChild(
@@ -1236,7 +1245,7 @@ if (page.slug === "disciplines") {
     !desktop &&
     !mobile &&
     !video &&
-    page.slug!=="blazons"
+    !["blazons", "disciplines", "actualites"].includes(page.slug)
   ){
     section.appendChild(
       element("p","empty","Contenu bientôt disponible.")
