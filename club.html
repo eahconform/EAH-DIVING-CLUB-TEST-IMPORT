@@ -2405,6 +2405,829 @@ function EAH24_APPLIQUER_SITE(cfg) {
   root.dataset.eahStyle = String(numero);
 }
 
+<!--
+IMPORTANT :
+Le contenu ci-dessous doit être collé DANS le script
+JavaScript existant de club.html, juste avant start();
+
+Ne pas coller les balises <script> dans le script.
+Le code JavaScript commence après ce commentaire.
+-->
+
+/* ============================================================
+   EAH DIVING CLUB — FICHES DETAILLEES V28
+   Compatible avec le club.html existant
+
+   - Couverture et illustration indépendantes
+   - Aucune illustration inventée
+   - Fiches disciplines
+   - Fiches blazons
+   - Fiches actualités
+   - Galerie boutique
+   - Prix, descriptions, vidéos, tailles
+   - Préservation du panier et de l'espace club
+============================================================ */
+
+const EAH28_STYLE = document.createElement("style");
+
+EAH28_STYLE.textContent = `
+  .eah28-clickable {
+    cursor: pointer;
+    transition: transform .2s ease, opacity .2s ease;
+  }
+
+  .eah28-clickable:hover {
+    transform: scale(1.015);
+    opacity: .92;
+  }
+
+  .eah28-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(0,0,0,.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+  }
+
+  .eah28-window {
+    width: min(100%, 950px);
+    max-height: 94vh;
+    overflow-y: auto;
+    background: var(--eah-card, #102B42);
+    color: var(--eah-text, #FFFFFF);
+    border: 1px solid #ffffff30;
+    border-radius: 18px;
+    padding: 24px;
+    position: relative;
+  }
+
+  .eah28-close {
+    position: sticky;
+    top: 0;
+    float: right;
+    z-index: 2;
+    background: #162435;
+    border: 1px solid #ffffff50;
+    color: white;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 27px;
+    cursor: pointer;
+  }
+
+  .eah28-window h2 {
+    margin: 12px 0 20px;
+  }
+
+  .eah28-media {
+    width: 100%;
+    max-height: 65vh;
+    object-fit: contain;
+    border-radius: 12px;
+    background: #00000025;
+    margin: 12px 0;
+  }
+
+  .eah28-gallery {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 12px 0 20px;
+  }
+
+  .eah28-gallery button {
+    padding: 3px;
+    width: 85px;
+    height: 75px;
+    background: transparent;
+    border: 1px solid #ffffff50;
+    border-radius: 8px;
+  }
+
+  .eah28-gallery img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .eah28-description {
+    white-space: pre-wrap;
+    line-height: 1.7;
+    margin: 18px 0;
+  }
+
+  .eah28-price {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 12px 0;
+  }
+
+  .eah28-tarif {
+    border-bottom: 1px solid #ffffff25;
+    padding: 12px 0;
+  }
+
+  .eah28-select {
+    max-width: 300px;
+    margin: 12px 0;
+  }
+
+  .eah28-card-image {
+    width: 100%;
+    height: 220px;
+    object-fit: contain;
+    cursor: pointer;
+  }
+
+  .eah28-coverless {
+    background-image: none !important;
+  }
+
+  @media(max-width:600px) {
+    .eah28-window {
+      padding: 14px;
+    }
+
+    .eah28-media {
+      max-height: 50vh;
+    }
+  }
+`;
+
+document.head.appendChild(EAH28_STYLE);
+
+
+/* ============================================================
+   OUTILS
+============================================================ */
+
+function EAH28_TEXT(value) {
+  return String(value == null ? "" : value).trim();
+}
+
+function EAH28_IMAGE(value) {
+  return safeImage(value);
+}
+
+function EAH28_APPEND_TEXT(parent, tag, text, className) {
+  if (!EAH28_TEXT(text)) return null;
+
+  const node = document.createElement(tag);
+  node.textContent = EAH28_TEXT(text);
+
+  if (className) node.className = className;
+
+  parent.appendChild(node);
+  return node;
+}
+
+function EAH28_IMAGE_NODE(url, alt, className) {
+  const img = document.createElement("img");
+  img.src = EAH28_IMAGE(url);
+  img.alt = alt || "";
+  img.className = className || "";
+  img.loading = "lazy";
+  return img;
+}
+
+function EAH28_VIDEO(parent, url) {
+  const videoUrl = EAH28_IMAGE(url);
+  if (!videoUrl) return;
+
+  if (
+    /\.(mp4|webm|ogg)(\?|#|$)/i.test(videoUrl)
+  ) {
+    const video = document.createElement("video");
+    video.src = videoUrl;
+    video.controls = true;
+    video.preload = "metadata";
+    video.className = "eah28-media";
+    parent.appendChild(video);
+  } else {
+    const link = document.createElement("a");
+    link.href = videoUrl;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = "Voir la vidéo";
+    parent.appendChild(link);
+  }
+}
+
+
+/* ============================================================
+   FENETRE DETAILLEE
+============================================================ */
+
+function EAH28_MODAL(title, contentBuilder) {
+  document.querySelector(".eah28-modal")?.remove();
+
+  const overlay = document.createElement("div");
+  overlay.className = "eah28-modal";
+
+  const windowBox = document.createElement("div");
+  windowBox.className = "eah28-window";
+  windowBox.setAttribute("role", "dialog");
+  windowBox.setAttribute("aria-modal", "true");
+  windowBox.setAttribute("aria-label", title);
+
+  const close = document.createElement("button");
+  close.className = "eah28-close";
+  close.textContent = "×";
+  close.setAttribute("aria-label", "Fermer");
+
+  close.onclick = () => overlay.remove();
+
+  windowBox.appendChild(close);
+
+  EAH28_APPEND_TEXT(windowBox, "h2", title);
+
+  contentBuilder(windowBox);
+
+  overlay.appendChild(windowBox);
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay) overlay.remove();
+  });
+
+  const escapeHandler = event => {
+    if (event.key === "Escape") {
+      overlay.remove();
+      document.removeEventListener(
+        "keydown",
+        escapeHandler
+      );
+    }
+  };
+
+  document.addEventListener("keydown", escapeHandler);
+
+  close.focus();
+}
+
+
+/* ============================================================
+   GALERIE PHOTO
+============================================================ */
+
+function EAH28_GALLERY(parent, photos, title) {
+  const urls = [...new Set(
+    photos.map(EAH28_IMAGE).filter(Boolean)
+  )];
+
+  if (!urls.length) return;
+
+  const main = EAH28_IMAGE_NODE(
+    urls[0],
+    title,
+    "eah28-media"
+  );
+
+  main.loading = "eager";
+  parent.appendChild(main);
+
+  if (urls.length === 1) return;
+
+  const gallery = document.createElement("div");
+  gallery.className = "eah28-gallery";
+
+  urls.forEach((url, index) => {
+    const thumb = document.createElement("button");
+    thumb.type = "button";
+    thumb.setAttribute(
+      "aria-label",
+      "Afficher la photo " + (index + 1)
+    );
+
+    thumb.appendChild(
+      EAH28_IMAGE_NODE(url, title)
+    );
+
+    thumb.onclick = () => {
+      main.src = url;
+    };
+
+    gallery.appendChild(thumb);
+  });
+
+  parent.appendChild(gallery);
+}
+
+
+/* ============================================================
+   COUVERTURE INDEPENDANTE DE L'ILLUSTRATION
+============================================================ */
+
+const EAH28_ORIGINAL_HEADER = renderHeader;
+
+renderHeader = function() {
+  EAH28_ORIGINAL_HEADER();
+
+  const page = state.pages.find(
+    p => String(p.slug).toLowerCase() ===
+      String(state.currentPage).toLowerCase()
+  );
+
+  const hero = document.getElementById("hero");
+
+  if (!hero) return;
+
+  // Une couverture doit être explicitement renseignée.
+  // La photo d'illustration ne sert jamais de couverture.
+
+  const cover = EAH28_IMAGE(
+    page?.settings?.cover_url ||
+    page?.image_url ||
+    ""
+  );
+
+  if (cover) {
+    hero.style.backgroundImage = `url("${cover}")`;
+    hero.classList.remove("eah28-coverless");
+  } else {
+    hero.style.backgroundImage = "none";
+    hero.classList.add("eah28-coverless");
+  }
+};
+
+
+/* ============================================================
+   DISCIPLINES
+============================================================ */
+
+EAH_RENDER_DISCIPLINES = function(page, section) {
+  const disciplines =
+    page.settings?.disciplines || [];
+
+  if (!disciplines.length) {
+    EAH28_APPEND_TEXT(
+      section,
+      "p",
+      "Aucune discipline disponible."
+    );
+    return;
+  }
+
+  const grid = element("div", "cards");
+
+  disciplines.forEach(d => {
+    if (d.active === false) return;
+
+    const name = d.nom || d.name || "Discipline";
+    const card = element("article", "card");
+
+    const image = EAH28_IMAGE(
+      d.image_url || d.photo_illustration_url
+    );
+
+    const open = () => {
+      EAH28_MODAL(name, box => {
+        EAH28_GALLERY(box, [image], name);
+
+        EAH28_APPEND_TEXT(
+          box,
+          "p",
+          d.description || d.description_longue,
+          "eah28-description"
+        );
+
+        const tarifs = Array.isArray(d.tarifs)
+          ? d.tarifs
+          : [1, 2, 3].map(n => ({
+              titre: "Tarif " + n,
+              prix: d["tarif_" + n],
+              description: d["description_tarif_" + n]
+            }));
+
+        tarifs.forEach(t => {
+          if (!t.prix && !t.description) return;
+
+          const line = element("div", "eah28-tarif");
+
+          EAH28_APPEND_TEXT(
+            line,
+            "strong",
+            t.titre || "Tarif"
+          );
+
+          EAH28_APPEND_TEXT(
+            line,
+            "p",
+            t.prix ? String(t.prix) + " €" : ""
+          );
+
+          EAH28_APPEND_TEXT(
+            line,
+            "p",
+            t.description
+          );
+
+          box.appendChild(line);
+        });
+
+        EAH28_VIDEO(box, d.video_url);
+      });
+    };
+
+    if (image) {
+      const img = EAH28_IMAGE_NODE(
+        image,
+        name,
+        "eah28-card-image"
+      );
+
+      img.onclick = open;
+      card.appendChild(img);
+    }
+
+    EAH28_APPEND_TEXT(card, "h3", name);
+
+    card.appendChild(
+      button("Découvrir", open, true)
+    );
+
+    grid.appendChild(card);
+  });
+
+  section.appendChild(grid);
+};
+
+
+/* ============================================================
+   BLAZONS
+============================================================ */
+
+renderBadges = function(section) {
+  const page = state.pages.find(
+    p => p.slug === "blazons"
+  );
+
+  const settings = page?.settings || {};
+
+  const details =
+    settings.blazons_v21 ||
+    settings.blazons_details ||
+    [];
+
+  const grid = element("div", "cards");
+
+  state.badges.forEach(badge => {
+    const detail = details.find(
+      b => String(b.id) === String(badge.badge_key)
+    ) || {};
+
+    const name = detail.name || badge.name;
+
+    const image = EAH28_IMAGE(
+      detail.image_url || badge.image_url
+    );
+
+    const card = element("article", "card");
+
+    const open = () => {
+      EAH28_MODAL(name, box => {
+        EAH28_GALLERY(box, [image], name);
+
+        EAH28_APPEND_TEXT(
+          box,
+          "p",
+          detail.description,
+          "eah28-description"
+        );
+
+        let criteria = detail.criteres || [];
+
+        if (typeof criteria === "string") {
+          criteria = criteria.split(/\r?\n/);
+        }
+
+        if (!criteria.length) {
+          criteria = (
+            settings.criteres_blazons || []
+          )
+            .filter(c =>
+              String(c.blazon_id) ===
+              String(badge.badge_key)
+            )
+            .map(c =>
+              c.description +
+              (c.valeur ? " : " + c.valeur : "")
+            );
+        }
+
+        criteria.forEach(item => {
+          EAH28_APPEND_TEXT(
+            box,
+            "p",
+            "✓ " + item
+          );
+        });
+      });
+    };
+
+    if (image) {
+      const img = EAH28_IMAGE_NODE(
+        image,
+        name,
+        "eah28-card-image"
+      );
+      img.onclick = open;
+      card.appendChild(img);
+    }
+
+    EAH28_APPEND_TEXT(card, "h3", name);
+
+    card.appendChild(
+      button("Voir les critères", open, true)
+    );
+
+    grid.appendChild(card);
+  });
+
+  section.appendChild(grid);
+};
+
+
+/* ============================================================
+   ACTUALITES
+============================================================ */
+
+EAH_RENDER_ACTUALITES = function(page, section) {
+  const articles =
+    page.settings?.items_v21 ||
+    page.settings?.actualites ||
+    [];
+
+  const grid = element("div", "cards");
+
+  articles.forEach(article => {
+    if (article.active === false) return;
+
+    const title =
+      article.titre ||
+      article.nom ||
+      article.title ||
+      "Actualité";
+
+    const image = EAH28_IMAGE(
+      article.image_url ||
+      article.photo_illustration_url
+    );
+
+    const card = element("article", "card");
+
+    const open = () => {
+      EAH28_MODAL(title, box => {
+        EAH28_GALLERY(box, [image], title);
+
+        EAH28_APPEND_TEXT(
+          box,
+          "p",
+          article.contenu ||
+          article.texte ||
+          article.description_longue ||
+          article.description,
+          "eah28-description"
+        );
+
+        EAH28_VIDEO(box, article.video_url);
+      });
+    };
+
+    if (image) {
+      const img = EAH28_IMAGE_NODE(
+        image,
+        title,
+        "eah28-card-image"
+      );
+      img.onclick = open;
+      card.appendChild(img);
+    }
+
+    EAH28_APPEND_TEXT(card, "h3", title);
+
+    card.appendChild(
+      button("Lire l'article", open, true)
+    );
+
+    grid.appendChild(card);
+  });
+
+  section.appendChild(grid);
+};
+
+
+/* ============================================================
+   BOUTIQUE
+============================================================ */
+
+renderBoutique = function(section) {
+  const page = state.pages.find(
+    p => p.slug === "boutique"
+  );
+
+  const enriched = page?.settings?.products_v27 || [];
+
+  const products = enriched.length
+    ? enriched
+    : state.products;
+
+  const grid = element("div", "cards");
+
+  const cartBox = element("div", "panel");
+  cartBox.style.marginTop = "25px";
+
+  products.forEach(product => {
+    if (product.active === false) return;
+
+    const name = product.name || "Produit";
+
+    const photos = Array.isArray(product.images)
+      ? product.images
+      : [product.image_url];
+
+    const card = element("article", "card");
+
+    const open = () => {
+      EAH28_MODAL(name, box => {
+        EAH28_GALLERY(box, photos, name);
+
+        EAH28_APPEND_TEXT(
+          box,
+          "p",
+          product.description,
+          "eah28-description"
+        );
+
+        EAH28_APPEND_TEXT(
+          box,
+          "p",
+          money(product.price),
+          "eah28-price"
+        );
+
+        EAH28_VIDEO(box, product.video_url);
+
+        const sizes = Array.isArray(product.sizes)
+          ? product.sizes
+          : [];
+
+        const select = document.createElement("select");
+        select.className = "eah28-select";
+
+        sizes.forEach(size => {
+          const option = document.createElement("option");
+          option.value = size;
+          option.textContent = size;
+          select.appendChild(option);
+        });
+
+        if (sizes.length) {
+          EAH28_APPEND_TEXT(
+            box,
+            "p",
+            "Choisir une taille :"
+          );
+          box.appendChild(select);
+        }
+
+        EAH28_APPEND_TEXT(
+          box,
+          "p",
+          "Stock : " + product.stock
+        );
+
+        const add = button(
+          "Ajouter au panier",
+          () => {
+            addToCart(
+              product,
+              sizes.length ? select.value : ""
+            );
+
+            renderCart(cartBox);
+
+            document.querySelector(
+              ".eah28-modal"
+            )?.remove();
+          },
+          true
+        );
+
+        add.disabled = Number(product.stock) <= 0;
+        box.appendChild(add);
+      });
+    };
+
+    if (photos[0]) {
+      const img = EAH28_IMAGE_NODE(
+        photos[0],
+        name,
+        "eah28-card-image"
+      );
+
+      img.onclick = open;
+      card.appendChild(img);
+    }
+
+    EAH28_APPEND_TEXT(card, "h3", name);
+
+    EAH28_APPEND_TEXT(
+      card,
+      "p",
+      money(product.price),
+      "eah28-price"
+    );
+
+    card.appendChild(
+      button("Voir le produit", open, true)
+    );
+
+    grid.appendChild(card);
+  });
+
+  section.appendChild(grid);
+  section.appendChild(cartBox);
+
+  renderCart(cartBox);
+};
+
+
+/* ============================================================
+   PAGES : ILLUSTRATION UNIQUEMENT SI RENSEIGNEE
+============================================================ */
+
+renderStandardPage = function(page, section) {
+  if (page.description) {
+    EAH28_APPEND_TEXT(
+      section,
+      "p",
+      page.description,
+      "page-description"
+    );
+  }
+
+  const settings = page.settings || {};
+
+  // L'illustration ne reprend jamais la couverture.
+  const illustration = EAH28_IMAGE(
+    settings.illustration_url || ""
+  );
+
+  if (illustration) {
+    const img = EAH28_IMAGE_NODE(
+      illustration,
+      page.title,
+      "page-image"
+    );
+
+    section.appendChild(img);
+  }
+
+  const video = EAH28_IMAGE(
+    settings.video_v21 || page.video_url
+  );
+
+  if (video) {
+    EAH28_VIDEO(section, video);
+  }
+
+  if (page.slug === "disciplines") {
+    EAH_RENDER_DISCIPLINES(page, section);
+  }
+
+  if (page.slug === "blazons") {
+    renderBadges(section);
+  }
+
+  if (page.slug === "actualites") {
+    EAH_RENDER_ACTUALITES(page, section);
+  }
+
+  if (
+    !page.description &&
+    !illustration &&
+    !video &&
+    ![
+      "disciplines",
+      "blazons",
+      "actualites"
+    ].includes(page.slug)
+  ) {
+    EAH28_APPEND_TEXT(
+      section,
+      "p",
+      "Contenu bientôt disponible."
+    );
+  }
+};
+
+console.log("EAH V28 : fiches détaillées chargées.");
+
 start();
 
 })();
