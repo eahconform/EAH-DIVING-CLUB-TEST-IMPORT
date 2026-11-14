@@ -2238,21 +2238,32 @@ function nfcPendingKey() {
   return "eah_nfc_pending_" + CLUB_SLUG + "_" + NFC_TOKEN;
 }
 
+
 function nfcSavePending(data) {
-  sessionStorage.setItem(nfcPendingKey(), JSON.stringify(data));
+  localStorage.setItem(
+    nfcPendingKey(),
+    JSON.stringify(data)
+  );
 }
 
 function nfcReadPending() {
   try {
-    return JSON.parse(sessionStorage.getItem(nfcPendingKey()) || "null");
-  } catch (_) {
+    const raw =
+      localStorage.getItem(nfcPendingKey()) ||
+      sessionStorage.getItem(nfcPendingKey());
+
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    console.warn("Données NFC :", error);
     return null;
   }
 }
 
 function nfcClearPending() {
+  localStorage.removeItem(nfcPendingKey());
   sessionStorage.removeItem(nfcPendingKey());
 }
+
 
 async function renderNfc() {
   const pages = nfcMode();
@@ -2448,53 +2459,124 @@ async function renderNfc() {
       });
     }
 
-    async function finishActivation() {
-      const { data, error } = await state.sb.auth.getUser();
+    
+async function finishActivation() {
+  const { data, error } = await state.sb.auth.getUser();
 
-      if (error) throw error;
-      if (!data?.user) throw new Error("Connectez-vous pour activer la carte.");
+  if (error) throw error;
 
-      if (!data.user.email_confirmed_at) {
-        throw new Error("Confirmez votre adresse e-mail.");
-      }
+  const user = data?.user;
 
-      const saved = nfcReadPending() || {};
-      const f = first.value.trim() || saved.first || "";
-      const l = last.value.trim() || saved.last || "";
+  if (!user) {
+    throw new Error("Connexion au compte nécessaire.");
+  }
 
-      if (!f || !l) {
-        throw new Error("Prénom et nom obligatoires.");
-      }
+  if (!user.email_confirmed_at) {
+    throw new Error("Confirmez votre adresse e-mail.");
+  }
 
-      if (
-        saved.email &&
-        data.user.email?.toLowerCase() !== saved.email.toLowerCase()
-      ) {
-        throw new Error("Le compte connecté ne correspond pas à l'adresse saisie.");
-      }
+  const saved = nfcReadPending() || {};
 
-      await nfcActivate(f, l, id.value.trim() || saved.id || "");
+  const prenom = (
+    saved.first || first.value || ""
+  ).trim();
 
-      try {
-        await nfcSaveDetails(
-          group.value || saved.groupId,
-          coach.value || saved.coachId,
-          photoInput.files?.[0] || null,
-          driveInput.value.trim() || saved.driveUrl || ""
-        );
-      } catch (detailsError) {
-        message(
-          feedback,
-          "Carte activée, mais les détails n'ont pas été enregistrés : " +
-          detailsError.message,
-          true
-        );
-        return;
-      }
+  const nom = (
+    saved.last || last.value || ""
+  ).trim();
 
-      nfcClearPending();
-      await renderNfc();
+  const identifiant = (
+    saved.id || id.value || ""
+  ).trim();
+
+  const adresse = (
+    saved.email || email.value || ""
+  ).trim().toLowerCase();
+
+  if (!prenom || !nom) {
+    throw new Error(
+      "Prénom et nom manquants. Complétez le formulaire."
+    );
+  }
+
+  if (
+    adresse &&
+    user.email?.toLowerCase() !== adresse
+  ) {
+    throw new Error(
+      "L'adresse du compte ne correspond pas au profil."
+    );
+  }
+
+  const existing = await nfcProfile();
+
+  if (
+    String(existing?.status || "").toUpperCase()
+    !== "ACTIVE"
+  ) {
+    const result = await nfcActivate(
+      prenom,
+      nom,
+      identifiant
+    );
+
+    console.info("EAH ID enregistré :", result);
+  } else {
+    const card = await nfcLookup();
+
+    if (
+      String(card?.card_status).toUpperCase() === "ACTIVE"
+    ) {
+      console.info("Carte déjà activée.");
     }
+  }
+
+  const groupe = saved.groupId || group.value || null;
+  const entraineur = saved.coachId || coach.value || null;
+  const drive = saved.driveUrl ||
+    driveInput.value.trim() || "";
+
+  try {
+    await nfcSaveDetails(
+      groupe,
+      entraineur,
+      photoInput.files?.[0] || null,
+      drive
+    );
+  } catch (detailsError) {
+    throw new Error(
+      "Le compte est activé, mais les informations " +
+      "complémentaires n'ont pas été enregistrées : " +
+      detailsError.message
+    );
+  }
+
+  const profile = await nfcProfile();
+
+  if (
+    String(profile?.status || "").toUpperCase()
+    !== "ACTIVE"
+  ) {
+    throw new Error(
+      "L'activation du profil n'a pas été confirmée."
+    );
+  }
+
+  if (
+    identifiant &&
+    String(profile.eah_id).toUpperCase() !==
+    identifiant.toUpperCase()
+  ) {
+    throw new Error(
+      "L'identifiant enregistré ne correspond pas " +
+      "à l'identifiant personnalisé demandé."
+    );
+  }
+
+  nfcClearPending();
+
+  await renderNfc();
+}
 
     
 /* ==========================================================
