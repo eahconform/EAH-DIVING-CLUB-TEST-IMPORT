@@ -715,12 +715,13 @@ function renderHeader() {
   const s = cfg.settings || {};
 
   const title = cfg.site_title || c.name || "EAH Diving Club";
-  const heroTitle = s.HERO_TITLE || title;
+  const heroTitle = String(s.HERO_TITLE ?? "").trim();
 
   document.title = title;
 
   $("club-brand").textContent = title;
   $("hero-title").textContent = heroTitle;
+$("hero-title").hidden = !heroTitle;
   $("footer-name").textContent = title;
 
   $("hero-tagline").textContent =
@@ -3220,7 +3221,323 @@ renderStandardPage = function(page, section) {
 
 console.log("EAH V28 : fiches détaillées chargées.");
 
-start();
+
+/* ==========================================================
+   EAH DIVING - ACTIVATION NFC V4
+   Première activation + compte + EAH ID
+========================================================== */
+
+const EAH_NFC_TOKEN = new URLSearchParams(
+  window.location.search
+).get("nfc");
+
+function EAH_NFC_FIELD(
+  parent, labelText, type, placeholder, required = true
+) {
+  const label = document.createElement("label");
+  label.textContent = labelText;
+
+  const input = document.createElement("input");
+  input.type = type;
+  input.placeholder = placeholder || "";
+  input.required = required;
+
+  label.appendChild(input);
+  parent.appendChild(label);
+
+  return input;
+}
+
+function EAH_NFC_STATUS(container, text, error = false) {
+  container.textContent = text;
+  container.className =
+    "status " + (error ? "error" : "success");
+}
+
+async function EAH_NFC_ACTIVER(
+  token, prenom, nom, identifiant, feedback
+) {
+  const result = await sb.rpc("eah_nfc_activate", {
+    p_club_slug: CLUB_SLUG,
+    p_token: token,
+    p_first_name: prenom,
+    p_last_name: nom,
+    p_eah_id: identifiant || null
+  });
+
+  if (result.error) {
+    throw new Error(result.error.message);
+  }
+
+  EAH_NFC_STATUS(
+    feedback,
+    "Profil activé ! Votre EAH ID : " + result.data
+  );
+
+  await refreshMember();
+
+  const cleanUrl = new URL(window.location.href);
+  cleanUrl.searchParams.delete("nfc");
+
+  history.replaceState(
+    null, "",
+    cleanUrl.pathname +
+    cleanUrl.search +
+    "#espace-club"
+  );
+
+  renderPages("espace-club");
+}
+
+async function EAH_NFC_AFFICHER() {
+
+  if (!EAH_NFC_TOKEN || !state.club) return;
+
+  const result = await sb.rpc("eah_nfc_lookup", {
+    p_club_slug: CLUB_SLUG,
+    p_token: EAH_NFC_TOKEN
+  });
+
+  const card = result.data?.[0];
+
+  const panel = document.createElement("section");
+  panel.className = "panel";
+  panel.id = "eah-nfc-activation";
+
+  panel.style.maxWidth = "650px";
+  panel.style.margin = "30px auto";
+  panel.style.padding = "25px";
+
+  const heading = document.createElement("h2");
+  heading.textContent = "Activation de votre carte EAH";
+  panel.appendChild(heading);
+
+  const feedback = document.createElement("div");
+  panel.appendChild(feedback);
+
+  const app = document.getElementById("app");
+  const main = document.getElementById("pages");
+
+  app.insertBefore(panel, main);
+
+  if (result.error || !card) {
+    EAH_NFC_STATUS(
+      feedback,
+      "Carte NFC introuvable ou lien incorrect.",
+      true
+    );
+    return;
+  }
+
+  if (card.card_status === "ACTIVE") {
+    EAH_NFC_STATUS(
+      feedback,
+      "Cette carte est déjà activée. " +
+      "Connectez-vous à votre espace club."
+    );
+
+    const loginButton = button(
+      "Ouvrir l'espace club",
+      () => showPage("espace-club"),
+      true
+    );
+
+    panel.appendChild(loginButton);
+    return;
+  }
+
+  const description = document.createElement("p");
+  description.textContent =
+    "Carte numéro " + card.card_number +
+    " — créez votre profil personnel.";
+
+  panel.appendChild(description);
+
+  const form = document.createElement("form");
+  form.className = "form";
+
+  const prenom = EAH_NFC_FIELD(
+    form, "Prénom", "text", "Votre prénom"
+  );
+
+  const nom = EAH_NFC_FIELD(
+    form, "Nom", "text", "Votre nom"
+  );
+
+  const eahId = EAH_NFC_FIELD(
+    form,
+    "EAH ID personnalisé (facultatif)",
+    "text",
+    card.default_identifier || "",
+    false
+  );
+
+  eahId.maxLength = 32;
+  eahId.pattern = "[A-Za-z0-9_-]{4,32}";
+
+  const email = EAH_NFC_FIELD(
+    form, "Adresse e-mail", "email", "votre@email.fr"
+  );
+
+  const password = EAH_NFC_FIELD(
+    form,
+    "Mot de passe",
+    "password",
+    "8 caractères minimum"
+  );
+
+  password.minLength = 8;
+  password.autocomplete = "new-password";
+
+  const submit = document.createElement("button");
+  submit.type = "submit";
+  submit.className = "primary-button";
+  submit.textContent = "Créer et activer mon profil";
+
+  form.appendChild(submit);
+  panel.appendChild(form);
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    submit.disabled = true;
+
+    try {
+      const session = await sb.auth.getUser();
+
+      if (!session.data?.user) {
+        const signup = await sb.auth.signUp({
+          email: email.value.trim(),
+          password: password.value,
+          options: {
+            emailRedirectTo: window.location.href,
+            data: {
+              first_name: prenom.value.trim(),
+              last_name: nom.value.trim()
+            }
+          }
+        });
+
+        if (signup.error) {
+          throw signup.error;
+        }
+
+        if (!signup.data.session) {
+          EAH_NFC_STATUS(
+            feedback,
+            "Compte enregistré. Vérifiez votre e-mail, " +
+            "confirmez votre compte, puis revenez sur " +
+            "ce lien NFC pour terminer l'activation."
+          );
+          return;
+        }
+      }
+
+      await EAH_NFC_ACTIVER(
+        EAH_NFC_TOKEN,
+        prenom.value.trim(),
+        nom.value.trim(),
+        eahId.value.trim(),
+        feedback
+      );
+
+    } catch (error) {
+      EAH_NFC_STATUS(
+        feedback,
+        error.message || "Activation impossible.",
+        true
+      );
+    } finally {
+      submit.disabled = false;
+    }
+  });
+
+  const existing = document.createElement("div");
+  existing.style.marginTop = "20px";
+
+  const existingTitle = document.createElement("h3");
+  existingTitle.textContent =
+    "Vous avez déjà un compte EAH ?";
+
+  existing.appendChild(existingTitle);
+
+  const login = document.createElement("form");
+  login.className = "form";
+
+  const loginEmail = EAH_NFC_FIELD(
+    login, "E-mail du compte", "email", "votre@email.fr"
+  );
+
+  const loginPassword = EAH_NFC_FIELD(
+    login, "Mot de passe", "password", ""
+  );
+
+  const loginSubmit = document.createElement("button");
+  loginSubmit.type = "submit";
+  loginSubmit.className = "secondary-button";
+  loginSubmit.textContent = "Se connecter et activer";
+
+  login.appendChild(loginSubmit);
+  existing.appendChild(login);
+  panel.appendChild(existing);
+
+  login.addEventListener("submit", async event => {
+    event.preventDefault();
+    loginSubmit.disabled = true;
+
+    try {
+      const auth = await sb.auth.signInWithPassword({
+        email: loginEmail.value.trim(),
+        password: loginPassword.value
+      });
+
+      if (auth.error) throw auth.error;
+
+      if (!prenom.value.trim() || !nom.value.trim()) {
+        throw new Error(
+          "Renseignez aussi votre prénom et votre nom " +
+          "dans le formulaire au-dessus."
+        );
+      }
+
+      await EAH_NFC_ACTIVER(
+        EAH_NFC_TOKEN,
+        prenom.value.trim(),
+        nom.value.trim(),
+        eahId.value.trim(),
+        feedback
+      );
+
+    } catch (error) {
+      EAH_NFC_STATUS(
+        feedback,
+        error.message || "Connexion impossible.",
+        true
+      );
+    } finally {
+      loginSubmit.disabled = false;
+    }
+  });
+
+  panel.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+/* ==========================================================
+   DÉMARRAGE DU SITE + NFC
+========================================================== */
+
+async function EAH_NFC_START() {
+  await start();
+
+  if (state.club && EAH_NFC_TOKEN) {
+    await EAH_NFC_AFFICHER();
+  }
+}
+
+EAH_NFC_START();
+
 
 })();
 </script>
