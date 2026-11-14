@@ -2024,8 +2024,10 @@ function renderPages(preferred) {
   showPage(requested);
 }
 
+
 /* ==========================================
-   NFC - ACTIVATION ET PROFIL
+   EAH DIVING CLUB - NFC V7
+   Photo + groupe + coach + email
 ========================================== */
 
 function nfcMode() {
@@ -2037,7 +2039,6 @@ function nfcMode() {
   $("app").querySelector("footer").hidden = true;
 
   const pages = $("pages");
-
   pages.replaceChildren();
   pages.style.maxWidth = "720px";
   pages.style.margin = "auto";
@@ -2047,400 +2048,695 @@ function nfcMode() {
 
 function nfcRedirect() {
   const url = new URL(location.href);
-
   url.hash = "";
   url.searchParams.delete("code");
-
+  url.searchParams.delete("error");
+  url.searchParams.delete("error_description");
   return url.toString();
 }
 
 async function nfcLookup() {
-  const result = await state.sb.rpc(
-    "eah_nfc_lookup",
-    {
-      p_club_slug:CLUB_SLUG,
-      p_token:NFC_TOKEN
+  const { data, error } = await state.sb.rpc(
+    "eah_nfc_lookup", {
+      p_club_slug: CLUB_SLUG,
+      p_token: NFC_TOKEN
     }
   );
 
-  if(result.error)
-    throw result.error;
-
-  return Array.isArray(result.data)
-    ? result.data[0]
-    : result.data;
+  if (error) throw error;
+  return Array.isArray(data) ? data[0] : data;
 }
 
-async function nfcActivate(first,last,id) {
-  const result = await state.sb.rpc(
-    "eah_nfc_activate",
-    {
-      p_club_slug:CLUB_SLUG,
-      p_token:NFC_TOKEN,
-      p_first_name:first,
-      p_last_name:last,
-      p_eah_id:id || null
+async function nfcOptions() {
+  const { data, error } = await state.sb.rpc(
+    "eah_nfc_options_v7", {
+      p_club_slug: CLUB_SLUG
     }
   );
 
-  if(result.error)
-    throw result.error;
+  if (error) throw error;
 
-  return result.data;
+  return {
+    groups: Array.isArray(data?.groups)
+      ? data.groups : [],
+    coaches: Array.isArray(data?.coaches)
+      ? data.coaches : []
+  };
+}
+
+async function nfcProfile() {
+  const { data, error } = await state.sb.rpc(
+    "eah_nfc_profile_v7", {
+      p_club_slug: CLUB_SLUG,
+      p_token: NFC_TOKEN
+    }
+  );
+
+  if (error) throw error;
+  return data;
+}
+
+async function nfcActivate(first, last, id) {
+  const { data, error } = await state.sb.rpc(
+    "eah_nfc_activate", {
+      p_club_slug: CLUB_SLUG,
+      p_token: NFC_TOKEN,
+      p_first_name: first,
+      p_last_name: last,
+      p_eah_id: id || null
+    }
+  );
+
+  if (error) throw error;
+  return data;
+}
+
+async function nfcUploadPhoto(file) {
+  if (!file) return null;
+
+  const types = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp"
+  };
+
+  if (!types[file.type]) {
+    throw new Error(
+      "Photo : utilisez JPG, PNG ou WebP."
+    );
+  }
+
+  if (file.size > 3 * 1024 * 1024) {
+    throw new Error(
+      "La photo ne doit pas dépasser 3 Mo."
+    );
+  }
+
+  const { data: auth, error: authError } =
+    await state.sb.auth.getUser();
+
+  if (authError || !auth?.user) {
+    throw new Error(
+      "Connectez-vous avant d'envoyer la photo."
+    );
+  }
+
+  const userId = auth.user.id;
+  const unique = crypto.randomUUID();
+
+  const path =
+    userId + "/" + unique + "." + types[file.type];
+
+  const { error } = await state.sb.storage
+    .from("eah-nfc-profiles")
+    .upload(path, file, {
+      contentType: file.type,
+      upsert: false
+    });
+
+  if (error) throw error;
+
+  return state.sb.storage
+    .from("eah-nfc-profiles")
+    .getPublicUrl(path).data.publicUrl;
+}
+
+async function nfcSaveDetails(groupId, coachId, file) {
+  const photoUrl = await nfcUploadPhoto(file);
+
+  const { error } = await state.sb.rpc(
+    "eah_nfc_details_v7", {
+      p_club_slug: CLUB_SLUG,
+      p_token: NFC_TOKEN,
+      p_group_id: groupId || null,
+      p_coach_id: coachId || null,
+      p_photo_url: photoUrl
+    }
+  );
+
+  if (error) throw error;
+}
+
+function nfcSelect(parent, title, items) {
+  const label = el("label", "", title);
+  const select = el("select");
+
+  const empty = el(
+    "option", "", "Sélectionner..."
+  );
+  empty.value = "";
+  select.appendChild(empty);
+
+  items.forEach(item => {
+    const option = el(
+      "option", "", item.name || "Sans nom"
+    );
+    option.value = item.id;
+    select.appendChild(option);
+  });
+
+  label.appendChild(select);
+  parent.appendChild(label);
+  return select;
+}
+
+function nfcPendingKey() {
+  return "eah_nfc_pending_" +
+    CLUB_SLUG + "_" + NFC_TOKEN;
+}
+
+function nfcSavePending(data) {
+  sessionStorage.setItem(
+    nfcPendingKey(),
+    JSON.stringify(data)
+  );
+}
+
+function nfcReadPending() {
+  try {
+    return JSON.parse(
+      sessionStorage.getItem(nfcPendingKey()) ||
+      "null"
+    );
+  } catch (_) {
+    return null;
+  }
+}
+
+function nfcClearPending() {
+  sessionStorage.removeItem(nfcPendingKey());
 }
 
 async function renderNfc() {
   const pages = nfcMode();
-
-  const panel = el("section","panel");
+  const panel = el("section", "panel");
   const heading = el(
-    "h2","","Carte NFC EAH Diving"
+    "h2", "", "Carte NFC EAH Diving"
   );
   const feedback = el("div");
 
-  panel.append(heading,feedback);
+  panel.append(heading, feedback);
   pages.appendChild(panel);
 
-  if(!state.sb) {
+  if (!state.sb) {
     message(
       feedback,
-      "Connexion Supabase indisponible.",
-      true
+      "Connexion Supabase indisponible.", true
     );
     return;
   }
-
-  let card;
 
   try {
-    card = await nfcLookup();
-  } catch(error) {
-    message(
-      feedback,
-      "Impossible de consulter la carte : " +
-      error.message,
-      true
-    );
-    return;
-  }
+    const { error } = await state.sb.auth
+      .getSession();
 
-  if(!card) {
-    message(
-      feedback,
-      "Carte NFC inconnue ou inaccessible.",
-      true
-    );
-    return;
-  }
+    if (error) throw error;
 
-  /* CARTE DEJA ACTIVEE */
+    const card = await nfcLookup();
 
-  if(
-    String(card.card_status).toUpperCase() ===
-    "ACTIVE"
-  ) {
+    if (!card) {
+      throw new Error("Carte NFC introuvable.");
+    }
+
+    const profile = await nfcProfile();
+
+    /* PROFIL DEJA ACTIVE */
+
+    if (
+      String(profile?.status || card.card_status)
+        .toUpperCase() === "ACTIVE"
+    ) {
+      heading.textContent =
+        profile?.name || card.profile_name ||
+        "Profil EAH Diving";
+
+      if (profile?.photo_url) {
+        const photo = image(
+          panel,
+          profile.photo_url,
+          "Photo du profil",
+          "page-image"
+        );
+
+        if (photo) {
+          photo.style.maxWidth = "230px";
+          photo.style.maxHeight = "230px";
+          photo.style.borderRadius = "50%";
+          photo.style.objectFit = "cover";
+          photo.style.aspectRatio = "1/1";
+        }
+      }
+
+      description(
+        panel,
+        profile?.club_name || card.club_name
+      );
+
+      panel.appendChild(
+        el("h3", "",
+          "EAH ID : " +
+          (profile?.eah_id ||
+           card.profile_eah_id || "")
+        )
+      );
+
+      if (profile?.group_name) {
+        panel.appendChild(
+          el("p", "",
+            "Groupe : " + profile.group_name)
+        );
+      }
+
+      if (profile?.coach_name) {
+        panel.appendChild(
+          el("p", "",
+            "Coach : " + profile.coach_name)
+        );
+      }
+
+      panel.appendChild(
+        el("p", "status success",
+          "Profil EAH activé.")
+      );
+
+      return;
+    }
+
+    /* OPTIONS CLUB */
+
+    const options = await nfcOptions();
+
     heading.textContent =
-      card.profile_name ||
-      "Profil EAH Diving";
-
-    description(panel,card.club_name);
-
-    panel.appendChild(
-      el(
-        "h3","",
-        "EAH ID : " +
-        (card.profile_eah_id || "")
-      )
-    );
+      "Activez votre profil EAH";
 
     description(
       panel,
-      "Carte EAH n° " +
+      "Carte n° " +
       (card.card_number || "") +
-      " — profil activé."
+      " — " + (card.club_name || "")
     );
 
-    const link = el(
-      "a","primary-button",
-      "Accéder à l'espace club"
+    const form = el("form", "form");
+
+    const first = field(
+      form, "Prénom", "text"
     );
 
-    link.href =
-      location.pathname +
-      "?club=" +
-      encodeURIComponent(CLUB_SLUG) +
-      "#espace-club";
+    const last = field(
+      form, "Nom", "text"
+    );
 
-    link.style.display = "inline-block";
+    const id = field(
+      form,
+      "EAH ID personnalisé (facultatif)",
+      "text",
+      false
+    );
 
-    panel.appendChild(link);
-    return;
-  }
+    id.placeholder =
+      card.default_identifier || "";
 
-  /* FORMULAIRE ACTIVATION */
+    id.pattern = "[A-Za-z0-9_-]{4,32}";
+    id.maxLength = 32;
 
-  heading.textContent =
-    "Activez votre profil EAH";
+    const email = field(
+      form, "Adresse e-mail", "email"
+    );
 
-  description(
-    panel,
-    "Carte n° " +
-    (card.card_number || "") +
-    " — " + (card.club_name || "")
-  );
+    const password = field(
+      form, "Mot de passe", "password"
+    );
 
-  const form = el("form","form");
+    password.minLength = 8;
+    password.autocomplete = "new-password";
 
-  const first = field(
-    form,"Prénom","text"
-  );
+    /* PHOTO */
 
-  const last = field(
-    form,"Nom","text"
-  );
+    const photoLabel = el(
+      "label", "", "Photo du profil"
+    );
 
-  const id = field(
-    form,
-    "EAH ID personnalisé (facultatif)",
-    "text",
-    false
-  );
+    const photoInput = el("input");
+    photoInput.type = "file";
+    photoInput.accept =
+      "image/jpeg,image/png,image/webp";
 
-  id.placeholder =
-    card.default_identifier || "";
+    const preview = el("img");
+    preview.hidden = true;
+    preview.style.width = "150px";
+    preview.style.height = "150px";
+    preview.style.objectFit = "cover";
+    preview.style.borderRadius = "50%";
 
-  id.pattern = "[A-Za-z0-9_-]{4,32}";
-  id.maxLength = 32;
+    let previewUrl = null;
 
-  const email = field(
-    form,"Adresse e-mail","email"
-  );
-
-  const password = field(
-    form,"Mot de passe","password"
-  );
-
-  password.minLength = 8;
-  password.autocomplete = "new-password";
-
-  const submit = el(
-    "button",
-    "primary-button",
-    "Créer mon profil"
-  );
-
-  submit.type = "submit";
-  form.appendChild(submit);
-  panel.appendChild(form);
-
-  form.addEventListener(
-    "submit",
-    async event => {
-      event.preventDefault();
-      submit.disabled = true;
-
-      try {
-        const f = first.value.trim();
-        const l = last.value.trim();
-        const custom = id.value.trim();
-        const adresse =
-          email.value.trim().toLowerCase();
-
-        if(!f || !l)
-          throw new Error(
-            "Prénom et nom obligatoires."
-          );
-
-        const current =
-          await state.sb.auth.getUser();
-
-        if(current.data?.user) {
-          if(
-            String(
-              current.data.user.email || ""
-            ).toLowerCase() !== adresse
-          ) {
-            throw new Error(
-              "Un autre compte est connecté."
-            );
-          }
-
-          if(
-            !current.data.user.email_confirmed_at
-          ) {
-            throw new Error(
-              "Confirmez votre adresse e-mail."
-            );
-          }
-
-          await nfcActivate(f,l,custom);
-          await renderNfc();
-          return;
-        }
-
-        const result =
-          await state.sb.auth.signUp({
-            email:adresse,
-            password:password.value,
-            options:{
-              emailRedirectTo:nfcRedirect(),
-              data:{
-                first_name:f,
-                last_name:l,
-                eah_id_requested:custom,
-                nfc_club_slug:CLUB_SLUG
-              }
-            }
-          });
-
-        if(result.error)
-          throw result.error;
-
-        if(result.data.session) {
-          await nfcActivate(f,l,custom);
-          await renderNfc();
-        } else {
-          message(
-            feedback,
-            "Inscription reçue. Vérifiez votre " +
-            "e-mail de confirmation, puis " +
-            "revenez sur ce lien NFC."
-          );
-        }
-
-      } catch(error) {
-        message(
-          feedback,error.message,true
-        );
-      } finally {
-        submit.disabled = false;
+    photoInput.addEventListener("change", () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        previewUrl = null;
       }
+
+      const file = photoInput.files?.[0];
+
+      if (!file) {
+        preview.hidden = true;
+        return;
+      }
+
+      previewUrl = URL.createObjectURL(file);
+      preview.src = previewUrl;
+      preview.hidden = false;
+    });
+
+    photoLabel.append(photoInput, preview);
+    form.appendChild(photoLabel);
+
+    /* GROUPE */
+
+    const group = nfcSelect(
+      form,
+      "Groupe d'affectation",
+      options.groups
+    );
+
+    /* COACH */
+
+    const coach = nfcSelect(
+      form,
+      "Coach associé au profil",
+      options.coaches
+    );
+
+    /* BOUTON */
+
+    const submit = el(
+      "button",
+      "primary-button",
+      "Créer mon profil"
+    );
+
+    submit.type = "submit";
+    form.appendChild(submit);
+    panel.appendChild(form);
+
+    /* DONNEES TEMPORAIRES */
+
+    const pending = nfcReadPending();
+
+    if (pending) {
+      first.value = pending.first || "";
+      last.value = pending.last || "";
+      id.value = pending.id || "";
+      email.value = pending.email || "";
+      group.value = pending.groupId || "";
+      coach.value = pending.coachId || "";
     }
-  );
 
-  /* RENVOI EMAIL */
+    async function finishActivation() {
+      const { data, error } =
+        await state.sb.auth.getUser();
 
-  const resend = button(
-    "Renvoyer le mail de confirmation",
-    async () => {
-      resend.disabled = true;
+      if (error) throw error;
+
+      if (!data?.user) {
+        throw new Error(
+          "Connectez-vous pour activer la carte."
+        );
+      }
+
+      if (!data.user.email_confirmed_at) {
+        throw new Error(
+          "Confirmez votre adresse e-mail."
+        );
+      }
+
+      const f = first.value.trim();
+      const l = last.value.trim();
+
+      if (!f || !l) {
+        throw new Error(
+          "Prénom et nom obligatoires."
+        );
+      }
+
+      await nfcActivate(
+        f, l, id.value.trim()
+      );
+
+      /* La photo n'est plus disponible après
+         un rechargement de page.
+         Les autres données sont conservées. */
 
       try {
-        if(!email.value.trim())
-          throw new Error(
-            "Saisissez votre adresse e-mail."
-          );
-
-        const result =
-          await state.sb.auth.resend({
-            type:"signup",
-            email:email.value.trim(),
-            options:{
-              emailRedirectTo:nfcRedirect()
-            }
-          });
-
-        if(result.error)
-          throw result.error;
+        await nfcSaveDetails(
+          group.value,
+          coach.value,
+          photoInput.files?.[0] || null
+        );
+      } catch (detailsError) {
+        nfcClearPending();
 
         message(
           feedback,
-          "Demande de renvoi transmise. " +
-          "Vérifiez aussi les spams."
+          "Carte activée, mais les informations " +
+          "complémentaires n'ont pas été " +
+          "enregistrées : " +
+          detailsError.message,
+          true
         );
 
-      } catch(error) {
-        message(
-          feedback,error.message,true
-        );
-      } finally {
-        resend.disabled = false;
+        return;
       }
+
+      nfcClearPending();
+      await renderNfc();
     }
-  );
 
-  panel.appendChild(resend);
+    /* CREATION COMPTE */
 
-  /* CONNEXION COMPTE EXISTANT */
+    form.addEventListener(
+      "submit",
+      async event => {
+        event.preventDefault();
+        submit.disabled = true;
 
-  const details = el("details");
-  details.style.marginTop = "25px";
+        try {
+          const f = first.value.trim();
+          const l = last.value.trim();
+          const adresse =
+            email.value.trim().toLowerCase();
 
-  details.appendChild(
-    el(
-      "summary","",
-      "Déjà inscrit ? Se connecter et activer"
-    )
-  );
+          if (!f || !l || !adresse) {
+            throw new Error(
+              "Complétez les champs obligatoires."
+            );
+          }
 
-  const login = el("form","form");
+          const current =
+            await state.sb.auth.getUser();
 
-  const loginEmail = field(
-    login,"E-mail","email"
-  );
+          if (current.data?.user) {
+            if (
+              current.data.user.email
+                ?.toLowerCase() !== adresse
+            ) {
+              throw new Error(
+                "Un autre compte est connecté. " +
+                "Déconnectez-le avant de continuer."
+              );
+            }
 
-  const loginPassword = field(
-    login,"Mot de passe","password"
-  );
+            await finishActivation();
+            return;
+          }
 
-  const loginButton = el(
-    "button",
-    "primary-button",
-    "Se connecter"
-  );
-
-  loginButton.type = "submit";
-
-  login.appendChild(loginButton);
-  details.appendChild(login);
-  panel.appendChild(details);
-
-  login.addEventListener(
-    "submit",
-    async event => {
-      event.preventDefault();
-      loginButton.disabled = true;
-
-      try {
-        const result =
-          await state.sb.auth.signInWithPassword({
-            email:loginEmail.value.trim(),
-            password:loginPassword.value
+          nfcSavePending({
+            first: f,
+            last: l,
+            id: id.value.trim(),
+            email: adresse,
+            groupId: group.value,
+            coachId: coach.value
           });
 
-        if(result.error)
-          throw result.error;
+          const { data, error } =
+            await state.sb.auth.signUp({
+              email: adresse,
+              password: password.value,
+              options: {
+                emailRedirectTo: nfcRedirect(),
+                data: {
+                  first_name: f,
+                  last_name: l,
+                  eah_id_requested:
+                    id.value.trim(),
+                  nfc_club_slug: CLUB_SLUG
+                }
+              }
+            });
 
-        if(
-          first.value.trim() &&
-          last.value.trim()
-        ) {
-          await nfcActivate(
-            first.value.trim(),
-            last.value.trim(),
-            id.value.trim()
-          );
+          if (error) throw error;
 
-          await renderNfc();
-        } else {
+          if (data.session) {
+            await finishActivation();
+          } else {
+            message(
+              feedback,
+              "Demande d'inscription reçue. " +
+              "Si votre adresse est éligible, " +
+              "vous recevrez un e-mail de " +
+              "confirmation. Vérifiez aussi " +
+              "vos courriers indésirables. " +
+              "Après confirmation, revenez " +
+              "sur cette carte NFC. " +
+              "La photo devra être " +
+              "sélectionnée à nouveau."
+            );
+          }
+
+        } catch (error) {
           message(
-            feedback,
-            "Connexion réussie. Renseignez " +
-            "votre prénom et votre nom dans " +
-            "le formulaire pour activer la carte."
+            feedback, error.message, true
           );
+        } finally {
+          submit.disabled = false;
         }
+      }
+    );
 
-      } catch(error) {
+    /* RENVOYER EMAIL */
+
+    panel.appendChild(
+      button(
+        "Renvoyer le mail de confirmation",
+        async () => {
+          try {
+            const adresse =
+              email.value.trim().toLowerCase();
+
+            if (!adresse) {
+              throw new Error(
+                "Saisissez votre e-mail."
+              );
+            }
+
+            const { error } =
+              await state.sb.auth.resend({
+                type: "signup",
+                email: adresse,
+                options: {
+                  emailRedirectTo: nfcRedirect()
+                }
+              });
+
+            if (error) throw error;
+
+            message(
+              feedback,
+              "Demande de renvoi acceptée. " +
+              "La réception dépend du service " +
+              "d'envoi configuré dans Supabase."
+            );
+
+          } catch (error) {
+            message(
+              feedback, error.message, true
+            );
+          }
+        }
+      )
+    );
+
+    /* CONNEXION EXISTANTE */
+
+    const details = el("details");
+    details.style.marginTop = "20px";
+
+    details.appendChild(
+      el("summary", "",
+        "Déjà inscrit ? Se connecter")
+    );
+
+    const login = el("form", "form");
+
+    const loginEmail = field(
+      login, "E-mail", "email"
+    );
+
+    const loginPassword = field(
+      login, "Mot de passe", "password"
+    );
+
+    const loginButton = el(
+      "button",
+      "primary-button",
+      "Se connecter et activer"
+    );
+
+    loginButton.type = "submit";
+    login.appendChild(loginButton);
+    details.appendChild(login);
+    panel.appendChild(details);
+
+    login.addEventListener(
+      "submit",
+      async event => {
+        event.preventDefault();
+        loginButton.disabled = true;
+
+        try {
+          const { error } =
+            await state.sb.auth.signInWithPassword({
+              email: loginEmail.value.trim(),
+              password: loginPassword.value
+            });
+
+          if (error) throw error;
+
+          await finishActivation();
+
+        } catch (error) {
+          message(
+            feedback, error.message, true
+          );
+        } finally {
+          loginButton.disabled = false;
+        }
+      }
+    );
+
+    /* REPRISE APRES CONFIRMATION EMAIL */
+
+    const current = await state.sb.auth.getUser();
+
+    if (
+      current.data?.user?.email_confirmed_at &&
+      pending &&
+      current.data.user.email
+        ?.toLowerCase() ===
+        pending.email?.toLowerCase()
+    ) {
+      try {
+        await finishActivation();
+      } catch (error) {
         message(
-          feedback,error.message,true
+          feedback,
+          "Compte confirmé. " +
+          error.message,
+          true
         );
-      } finally {
-        loginButton.disabled = false;
       }
     }
-  );
+
+  } catch (error) {
+    message(
+      feedback,
+      "Erreur NFC : " + error.message,
+      true
+    );
+  }
 }
+
 
 /* ==========================================
    ACTUALISATION
