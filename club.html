@@ -2460,19 +2460,16 @@ async function renderNfc() {
     }
 
     
+
+
 async function finishActivation() {
-  const { data, error } = await state.sb.auth.getUser();
+  const { data, error } =
+    await state.sb.auth.getUser();
 
   if (error) throw error;
 
-  const user = data?.user;
-
-  if (!user) {
-    throw new Error("Connexion au compte nécessaire.");
-  }
-
-  if (!user.email_confirmed_at) {
-    throw new Error("Confirmez votre adresse e-mail.");
+  if (!data?.user) {
+    throw new Error("Compte non connecté.");
   }
 
   const saved = nfcReadPending() || {};
@@ -2489,87 +2486,47 @@ async function finishActivation() {
     saved.id || id.value || ""
   ).trim();
 
-  const adresse = (
-    saved.email || email.value || ""
-  ).trim().toLowerCase();
-
   if (!prenom || !nom) {
-    throw new Error(
-      "Prénom et nom manquants. Complétez le formulaire."
-    );
+    throw new Error("Nom et prénom obligatoires.");
   }
 
-  if (
-    adresse &&
-    user.email?.toLowerCase() !== adresse
-  ) {
-    throw new Error(
-      "L'adresse du compte ne correspond pas au profil."
-    );
-  }
+  const eahId = await nfcActivate(
+    prenom,
+    nom,
+    identifiant
+  );
 
-  const existing = await nfcProfile();
-
-  if (
-    String(existing?.status || "").toUpperCase()
-    !== "ACTIVE"
-  ) {
-    const result = await nfcActivate(
-      prenom,
-      nom,
-      identifiant
-    );
-
-    console.info("EAH ID enregistré :", result);
-  } else {
-    const card = await nfcLookup();
-
-    if (
-      String(card?.card_status).toUpperCase() === "ACTIVE"
-    ) {
-      console.info("Carte déjà activée.");
-    }
-  }
-
-  const groupe = saved.groupId || group.value || null;
-  const entraineur = saved.coachId || coach.value || null;
-  const drive = saved.driveUrl ||
-    driveInput.value.trim() || "";
+  console.info("Profil EAH créé :", eahId);
 
   try {
     await nfcSaveDetails(
-      groupe,
-      entraineur,
-      photoInput.files?.[0] || null,
-      drive
+      saved.groupId || group.value || null,
+      saved.coachId || coach.value || null,
+      photoInput.files?.[0] || null
     );
   } catch (detailsError) {
-    throw new Error(
-      "Le compte est activé, mais les informations " +
-      "complémentaires n'ont pas été enregistrées : " +
-      detailsError.message
+    console.warn(
+      "Informations complémentaires :",
+      detailsError
+    );
+
+    message(
+      feedback,
+      "Profil créé, mais la photo, le groupe ou " +
+      "le coach n'a pas été enregistré : " +
+      detailsError.message,
+      true
     );
   }
 
   const profile = await nfcProfile();
 
   if (
-    String(profile?.status || "").toUpperCase()
+    String(profile?.status).toUpperCase()
     !== "ACTIVE"
   ) {
     throw new Error(
-      "L'activation du profil n'a pas été confirmée."
-    );
-  }
-
-  if (
-    identifiant &&
-    String(profile.eah_id).toUpperCase() !==
-    identifiant.toUpperCase()
-  ) {
-    throw new Error(
-      "L'identifiant enregistré ne correspond pas " +
-      "à l'identifiant personnalisé demandé."
+      "La création du profil n'a pas été confirmée."
     );
   }
 
@@ -2577,6 +2534,9 @@ async function finishActivation() {
 
   await renderNfc();
 }
+
+  
+
 
     
 /* ==========================================================
@@ -2874,43 +2834,94 @@ async function renderNfcRecovery() {
   panel.appendChild(form);
   pages.appendChild(panel);
 
-  form.addEventListener("submit", async event => {
-    event.preventDefault();
-    submit.disabled = true;
+  
+form.addEventListener("submit", async event => {
+  event.preventDefault();
 
-    try {
-      if (password.value !== confirm.value) {
-        throw new Error("Les mots de passe ne correspondent pas.");
+  submit.disabled = true;
+  submit.textContent = "Création du profil...";
+
+  try {
+    const prenom = first.value.trim();
+    const nom = last.value.trim();
+    const adresse = email.value.trim().toLowerCase();
+    const motDePasse = password.value;
+
+    if (!prenom || !nom || !adresse) {
+      throw new Error("Complétez les champs obligatoires.");
+    }
+
+    if (motDePasse.length < 8) {
+      throw new Error(
+        "Le mot de passe doit contenir au moins 8 caractères."
+      );
+    }
+
+    nfcSavePending({
+      first: prenom,
+      last: nom,
+      id: id.value.trim(),
+      email: adresse,
+      groupId: group.value,
+      coachId: coach.value
+    });
+
+    const { data: current } =
+      await state.sb.auth.getUser();
+
+    if (current?.user) {
+      if (
+        current.user.email?.toLowerCase() !== adresse
+      ) {
+        throw new Error(
+          "Un autre compte est connecté. " +
+          "Déconnectez-vous avant de continuer."
+        );
       }
-
-      const { data, error: sessionError } =
-        await state.sb.auth.getSession();
-
-      if (sessionError) throw sessionError;
-      if (!data.session) {
-        throw new Error("Lien expiré ou invalide. Demandez un nouveau lien.");
-      }
-
-      const { error } = await state.sb.auth.updateUser({
-        password: password.value
-      });
+    } else {
+      const { data, error } =
+        await state.sb.auth.signUp({
+          email: adresse,
+          password: motDePasse,
+          options: {
+            data: {
+              first_name: prenom,
+              last_name: nom,
+              eah_id_requested: id.value.trim(),
+              nfc_club_slug: CLUB_SLUG
+            }
+          }
+        });
 
       if (error) throw error;
 
-      message(feedback, "Mot de passe enregistré avec succès.");
-
-      const link = el("a", "primary-button", "Continuer vers mon profil");
-      link.href = nfcRedirect();
-      link.style.display = "inline-block";
-      panel.appendChild(link);
-
-    } catch (error) {
-      message(feedback, error.message, true);
-    } finally {
-      submit.disabled = false;
+      if (!data.session) {
+        throw new Error(
+          "Aucune session créée. Vérifiez que " +
+          "Confirm email est désactivé dans Supabase. " +
+          "Si ce compte existe déjà, utilisez " +
+          "la connexion avec son mot de passe."
+        );
+      }
     }
-  });
-}
+
+    await finishActivation();
+
+  } catch (error) {
+    console.error("Création EAH :", error);
+
+    message(
+      feedback,
+      "Création impossible : " + error.message,
+      true
+    );
+
+  } finally {
+    submit.disabled = false;
+    submit.textContent = "Créer mon profil";
+  }
+});
+
 
 function nfcIsRecovery() {
   const hash = new URLSearchParams(location.hash.slice(1));
