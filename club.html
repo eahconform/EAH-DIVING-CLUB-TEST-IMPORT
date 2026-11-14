@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -7,440 +8,275 @@
 <title>EAH Diving Club</title>
 
 <style>
-:root{
+:root {
   --primary:#0b6bff;
   --secondary:#03131f;
-  --text:#fff;
+  --text:#ffffff;
   --muted:#b8cadb;
+  --card:#102b42;
+  --radius:14px;
+  --overlay:.58;
+  --font:Arial,sans-serif;
 }
-*{box-sizing:border-box}
-body{
+* {box-sizing:border-box}
+[hidden] {display:none!important}
+body {
   margin:0;
   background:var(--secondary);
   color:var(--text);
-  font-family:Arial,Helvetica,sans-serif;
+  font-family:var(--font);
 }
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-button:disabled{opacity:.5;cursor:not-allowed}
-a{color:inherit}
-[hidden]{display:none!important}
-header{
+button,input,select,textarea {font:inherit}
+button {cursor:pointer}
+button:disabled {opacity:.5;cursor:not-allowed}
+a {color:inherit}
+header {
   position:sticky;
   top:0;
-  z-index:10;
-  padding:16px 24px;
+  z-index:20;
+  padding:14px 20px;
   background:var(--secondary);
-  border-bottom:1px solid #ffffff25;
+  border-bottom:1px solid #ffffff30;
 }
-.header-inner{
-  max-width:1400px;
+.header-inner {
+  max-width:1300px;
   margin:auto;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:20px;
+  gap:16px;
   flex-wrap:wrap;
 }
-.brand{
+.brand {
   display:flex;
   align-items:center;
   gap:12px;
   font-size:20px;
   font-weight:800;
 }
-.brand img{width:54px;height:54px;object-fit:contain}
-nav{display:flex;gap:8px;flex-wrap:wrap}
-nav button,.secondary-button{
-  padding:12px 16px;
-  background:transparent;
-  border:1px solid #ffffff35;
-  color:white;
-  border-radius:10px;
+.brand img {
+  width:52px;
+  height:52px;
+  object-fit:contain;
 }
-nav button.active,nav button:hover,.primary-button{
+nav,.actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+button,.primary-button {
+  padding:11px 15px;
+  border:1px solid #ffffff50;
+  border-radius:10px;
+  background:transparent;
+  color:inherit;
+  text-decoration:none;
+}
+button.active,.primary-button {
   background:var(--primary);
   border-color:var(--primary);
-  color:white;
+  color:#fff;
 }
-.primary-button{
-  padding:12px 18px;
-  border:0;
-  border-radius:10px;
-  font-weight:bold;
-}
-.hero{
-  min-height:360px;
-  padding:65px 25px;
+.hero {
+  position:relative;
+  min-height:320px;
+  padding:45px 20px;
   display:flex;
   align-items:center;
   justify-content:center;
   text-align:center;
-  background-size:cover;
   background-position:center;
-  position:relative;
+  background-size:cover;
 }
-.hero:before{
+.hero:before {
   content:"";
   position:absolute;
   inset:0;
-  background:rgba(0,12,24,.58);
+  background:rgba(0,12,24,var(--overlay));
 }
-.hero-content{position:relative;max-width:1000px}
-.hero h1{
-  font-size:clamp(34px,6vw,75px);
-  margin:0 0 20px;
+.hero-content {
+  position:relative;
+  max-width:1000px;
 }
-.hero p{
-  font-size:clamp(17px,2vw,24px);
-  color:#e3edf5;
+.hero h1 {
+  margin:0;
+  color:#fff;
+  font-size:clamp(30px,5vw,56px);
+  overflow-wrap:anywhere;
+  text-shadow:0 3px 15px #000;
 }
-main{max-width:1250px;margin:auto;padding:40px 20px 80px}
-.page{display:none}
-.page.active{display:block}
-.page h2{font-size:clamp(28px,4vw,43px)}
-.page-description{
-  color:var(--muted);
+.hero p {
+  font-size:20px;
+  color:#fff;
+  text-shadow:0 2px 10px #000;
+}
+main {
+  max-width:1250px;
+  min-height:250px;
+  margin:auto;
+  padding:35px 20px 80px;
+}
+.page {display:none}
+.page.active {display:block}
+.page h2 {font-size:clamp(26px,4vw,40px)}
+.description {
+  white-space:pre-wrap;
   line-height:1.7;
-  white-space:pre-line;
 }
-.page-image{
-  width:100%;
-  max-height:560px;
-  object-fit:cover;
-  border-radius:15px;
-  margin:20px 0;
-}
-.page-video{
-  width:100%;
-  max-width:900px;
-  display:block;
-  margin:20px auto;
-}
-.cards{
+.muted {color:var(--muted)}
+.cards {
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-  gap:20px;
-  margin-top:25px;
+  grid-template-columns:repeat(
+    auto-fill,
+    minmax(min(100%,220px),280px)
+  );
+  gap:18px;
+  margin-top:22px;
 }
-.card,.panel{
-  background:#ffffff0b;
-  border:1px solid #ffffff25;
-  border-radius:15px;
-  padding:20px;
+.card,.panel {
+  background:var(--card);
+  border:1px solid #ffffff30;
+  border-radius:var(--radius);
+  padding:17px;
+  min-width:0;
 }
-.card img{
+.card {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.card img {
   width:100%;
-  height:210px;
+  aspect-ratio:1/1;
   object-fit:contain;
 }
-.card h3{margin:12px 0}
-.muted{color:var(--muted)}
-.price{font-size:23px;font-weight:bold}
-.form{
+.card h3 {margin:4px 0}
+.price {
+  font-size:22px;
+  font-weight:bold;
+}
+.page-image {
+  width:100%;
+  max-height:560px;
+  object-fit:contain;
+  border-radius:12px;
+  margin:20px 0;
+}
+.page-video {
+  display:block;
+  width:100%;
+  max-width:850px;
+  margin:15px auto;
+}
+.form {
   display:grid;
   gap:14px;
-  max-width:560px;
+  max-width:550px;
 }
-input,select,textarea{
+label {display:grid;gap:6px}
+input,select,textarea {
   width:100%;
-  padding:13px;
-  border:1px solid #ffffff40;
+  padding:12px;
   border-radius:9px;
-  color:white;
+  border:1px solid #ffffff50;
   background:#112b40;
+  color:#fff;
 }
-input::placeholder{color:#aec0ce}
-label{display:grid;gap:6px}
-.actions{display:flex;flex-wrap:wrap;gap:10px}
-.status{
-  padding:13px;
-  border-radius:9px;
-  background:#ffffff12;
+.status {
+  padding:14px;
   margin:15px 0;
-  white-space:pre-line;
+  border-radius:10px;
+  background:#ffffff15;
+  white-space:pre-wrap;
 }
-.error{border:1px solid #ff6c6c;color:#ffd1d1}
-.success{border:1px solid #45c98a}
-.empty{
-  padding:22px;
+.error {
+  border:1px solid #ff7777;
+  color:#ffd5d5;
+}
+.success {border:1px solid #50d69b}
+.empty {
+  padding:20px;
+  border:1px solid #ffffff30;
+  border-radius:10px;
   color:var(--muted);
-  border:1px solid #ffffff20;
-  border-radius:12px;
 }
-.cart-line{
+.cart-line {
   display:flex;
   justify-content:space-between;
   align-items:center;
   gap:12px;
-  border-bottom:1px solid #ffffff25;
-  padding:12px 0;
+  border-bottom:1px solid #ffffff30;
+  padding:10px 0;
 }
-.cart-line button{padding:8px}
-footer{
+footer {
   text-align:center;
-  padding:30px;
+  padding:28px;
   border-top:1px solid #ffffff20;
   color:var(--muted);
 }
-#loading{
+#loading {
   min-height:100vh;
   display:grid;
   place-items:center;
+  padding:20px;
   text-align:center;
-  font-size:24px;
 }
-@media(max-width:700px){
-  header{padding:12px}
-  .header-inner{justify-content:center}
-  nav{justify-content:center}
-  nav button{padding:10px;font-size:14px}
-  .hero{min-height:290px}
+.modal {
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  display:grid;
+  place-items:center;
+  padding:15px;
+  background:#000d;
 }
-  
-/* EAH — BOUTIQUE : CARTES COMPACTES */
-
-.cards {
-  display: grid;
-  grid-template-columns:
-    repeat(auto-fill, minmax(min(100%, 240px), 280px));
-  gap: 20px;
-  align-items: start;
+.modal-window {
+  width:min(100%,920px);
+  max-height:92vh;
+  overflow:auto;
+  padding:22px;
+  border-radius:16px;
+  border:1px solid #ffffff45;
+  background:var(--card);
 }
-
-.card {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 16px;
+.modal-close {float:right}
+.modal-media {
+  display:block;
+  width:100%;
+  max-height:60vh;
+  object-fit:contain;
+  margin:14px 0;
 }
-
-.card img {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: 280px;
-  aspect-ratio: 1 / 1;
-  object-fit: contain;
+.gallery {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
 }
-
-.card h3,
-.card .price {
-  margin: 4px 0;
+.gallery button {
+  width:80px;
+  height:70px;
+  padding:3px;
 }
-
-.card .muted {
-  margin: 4px 0;
+.gallery img {
+  width:100%;
+  height:100%;
+  object-fit:contain;
 }
-
-.card button {
-  align-self: flex-start;
+.detail-line {
+  border-bottom:1px solid #ffffff25;
+  padding:10px 0;
 }
-
-.hero::before {
-  display: none !important;
-}
-
-@media (max-width: 620px) {
+@media(max-width:650px) {
+  header {padding:10px}
+  .header-inner,nav {justify-content:center}
+  nav button {font-size:13px;padding:9px}
+  .hero {min-height:260px}
   .cards {
     grid-template-columns:
-      repeat(auto-fit, minmax(150px, 1fr));
+      repeat(auto-fit,minmax(150px,1fr));
   }
-
-  .card {
-    padding: 12px;
-  }
-
-  .card img {
-    max-height: 220px;
-  }
+  .card {padding:12px}
 }
-
-/* EAH V23 - PERSONNALISATION PREMIUM */
-
-body {
-  background-color: var(--eah-background, #071725);
-  color: var(--eah-text, #E8F2FF);
-  font-family: var(--eah-font, Arial, sans-serif);
-  font-size: var(--eah-text-size, 16px);
-}
-
-h1, h2, h3 {
-  color: var(--eah-title, #FFFFFF);
-}
-
-h1 {
-  font-size: var(--eah-title-size, 38px);
-}
-
-header, .site-header {
-  background-color: var(--eah-header, #10243A);
-}
-
-.card, .eah-card {
-  background-color: var(--eah-card, #15324C);
-  border-radius: var(--eah-radius, 14px);
-}
-
-.card h3, .eah-card h3 {
-  font-size: var(--eah-card-title-size, 23px);
-}
-
-button.active,
-.nav-btn.active,
-.btn-primary {
-  background-color: var(--eah-primary, #1478FF);
-}
-
-/* TITRE SUR PHOTO DE COUVERTURE */
-
-.eah-hero-premium {
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 360px;
-  padding: 56px 24px;
-  text-align: center;
-  overflow: hidden;
-}
-
-.eah-hero-premium::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, .72),
-    rgba(0, 0, 0, .34),
-    rgba(0, 0, 0, .72)
-  );
-}
-
-.eah-hero-premium h1 {
-  color: #FFFFFF;
-  font-size: clamp(
-    30px,
-    5vw,
-    var(--eah-hero-size, 52px)
-  );
-  line-height: 1.12;
-  font-weight: 800;
-  max-width: 950px;
-  margin: 0 auto;
-  text-shadow: 0 3px 18px rgba(0,0,0,.75);
-  overflow-wrap: anywhere;
-}
-
-.eah-hero-premium p {
-  color: #FFFFFF;
-  font-size: clamp(15px, 2vw, 20px);
-  max-width: 720px;
-  margin: 18px auto 0;
-  line-height: 1.6;
-  text-shadow: 0 2px 12px rgba(0,0,0,.85);
-}
-
-@media (max-width: 600px) {
-  .eah-hero-premium {
-    min-height: 300px;
-    padding: 40px 18px;
-  }
-}
-
-/* EAH V24 — THÈMES AUTOMATIQUES */
-
-body {
-  background: var(--eah-background, #071725);
-  color: var(--eah-text, #FFFFFF);
-  font-family: var(--eah-font, Arial, sans-serif);
-  font-size: var(--eah-text-size, 16px);
-}
-
-h1, h2, h3 {
-  color: var(--eah-title, #FFFFFF);
-}
-
-button.active,
-.nav-btn.active,
-.btn-primary {
-  background-color: var(--eah-primary, #1478FF);
-}
-
-.eah-hero-premium {
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 50px 24px;
-}
-
-.eah-hero-premium::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: rgba(
-    0, 0, 0,
-    var(--eah-overlay, .58)
-  );
-}
-
-.eah-hero-premium h1 {
-  color: #FFFFFF;
-  font-size: clamp(
-    30px, 5vw,
-    var(--eah-hero-size, 52px)
-  );
-  font-weight: 800;
-  line-height: 1.15;
-  max-width: 950px;
-  margin: 0 auto;
-  text-shadow: 0 4px 20px rgba(0,0,0,.85);
-}
-
-.eah-hero-premium p {
-  color: #FFFFFF;
-  font-size: clamp(
-    15px, 2vw,
-    var(--eah-hero-subtitle-size, 20px)
-  );
-  max-width: 720px;
-  margin: 20px auto 0;
-  line-height: 1.6;
-  text-shadow: 0 3px 14px rgba(0,0,0,.9);
-}
-
-/* Style 2 : Prestige */
-html[data-eah-style="2"] .eah-hero-premium h1 {
-  font-weight: 600;
-  letter-spacing: 1.5px;
-}
-
-/* Style 3 : Élégance Moderne */
-html[data-eah-style="3"] .eah-hero-premium h1 {
-  font-weight: 700;
-  letter-spacing: -1px;
-}
-
-/* Style 4 : Énergie */
-html[data-eah-style="4"] .eah-hero-premium h1 {
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-/* Style 5 : Nature et Performance */
-html[data-eah-style="5"] .eah-hero-premium h1 {
-  font-weight: 700;
-  letter-spacing: .5px;
-}
-
 </style>
 </head>
 
@@ -454,44 +290,40 @@ html[data-eah-style="5"] .eah-hero-premium h1 {
 </div>
 
 <div id="app" hidden>
-
-<header>
-  <div class="header-inner">
-    <div class="brand">
-      <img id="club-logo" alt="Logo" hidden>
-      <span id="club-brand"></span>
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <img id="club-logo" alt="Logo" hidden>
+        <span id="club-brand">EAH Diving Club</span>
+      </div>
+      <nav id="menu"></nav>
     </div>
-    <nav id="menu"></nav>
-  </div>
-</header>
+  </header>
 
-<section class="hero" id="hero">
-  <div class="hero-content">
-    <h1 id="hero-title"></h1>
-    <p id="hero-tagline"></p>
-  </div>
-</section>
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <h1 id="hero-title"></h1>
+      <p id="hero-tagline"></p>
+    </div>
+  </section>
 
-<main id="pages"></main>
+  <main id="pages"></main>
 
-<footer>
-  <span id="footer-name"></span>
-  <p>Propulsé par EAH Diving</p>
-</footer>
-
+  <footer>
+    <span id="footer-name"></span>
+    <p id="footer-text">Propulsé par EAH Diving</p>
+  </footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <script>
-(function(){
+(function() {
 "use strict";
 
-/* =========================================
-   EAH DIVING CLUB V3
-   SITE PERSONNALISABLE MULTICLUB
-   BOUTIQUE + AUTHENTIFICATION
-========================================= */
+/* ==========================================
+   EAH DIVING CLUB - VERSION CORRIGEE
+========================================== */
 
 const SUPABASE_URL =
   "https://limyeqpdzjjwsdximehp.supabase.co";
@@ -509,19 +341,9 @@ const CLUB_SLUG =
   params.get("eah_club_preview") ||
   DEFAULT_CLUB;
 
-const $ = id => document.getElementById(id);
+const NFC_TOKEN = params.get("nfc");
 
-const sb = window.supabase.createClient(
-  SUPABASE_URL,
-  PUBLIC_KEY,
-  {
-    auth:{
-      persistSession:true,
-      autoRefreshToken:true,
-      detectSessionInUrl:true
-    }
-  }
-);
+const $ = id => document.getElementById(id);
 
 const state = {
   club:null,
@@ -532,35 +354,92 @@ const state = {
   cart:[],
   user:null,
   member:null,
-  currentPage:""
+  currentPage:"",
+  sb:null
 };
 
 const MANAGER_ROLES = [
-  "admin",
-  "owner",
-  "manager",
-  "responsable"
+  "admin","owner","manager","responsable"
 ];
 
-function element(tag,className,text){
-  const e=document.createElement(tag);
-  if(className)e.className=className;
-  if(text!==undefined)e.textContent=String(text??"");
+/* ==========================================
+   OUTILS GENERAUX
+========================================== */
+
+function el(tag, cls="", value) {
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(value !== undefined)
+    e.textContent = String(value ?? "");
   return e;
 }
 
-function safeImage(value) {
+function button(label, handler, primary=false) {
+  const b = el(
+    "button",
+    primary ? "primary-button" : "",
+    label
+  );
+  b.type = "button";
+  b.addEventListener("click",handler);
+  return b;
+}
 
-  if (!value) return "";
+function message(parent,text,error=false) {
+  parent.replaceChildren(
+    el(
+      "div",
+      "status " + (error ? "error":"success"),
+      text
+    )
+  );
+}
+
+function money(value) {
+  return Number(value || 0).toLocaleString(
+    "fr-FR",
+    {style:"currency",currency:"EUR"}
+  );
+}
+
+function array(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function object(value) {
+  return value &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+      ? value : {};
+}
+
+function description(parent,text) {
+  if(!text) return;
+  parent.appendChild(
+    el("p","description",text)
+  );
+}
+
+function safeImage(value) {
+  if(!value) return "";
 
   const raw = String(value).trim();
 
-  // Reconnaissance des liens Google Drive
-  const match = raw.match(
-    /(?:drive\.google\.com\/file\/d\/|drive\.google\.com\/open\?id=|drive\.google\.com\/uc\?(?:[^#]*&)?id=)([a-zA-Z0-9_-]{20,})/
+  let match = raw.match(
+    /drive\.google\.com\/file\/d\/([\w-]+)/
   );
 
-  if (match) {
+  if(!match) {
+    match = raw.match(
+      /[?&]id=([\w-]{20,})/
+    );
+  }
+
+  if(!match && /^[\w-]{20,}$/.test(raw)) {
+    match = [raw,raw];
+  }
+
+  if(match) {
     return (
       "https://drive.google.com/thumbnail?id=" +
       encodeURIComponent(match[1]) +
@@ -568,441 +447,613 @@ function safeImage(value) {
     );
   }
 
-  // Reconnaissance d'un identifiant Drive seul
-  if (/^[a-zA-Z0-9_-]{20,}$/.test(raw)) {
-    return (
-      "https://drive.google.com/thumbnail?id=" +
-      encodeURIComponent(raw) +
-      "&sz=w1000"
-    );
-  }
-
-  // URL classique
   try {
-    const u = new URL(raw, location.href);
+    const url = new URL(raw,location.href);
 
-    if (["https:", "http:"].includes(u.protocol)) {
-      return u.href;
-    }
-
-  } catch (e) {}
+    if(["https:","http:"].includes(url.protocol))
+      return url.href;
+  } catch(e) {}
 
   return "";
 }
 
+function image(parent,url,alt,cls="") {
+  const src = safeImage(url);
+  if(!src) return null;
 
-function safeColor(value, fallback) {
-  const colors = {
-    "bleu": "#0B6BFF",
-    "bleu marine": "#102040",
-    "bleu clair": "#70C8FF",
-    "orange": "#FF9800",
-    "vert": "#23A455",
-    "rouge": "#E53935",
-    "blanc": "#FFFFFF",
-    "noir": "#000000",
-    "gris": "#808080",
-    "jaune": "#FFD600",
-    "rose": "#FF69B4",
-    "violet": "#9333EA"
+  const img = el("img",cls);
+  img.src = src;
+  img.alt = alt || "";
+  img.loading = "lazy";
+  img.onerror = () => {
+    img.hidden = true;
   };
 
-  const valueText = String(value ?? "").trim();
-  const key = valueText.toLowerCase();
+  parent.appendChild(img);
+  return img;
+}
 
-  if (colors[key]) return colors[key];
+function video(parent,url) {
+  const src = safeImage(url);
+  if(!src) return;
 
-  if (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(valueText)) {
-    return valueText;
+  if(/\.(mp4|webm|ogg)([?#]|$)/i.test(src)) {
+    const v = el("video","page-video");
+    v.src = src;
+    v.controls = true;
+    v.preload = "metadata";
+    parent.appendChild(v);
+  } else {
+    const a = el("a","","Voir la vidéo");
+    a.href = src;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    parent.appendChild(a);
   }
-
-  return fallback;
 }
 
+function safeColor(value,fallback) {
+  const colors = {
+    "bleu":"#0b6bff",
+    "bleu marine":"#102040",
+    "bleu clair":"#70c8ff",
+    "orange":"#ff9800",
+    "vert":"#23a455",
+    "rouge":"#e53935",
+    "blanc":"#ffffff",
+    "noir":"#000000",
+    "gris":"#808080",
+    "jaune":"#ffd600",
+    "rose":"#ff69b4",
+    "violet":"#9333ea"
+  };
 
-function money(value){
-  return Number(value||0).toLocaleString(
-    "fr-FR",
-    {style:"currency",currency:"EUR"}
+  const text = String(value || "").trim();
+
+  return colors[text.toLowerCase()] ||
+    (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(text)
+      ? text : fallback);
+}
+
+function numeric(value,fallback,min,max) {
+  const n = Number(value);
+  return value !== "" &&
+    value != null &&
+    Number.isFinite(n) &&
+    n >= min && n <= max
+      ? n : fallback;
+}
+
+/* ==========================================
+   SUPABASE - LECTURE PUBLIQUE
+========================================== */
+
+async function publicQuery(table,extra="") {
+  const url =
+    SUPABASE_URL +
+    "/rest/v1/" +
+    encodeURIComponent(table) +
+    "?select=*" +
+    extra;
+
+  const controller = new AbortController();
+
+  const timeout = setTimeout(
+    () => controller.abort(),
+    12000
   );
-}
 
-function message(container,text,isError=false){
-  container.replaceChildren();
-  const e=element(
-    "div",
-    "status "+(isError?"error":"success"),
-    text
-  );
-  container.appendChild(e);
-}
-
-function button(label,handler,primary=false){
-  const b=element(
-    "button",
-    primary?"primary-button":"secondary-button",
-    label
-  );
-  b.type="button";
-  b.addEventListener("click",handler);
-  return b;
-}
-
-async function publicQuery(table,query){
-  const response=await fetch(
-    SUPABASE_URL+"/rest/v1/"+table+"?"+query,
-    {
+  try {
+    const response = await fetch(url,{
       headers:{
         apikey:PUBLIC_KEY,
-        Authorization:"Bearer "+PUBLIC_KEY,
+        Authorization:"Bearer " + PUBLIC_KEY,
         Accept:"application/json"
       },
+      signal:controller.signal,
       cache:"no-store"
+    });
+
+    if(!response.ok) {
+      const body = await response.text();
+
+      throw new Error(
+        table + " : HTTP " +
+        response.status + " " +
+        body.slice(0,150)
+      );
     }
-  );
-  if(!response.ok)
-    throw new Error(
-      table+" : HTTP "+response.status
-    );
-  return response.json();
+
+    return await response.json();
+
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
-async function loadClub(){
-  const clubs=await publicQuery(
+async function loadClub() {
+  const clubs = await publicQuery(
     "clubs",
-    "select=*&slug=eq."+encodeURIComponent(CLUB_SLUG)
+    "&slug=eq." +
+    encodeURIComponent(CLUB_SLUG) +
+    "&limit=1"
   );
 
-  if(!clubs.length)
-    throw new Error("Club introuvable : "+CLUB_SLUG);
+  if(!clubs.length) {
+    throw new Error(
+      "Club introuvable ou non accessible : " +
+      CLUB_SLUG
+    );
+  }
 
-  state.club=clubs[0];
+  const club = clubs[0];
+  const id = encodeURIComponent(club.id);
 
-  const id=encodeURIComponent(state.club.id);
-
-  const results=await Promise.all([
-    publicQuery(
+  const requests = [
+    [
+      "config",
       "eah_club_site_config",
-      "select=*&club_id=eq."+id
-    ),
-    publicQuery(
+      "&club_id=eq." + id
+    ],
+    [
+      "pages",
       "eah_club_pages",
-      "select=*&club_id=eq."+id+
+      "&club_id=eq." + id +
       "&active=eq.true&order=sort_order.asc"
-    ),
-    publicQuery(
+    ],
+    [
+      "badges",
       "eah_club_badges",
-      "select=*&club_id=eq."+id+
+      "&club_id=eq." + id +
       "&active=eq.true&order=sort_order.asc"
-    ),
-    publicQuery(
+    ],
+    [
+      "products",
       "eah_club_products",
-      "select=*&club_id=eq."+id+
+      "&club_id=eq." + id +
       "&active=eq.true&order=sort_order.asc"
-    )
-  ]);
+    ]
+  ];
 
-  state.config=results[0][0]||{};
-  state.pages=results[1]||[];
-  state.badges=results[2]||[];
-  state.products=results[3]||[];
+  const results = await Promise.allSettled(
+    requests.map(r => publicQuery(r[1],r[2]))
+  );
+
+  const data = {};
+
+  results.forEach((result,index) => {
+    const key = requests[index][0];
+
+    if(result.status === "fulfilled") {
+      data[key] = result.value;
+    } else {
+      console.warn(
+        "EAH chargement " + key,
+        result.reason
+      );
+      data[key] = [];
+    }
+  });
+
+  state.club = club;
+  state.config = data.config[0] || {};
+  state.pages = data.pages;
+  state.badges = data.badges;
+  state.products = data.products;
+
+  if(!state.pages.length) {
+    state.pages = [{
+      slug:"accueil",
+      title:"Accueil",
+      description:
+        club.welcome_text ||
+        "Bienvenue sur le site de votre club.",
+      settings:{}
+    }];
+  }
 }
 
+/* ==========================================
+   THEMES ET PERSONNALISATION
+========================================== */
+
+function applyTheme() {
+  const cfg = state.config;
+  const s = object(cfg.settings);
+  const c = state.club || {};
+
+  const themes = {
+    1:[
+      "#1478ff","#071725","#10243a",
+      "#e8f2ff","#ffffff","#15324c"
+    ],
+    2:[
+      "#c7a466","#101010","#171717",
+      "#ede5d7","#f1d394","#24211c"
+    ],
+    3:[
+      "#087e8b","#f3f6f8","#ffffff",
+      "#263746","#183044","#ffffff"
+    ],
+    4:[
+      "#a855f7","#140d1f","#21152f",
+      "#f5efff","#ffffff","#302041"
+    ],
+    5:[
+      "#7bc99c","#0d211e","#102c28",
+      "#e6f5e9","#ffffff","#193b34"
+    ]
+  };
+
+  const theme =
+    themes[Number(s.STYLE_NUMERO)] ||
+    themes[1];
+
+  const root = document.documentElement;
+
+  const vars = {
+    "--primary":safeColor(
+      s.PRIMARY_COLOR ||
+      cfg.primary_color ||
+      c.primary_color,
+      theme[0]
+    ),
+    "--secondary":safeColor(
+      s.BACKGROUND_COLOR ||
+      cfg.secondary_color,
+      theme[1]
+    ),
+    "--text":safeColor(
+      s.TEXT_COLOR,theme[3]
+    ),
+    "--card":safeColor(
+      s.CARD_COLOR,theme[5]
+    ),
+    "--radius":
+      numeric(s.CARD_RADIUS,14,0,40) + "px",
+    "--overlay":
+      numeric(s.HERO_OVERLAY,.58,0,1)
+  };
+
+  Object.entries(vars).forEach(([key,value]) => {
+    root.style.setProperty(key,value);
+  });
+
+  const fonts = {
+    "Arial":"Arial,sans-serif",
+    "Roboto":"Roboto,Arial,sans-serif",
+    "Verdana":"Verdana,sans-serif",
+    "Georgia":"Georgia,serif",
+    "Tahoma":"Tahoma,sans-serif",
+    "Times New Roman":"Times New Roman,serif"
+  };
+
+  root.style.setProperty(
+    "--font",
+    fonts[s.FONT_FAMILY || s.TEXT_FONT] ||
+    theme.font ||
+    "Arial,sans-serif"
+  );
+
+  document.body.style.fontSize =
+    numeric(s.TEXT_SIZE,16,10,32) + "px";
+
+  const header = document.querySelector("header");
+
+  if(header) {
+    header.style.backgroundColor =
+      safeColor(s.HEADER_COLOR,theme[2]);
+  }
+
+  const background = safeImage(
+    s.BACKGROUND_IMAGE_URL
+  );
+
+  document.body.style.backgroundImage =
+    background ? `url("${background}")` : "none";
+
+  document.body.style.backgroundSize = "cover";
+  document.body.style.backgroundAttachment = "fixed";
+
+  const styleId = "eah-dynamic-style";
+
+  let style = $(styleId);
+
+  if(!style) {
+    style = el("style");
+    style.id = styleId;
+    document.head.appendChild(style);
+  }
+
+  const titleColor = safeColor(
+    s.TITLE_COLOR,theme[4]
+  );
+
+  const titleSize = numeric(
+    s.TITLE_SIZE,38,18,72
+  );
+
+  const heroSize = numeric(
+    s.HERO_TITLE_SIZE ||
+    s.COVER_TEXT_SIZE,
+    52,24,100
+  );
+
+  const cardSize = numeric(
+    s.CARD_TITLE_SIZE,23,12,42
+  );
+
+  style.textContent = `
+    .page h2 {
+      color:${titleColor};
+      font-size:${titleSize}px;
+    }
+    .card h3 {
+      color:${titleColor};
+      font-size:${cardSize}px;
+    }
+    .hero h1 {
+      font-size:clamp(30px,5vw,${heroSize}px);
+    }
+  `;
+}
 
 function renderHeader() {
-  const c = state.club;
-  const cfg = state.config || {};
-  const s = cfg.settings || {};
+  if(!state.club) return;
 
-  const title = cfg.site_title || c.name || "EAH Diving Club";
-  const heroTitle = String(s.HERO_TITLE ?? "").trim();
+  const cfg = state.config;
+  const c = state.club;
+  const s = object(cfg.settings);
+
+  applyTheme();
+
+  const title =
+    cfg.site_title ||
+    c.name ||
+    "EAH Diving Club";
 
   document.title = title;
 
   $("club-brand").textContent = title;
-  $("hero-title").textContent = heroTitle;
-$("hero-title").hidden = !heroTitle;
   $("footer-name").textContent = title;
 
+  $("footer-text").textContent =
+    s.FOOTER_TEXT ||
+    "Propulsé par EAH Diving";
+
+  const logo = safeImage(
+    cfg.logo_url || c.logo_url
+  );
+
+  const logoEl = $("club-logo");
+
+  logoEl.hidden = !logo;
+
+  if(logo) logoEl.src = logo;
+
+  logoEl.onerror = () => {
+    logoEl.hidden = true;
+  };
+
+  const heroTitle = String(
+    s.HERO_TITLE || ""
+  ).trim();
+
+  $("hero-title").textContent = heroTitle;
+  $("hero-title").hidden = !heroTitle;
+
   $("hero-tagline").textContent =
-    cfg.tagline || c.welcome_text || "";
-
-  const root = document.documentElement;
-
-  const primary = safeColor(
-    s.PRIMARY_COLOR || cfg.primary_color || c.primary_color,
-    "#0B6BFF"
-  );
-
-  const background = safeColor(
-    s.BACKGROUND_COLOR || cfg.secondary_color,
-    "#03131F"
-  );
-
-  root.style.setProperty("--primary", primary);
-  root.style.setProperty("--secondary", background);
-  root.style.setProperty(
-    "--text", safeColor(s.TEXT_COLOR, "#FFFFFF")
-  );
-
-  document.body.style.backgroundColor = background;
-
-  const header = document.querySelector("header");
-  if (header) {
-    header.style.backgroundColor =
-      safeColor(s.HEADER_COLOR, "#061827");
-  }
-
-  const titleColor = safeColor(s.TITLE_COLOR, "#FFFFFF");
-
-  const styleId = "eah-club-custom-style";
-  let customStyle = document.getElementById(styleId);
-
-  if (!customStyle) {
-    customStyle = document.createElement("style");
-    customStyle.id = styleId;
-    document.head.appendChild(customStyle);
-  }
-
-const EAH_FONTS = {
-  "Arial": "Arial, Helvetica, sans-serif",
-  "Roboto": "Roboto, Arial, sans-serif",
-  "Verdana": "Verdana, sans-serif",
-  "Georgia": "Georgia, serif",
-  "Tahoma": "Tahoma, sans-serif",
-  "Times New Roman": "Times New Roman, serif"
-};
-
-const selectedFont = String(
-  s.FONT_FAMILY || "Arial"
-).trim();
-
-const fontFamily =
-  EAH_FONTS[selectedFont] || EAH_FONTS.Arial;
-
-function EAH_FONT_SIZE(value, fallback, min, max) {
-  if (value === "" || value == null) return fallback;
-
-  const number = Number(value);
-
-  return Number.isFinite(number) &&
-    number >= min &&
-    number <= max
-      ? number
-      : fallback;
-}
-
-const textSize = EAH_FONT_SIZE(s.TEXT_SIZE, 16, 10, 32);
-const titleSize = EAH_FONT_SIZE(s.TITLE_SIZE, 36, 18, 72);
-const heroTitleSize = EAH_FONT_SIZE(
-  s.HERO_TITLE_SIZE, 56, 24, 100
-);
-const cardTitleSize = EAH_FONT_SIZE(
-  s.CARD_TITLE_SIZE, 20, 12, 42
-);
-
-root.style.setProperty("--eah-font", fontFamily);
-root.style.setProperty("--eah-text-size", textSize + "px");
-root.style.setProperty("--eah-title-size", titleSize + "px");
-root.style.setProperty(
-  "--eah-hero-title-size",
-  heroTitleSize + "px"
-);
-root.style.setProperty(
-  "--eah-card-title-size",
-  cardTitleSize + "px"
-);
-
-  const cardColor = safeColor(s.CARD_COLOR, "#102B42");
-
-  customStyle.textContent = `
-  
-body, button, input, select, textarea {
-  font-family: var(--eah-font);
-}
-
-body {
-  font-size: var(--eah-text-size);
-}
-
-.hero h1 {
-  font-size: var(--eah-hero-title-size);
-  line-height: 1.15;
-  overflow-wrap: anywhere;
-}
-
-.page h2 {
-  font-size: var(--eah-title-size);
-}
-
-.card h3 {
-  font-size: var(--eah-card-title-size);
-}
-
-    .hero h1, .page h2, .card h3 {
-      color: ${titleColor};
-    }
-    .card, .panel {
-      background-color: ${cardColor};
-    }
-  `;
-
-  const logo = safeImage(cfg.logo_url || c.logo_url);
-  const logoElement = $("club-logo");
-
-  if (logo) {
-    logoElement.src = logo;
-    logoElement.hidden = false;
-  } else {
-    logoElement.hidden = true;
-  }
-
-  const heroElement = $("hero");
-
-  const currentPage = state.pages.find(
-  page => page.slug === state.currentPage
-);
-
-const heroImage = safeImage(
-  currentPage?.image_url || cfg.hero_url
-);
-  const backgroundImage = safeImage(s.BACKGROUND_IMAGE_URL);
-
-  heroElement.style.backgroundImage =
-    heroImage ? `url("${heroImage}")` : "none";
-
-  if (backgroundImage) {
-    document.body.style.backgroundImage =
-      `url("${backgroundImage}")`;
-    document.body.style.backgroundSize = "cover";
-    document.body.style.backgroundPosition = "center";
-    document.body.style.backgroundAttachment = "fixed";
-  } else {
-    document.body.style.backgroundImage = "none";
-  }
-
-  const height = Number(s.HERO_HEIGHT);
-  if (Number.isFinite(height) && height >= 200 && height <= 1000) {
-    heroElement.style.minHeight = height + "px";
-  }
-
-  const overlay = Number(s.HERO_OVERLAY);
-  if (Number.isFinite(overlay) && overlay >= 0 && overlay <= 1) {
-    customStyle.textContent += `
-      .hero::before {
-        background: rgba(0, 12, 24, ${overlay});
-      }
-    `;
-  }
-
-  const footerText = document.querySelector("footer p");
-  if (footerText) {
-    footerText.textContent =
-      s.FOOTER_TEXT || "Propulsé par EAH Diving";
-  }
-}
-
-function renderBadges(section) {
-  const grid = element("div", "cards");
+    cfg.tagline ||
+    c.welcome_text ||
+    "";
 
   const page = state.pages.find(
-    p => p.slug === "blazons"
+    p => String(p.slug).toLowerCase() ===
+      state.currentPage
   );
 
-  const settings = page?.settings || {};
+  const ps = object(page?.settings);
 
-  const details = Array.isArray(
-    settings.blazons_details
-  ) ? settings.blazons_details : [];
+  const cover = safeImage(
+    ps.cover_url ||
+    ps.cover_image_url ||
+    cfg.hero_url ||
+    ""
+  );
 
-  const criteres = Array.isArray(
-    settings.criteres_blazons
-  ) ? settings.criteres_blazons : [];
+  $("hero").style.backgroundImage =
+    cover ? `url("${cover}")` : "none";
 
-  if (!state.badges.length) {
+  $("hero").style.minHeight =
+    numeric(s.HERO_HEIGHT,360,200,1000) +
+    "px";
+}
+
+/* ==========================================
+   MODALES ET GALERIES
+========================================== */
+
+function openModal(title,builder) {
+  document.querySelector(".modal")?.remove();
+
+  const overlay = el("div","modal");
+  const box = el("div","modal-window");
+
+  box.setAttribute("role","dialog");
+  box.setAttribute("aria-modal","true");
+
+  const close = button("✕",() => {
+    overlay.remove();
+  });
+
+  close.className = "modal-close";
+
+  box.appendChild(close);
+  box.appendChild(el("h2","",title));
+
+  builder(box);
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener("click",event => {
+    if(event.target === overlay)
+      overlay.remove();
+  });
+
+  const escapeHandler = event => {
+    if(event.key === "Escape") {
+      overlay.remove();
+      document.removeEventListener(
+        "keydown",escapeHandler
+      );
+    }
+  };
+
+  document.addEventListener(
+    "keydown",escapeHandler
+  );
+
+  close.focus();
+}
+
+function gallery(parent,photos,title) {
+  const urls = [...new Set(
+    array(photos)
+      .map(safeImage)
+      .filter(Boolean)
+  )];
+
+  if(!urls.length) return;
+
+  const main = image(
+    parent,urls[0],title,"modal-media"
+  );
+
+  if(urls.length < 2) return;
+
+  const thumbs = el("div","gallery");
+
+  urls.forEach((url,index) => {
+    const b = button(
+      "Photo " + (index+1),
+      () => {main.src = url}
+    );
+
+    b.textContent = "";
+
+    image(
+      b,url,
+      "Photo " + (index+1)
+    );
+
+    thumbs.appendChild(b);
+  });
+
+  parent.appendChild(thumbs);
+}
+
+/* ==========================================
+   DISCIPLINES
+========================================== */
+
+function renderDisciplines(page,section) {
+  const disciplines = array(
+    object(page.settings).disciplines
+  );
+
+  if(!disciplines.length) {
     section.appendChild(
-      element("p", "empty", "Aucun blazon disponible.")
+      el("p","empty","Aucune discipline disponible.")
     );
     return;
   }
 
-  state.badges.forEach(badge => {
-    const card = element("article", "card");
+  const grid = el("div","cards");
 
-    const detail = details.find(
-      b => String(b.id) === String(badge.badge_key)
-    );
+  disciplines.forEach(d => {
+    if(d.active === false) return;
 
-    const blazonV21 = (
-  settings.blazons_v21 || []
-).find(b => String(b.id) === String(badge.badge_key));
+    const name =
+      d.nom || d.name || "Discipline";
 
-const imageUrl = safeImage(
-  badge.image_url ||
-  detail?.image_url ||
-  blazonV21?.image_url ||
-  ""
-);
+    const picture =
+      d.image_url ||
+      d.photo_illustration_url ||
+      d.photo_url;
 
-    if (imageUrl) {
-      const img = element("img");
-      img.src = imageUrl;
-      img.alt = badge.name || "Blazon";
-      img.loading = "lazy";
-      card.appendChild(img);
+    const card = el("article","card");
+
+    const open = () => {
+      openModal(name,box => {
+        gallery(box,[picture],name);
+
+        description(
+          box,
+          d.description_longue ||
+          d.description
+        );
+
+        const tarifs = array(d.tarifs).length
+          ? d.tarifs
+          : [1,2,3].map(n => ({
+              titre:"Tarif " + n,
+              prix:d["tarif_" + n],
+              description:
+                d["description_tarif_" + n]
+            }));
+
+        tarifs.forEach(t => {
+          if(!t.prix && !t.description) return;
+
+          const line = el("div","detail-line");
+
+          line.appendChild(
+            el("h3","",t.titre || "Tarif")
+          );
+
+          if(t.prix) {
+            line.appendChild(
+              el("p","price",String(t.prix) + " €")
+            );
+          }
+
+          description(line,t.description);
+          box.appendChild(line);
+        });
+
+        if(d.tarif || d.prix) {
+          box.appendChild(
+            el(
+              "p","price",
+              "Tarif : " + (d.tarif || d.prix)
+            )
+          );
+        }
+
+        video(box,d.video_url);
+      });
+    };
+
+    const img = image(card,picture,name);
+
+    if(img) {
+      img.style.cursor = "pointer";
+      img.addEventListener("click",open);
+    }
+
+    card.appendChild(el("h3","",name));
+
+    if(d.description) {
+      card.appendChild(
+        el("p","muted",d.description)
+      );
     }
 
     card.appendChild(
-      element("h3", "", badge.name)
+      button("Découvrir",open,true)
     );
 
-    const action = button("Voir les critères", () => {
-      const existing = card.querySelector(
-        ".eah-badge-details"
-      );
-
-      if (existing) {
-        existing.remove();
-        return;
-      }
-
-      const panel = element(
-        "div",
-        "eah-badge-details panel"
-      );
-
-      if (detail?.description) {
-        panel.appendChild(
-          element("p", "", detail.description)
-        );
-      }
-
-      const items = criteres.filter(
-        c =>
-          String(c.blazon_id) ===
-          String(badge.badge_key) &&
-          c.active !== false
-      );
-
-      if (!items.length) {
-        panel.appendChild(
-          element("p", "muted", "Aucun critère renseigné.")
-        );
-      }
-
-      items.forEach(item => {
-        const text = item.description +
-          (item.valeur ? " : " + item.valeur : "");
-
-        panel.appendChild(
-          element("p", "", "✓ " + text)
-        );
-      });
-
-      card.appendChild(panel);
-    }, true);
-
-    card.appendChild(action);
     grid.appendChild(card);
   });
 
@@ -1010,450 +1061,257 @@ const imageUrl = safeImage(
 }
 
 /* ==========================================
-   EAH — AFFICHAGE DES DISCIPLINES
+   BLAZONS
 ========================================== */
 
+function renderBadges(page,section) {
+  const s = object(page.settings);
 
-function EAH_RENDER_DISCIPLINES(page, section) {
-  const disciplines = page.settings?.disciplines || [];
+  const details = array(
+    s.blazons_v21 || s.blazons_details
+  );
 
-  if (!Array.isArray(disciplines) || !disciplines.length) {
+  const criteres = array(s.criteres_blazons);
+
+  if(!state.badges.length) {
     section.appendChild(
-      element("p", "muted", "Aucune discipline disponible.")
+      el("p","empty","Aucun blazon disponible.")
     );
     return;
   }
 
-  const grid = element("div", "cards");
+  const grid = el("div","cards");
 
-  disciplines.forEach(discipline => {
-    if (discipline.active === false) return;
+  state.badges.forEach(badge => {
+    const detail = details.find(
+      x => String(x.id) ===
+        String(badge.badge_key)
+    ) || {};
 
-    const card = element("article", "card");
-    const nom = discipline.nom || discipline.name || "Discipline";
+    const name =
+      detail.name || badge.name || "Blazon";
 
-    const imageUrl = safeImage(
-      discipline.image_url ||
-      discipline.photo_illustration_url ||
-      discipline.photo_url ||
-      ""
+    const picture =
+      detail.image_url ||
+      badge.image_url;
+
+    const card = el("article","card");
+
+    const open = () => {
+      openModal(name,box => {
+        gallery(box,[picture],name);
+        description(box,detail.description);
+
+        let items = detail.criteres || [];
+
+        if(typeof items === "string")
+          items = items.split(/\r?\n/);
+
+        if(!array(items).length) {
+          items = criteres.filter(
+            x => String(x.blazon_id) ===
+              String(badge.badge_key) &&
+              x.active !== false
+          );
+        }
+
+        array(items).forEach(item => {
+          const text =
+            typeof item === "string"
+              ? item
+              : (
+                (item.description || "") +
+                (item.valeur
+                  ? " : " + item.valeur
+                  : "")
+              );
+
+          box.appendChild(
+            el("p","","✓ " + text)
+          );
+        });
+      });
+    };
+
+    const img = image(card,picture,name);
+
+    if(img) {
+      img.style.cursor = "pointer";
+      img.addEventListener("click",open);
+    }
+
+    card.appendChild(el("h3","",name));
+
+    card.appendChild(
+      button("Voir les critères",open,true)
     );
 
-    if (imageUrl) {
-      const img = element("img");
-      img.src = imageUrl;
-      img.alt = nom;
-      img.loading = "lazy";
-      card.appendChild(img);
-    }
-
-    card.appendChild(element("h3", "", nom));
-
-    if (discipline.description) {
-      card.appendChild(
-        element("p", "muted", discipline.description)
-      );
-    }
-
-    const details = element("div", "panel");
-    details.hidden = true;
-
-    if (discipline.description_longue) {
-      details.appendChild(
-        element("p", "", discipline.description_longue)
-      );
-    }
-
-    if (discipline.tarif || discipline.prix) {
-      details.appendChild(
-        element(
-          "p",
-          "price",
-          "Tarif : " + (discipline.tarif || discipline.prix)
-        )
-      );
-    }
-
-    const video = safeImage(discipline.video_url || "");
-
-    if (video) {
-      const lien = element("a", "", "Voir la vidéo");
-      lien.href = video;
-      lien.target = "_blank";
-      lien.rel = "noopener noreferrer";
-      details.appendChild(lien);
-    }
-
-    const action = button("Découvrir la discipline", () => {
-  details.hidden = !details.hidden;
-
-  action.textContent = details.hidden
-    ? "Découvrir la discipline"
-    : "Masquer les détails";
-
-}, true);
-
-    card.appendChild(action);
-    card.appendChild(details);
     grid.appendChild(card);
   });
 
   section.appendChild(grid);
 }
 
-function EAH_RENDER_ACTUALITES(page, section) {
-  const actualites =
-  page.settings?.items_v21 ||
-  page.settings?.actualites ||
-  page.settings?.articles ||
-  [];
+/* ==========================================
+   ACTUALITES
+========================================== */
 
-  if (!Array.isArray(actualites) || !actualites.length) {
+function renderActualites(page,section) {
+  const s = object(page.settings);
+
+  const articles = array(
+    s.items_v21 ||
+    s.actualites ||
+    s.articles
+  );
+
+  if(!articles.length) {
     section.appendChild(
-      element("p", "muted", "Aucune actualité disponible.")
+      el("p","empty","Aucune actualité disponible.")
     );
     return;
   }
 
-  const grid = element("div", "cards");
+  const grid = el("div","cards");
 
-  actualites.forEach(article => {
-    if (article.active === false) return;
+  articles.forEach(article => {
+    if(article.active === false) return;
 
-    const card = element("article", "card");
-
-    const titre =
+    const title =
       article.titre ||
       article.title ||
       article.nom ||
       "Actualité";
 
-    const imageUrl = safeImage(
+    const picture =
       article.image_url ||
-      article.photo_url ||
       article.photo_illustration_url ||
-      ""
-    );
+      article.photo_url;
 
-    if (imageUrl) {
-      const img = element("img");
-      img.src = imageUrl;
-      img.alt = titre;
-      img.loading = "lazy";
-      card.appendChild(img);
+    const card = el("article","card");
+
+    const open = () => {
+      openModal(title,box => {
+        gallery(box,[picture],title);
+
+        if(article.date) {
+          box.appendChild(
+            el("p","muted",article.date)
+          );
+        }
+
+        description(
+          box,
+          article.contenu ||
+          article.texte ||
+          article.description_longue ||
+          article.description
+        );
+
+        video(box,article.video_url);
+      });
+    };
+
+    const img = image(card,picture,title);
+
+    if(img) {
+      img.style.cursor = "pointer";
+      img.addEventListener("click",open);
     }
 
-    card.appendChild(element("h3", "", titre));
+    card.appendChild(el("h3","",title));
 
-    if (article.date) {
+    if(article.date) {
       card.appendChild(
-        element("p", "muted", String(article.date))
+        el("p","muted",article.date)
       );
-    }
-
-    if (article.description) {
-      card.appendChild(
-        element("p", "muted", article.description)
-      );
-    }
-
-    const contenu = element("div", "panel");
-    contenu.hidden = true;
-
-    const texte =
-      article.contenu ||
-      article.texte ||
-      article.description_longue ||
-      "";
-
-    if (texte) {
-      const p = element("p", "", texte);
-      p.style.whiteSpace = "pre-wrap";
-      contenu.appendChild(p);
-    }
-
-    const video = safeImage(article.video_url || "");
-
-    if (video) {
-      const lien = element("a", "", "Voir la vidéo");
-      lien.href = video;
-      lien.target = "_blank";
-      lien.rel = "noopener noreferrer";
-      contenu.appendChild(lien);
     }
 
     card.appendChild(
-      button("Lire l'article", () => {
-        contenu.hidden = !contenu.hidden;
-      }, true)
+      button("Lire l'article",open,true)
     );
 
-    card.appendChild(contenu);
     grid.appendChild(card);
   });
 
   section.appendChild(grid);
 }
 
-function renderStandardPage(page,section){
-  if(page.description){
-    section.appendChild(
-      element("p","page-description",page.description)
+/* ==========================================
+   BOUTIQUE
+========================================== */
+
+function addToCart(product,size) {
+  const stock = Number(product.stock);
+
+  const available =
+    Number.isFinite(stock) && stock >= 0
+      ? stock : 0;
+
+  const id = product.id || product.name;
+
+  const already = state.cart
+    .filter(x => x.id === id)
+    .reduce(
+      (sum,x) => sum + x.quantity,
+      0
     );
-  }
 
-  const desktop=safeImage(page.image_url);
-  const mobile=safeImage(page.mobile_image_url);
-
-  if(desktop||mobile){
-    const picture=element("picture");
-
-    if(mobile){
-      const source=element("source");
-      source.media="(max-width:700px)";
-      source.srcset=mobile;
-      picture.appendChild(source);
-    }
-
-    const img=element("img","page-image");
-    img.src=desktop||mobile;
-    img.alt=page.title||"";
-    picture.appendChild(img);
-
-    section.appendChild(picture);
-  }
-
-  const video=safeImage(page.video_url);
-
-  if(video){
-    const v=element("video","page-video");
-    v.src=video;
-    v.controls=true;
-    v.preload="metadata";
-    section.appendChild(v);
-  }
-if (page.slug === "disciplines") {
-  EAH_RENDER_DISCIPLINES(page, section);
-}
-  if (page.slug === "actualites") {
-  EAH_RENDER_ACTUALITES(page, section);
-}
-  if(page.slug==="blazons")
-    renderBadges(section);
-
-  if(
-    !page.description &&
-    !desktop &&
-    !mobile &&
-    !video &&
-    !["blazons", "disciplines", "actualites"].includes(page.slug)
-  ){
-    section.appendChild(
-      element("p","empty","Contenu bientôt disponible.")
-    );
-  }
-}
-
-/* =========================================
-   BOUTIQUE MULTICLUB
-========================================= */
-
-function renderBoutique(section){
-  const container=element("div");
-  section.appendChild(container);
-
-  const intro=element(
-    "p",
-    "muted",
-    "Découvrez les articles proposés par votre club."
-  );
-  container.appendChild(intro);
-
-  if(!state.products.length){
-    container.appendChild(
-      element("div","empty","Aucun article disponible.")
-    );
-  }else{
-    const grid=element("div","cards");
-
-    state.products.forEach(product=>{
-      const card=element("article","card");
-
-      const url=safeImage(product.image_url);
-      if(url){
-        const img=element("img");
-        img.src=url;
-        img.alt=product.name;
-        img.loading="lazy";
-        card.appendChild(img);
-      }
-
-      card.appendChild(
-        element("h3","",product.name)
-      );
-
-      if(product.description){
-        card.appendChild(
-          element("p","muted",product.description)
-        );
-      }
-
-      card.appendChild(
-        element("p","price",money(product.price))
-      );
-
-      card.appendChild(
-        element(
-          "p",
-          "muted",
-          "Stock : "+product.stock
-        )
-      );
-
-      const sizes=Array.isArray(product.sizes)
-        ? product.sizes
-        : [];
-
-      const select=element("select");
-
-      if(sizes.length){
-        sizes.forEach(size=>{
-          const option=element("option","",size);
-          option.value=String(size);
-          select.appendChild(option);
-        });
-        card.appendChild(select);
-      }
-
-      const add=button(
-        "Ajouter au panier",
-        ()=>{
-          const size=sizes.length?select.value:"";
-          addToCart(product,size);
-          renderCart(cartBox);
-        },
-        true
-      );
-
-      add.disabled=Number(product.stock)<=0;
-
-const detailsButton = button("Détails", () => {
-  const existing = card.querySelector(
-    ".eah-product-details"
-  );
-
-  if (existing) {
-    existing.remove();
-    return;
-  }
-
-  const details = element(
-    "div",
-    "eah-product-details panel"
-  );
-
-  details.style.marginTop = "15px";
-
-  details.appendChild(
-    element("h3", "", product.name)
-  );
-
-  details.appendChild(
-    element(
-      "p",
-      "muted",
-      product.description ||
-      "Aucune description disponible."
-    )
-  );
-
-  details.appendChild(
-    element("p", "price", money(product.price))
-  );
-
-  const videoUrl = safeImage(product.video_url);
-
-  if (videoUrl) {
-    const video = element("video", "page-video");
-    video.src = videoUrl;
-    video.controls = true;
-    video.preload = "metadata";
-    details.appendChild(video);
-  }
-
-  card.appendChild(details);
-});
-
-card.appendChild(detailsButton);
-
-      card.appendChild(add);
-      grid.appendChild(card);
-    });
-
-    container.appendChild(grid);
-  }
-
-  const cartBox=element("div","panel");
-  cartBox.style.marginTop="30px";
-  container.appendChild(cartBox);
-
-  renderCart(cartBox);
-}
-
-function addToCart(product,size){
-  const existing=state.cart.find(
-    x=>x.id===product.id&&x.size===size
-  );
-
-  const already=state.cart
-    .filter(x=>x.id===product.id)
-    .reduce((sum,x)=>sum+x.quantity,0);
-
-  if(already>=Number(product.stock)){
+  if(already >= available) {
     alert("Stock disponible atteint.");
-    return;
+    return false;
   }
 
-  if(existing){
+  const existing = state.cart.find(
+    x => x.id === id && x.size === size
+  );
+
+  if(existing) {
     existing.quantity++;
-  }else{
+  } else {
     state.cart.push({
-      id:product.id,
+      id:id,
       name:product.name,
-      price:Number(product.price),
-      size,
+      price:Number(product.price || 0),
+      size:size,
       quantity:1
     });
   }
+
+  return true;
 }
 
-function renderCart(container){
+function renderCart(container) {
   container.replaceChildren();
-  container.appendChild(element("h3","","Mon panier"));
 
-  if(!state.cart.length){
+  container.appendChild(
+    el("h3","","Mon panier")
+  );
+
+  if(!state.cart.length) {
     container.appendChild(
-      element("p","muted","Votre panier est vide.")
+      el("p","muted","Votre panier est vide.")
     );
     return;
   }
 
-  state.cart.forEach((item,index)=>{
-    const line=element("div","cart-line");
+  state.cart.forEach((item,index) => {
+    const line = el("div","cart-line");
 
     line.appendChild(
-      element(
-        "span",
-        "",
-        item.name+
-        (item.size?" — "+item.size:"")+
-        " × "+item.quantity+
-        " : "+money(item.price*item.quantity)
+      el(
+        "span","",
+        item.name +
+        (item.size ? " — " + item.size : "") +
+        " × " + item.quantity +
+        " : " + money(
+          item.price * item.quantity
+        )
       )
     );
 
     line.appendChild(
-      button("Retirer",()=>{
+      button("Retirer",() => {
         state.cart.splice(index,1);
         renderCart(container);
       })
@@ -1462,1911 +1320,195 @@ function renderCart(container){
     container.appendChild(line);
   });
 
-  const total=state.cart.reduce(
-    (sum,item)=>sum+item.price*item.quantity,
+  const total = state.cart.reduce(
+    (sum,x) => sum + x.price*x.quantity,
     0
   );
 
   container.appendChild(
-    element("h3","","Total indicatif : "+money(total))
+    el(
+      "h3","",
+      "Total indicatif : " + money(total)
+    )
   );
 
   container.appendChild(
-    element(
-      "p",
-      "muted",
-      "La prise de commande sera activée après installation "+
-      "du contrôle serveur des prix et des stocks."
+    el(
+      "p","muted",
+      "La validation des commandes nécessite " +
+      "un contrôle serveur des prix et des stocks."
     )
   );
 }
 
-/* =========================================
-   AUTHENTIFICATION ESPACE CLUB
-========================================= */
+function renderBoutique(page,section) {
+  const s = object(page.settings);
 
-async function refreshMember(){
-  const result=await sb.auth.getUser();
-
-  if(result.error){
-    state.user=null;
-    state.member=null;
-    return;
-  }
-
-  state.user=result.data.user||null;
-  state.member=null;
-
-  if(!state.user)return;
-
-  const response=await sb
-    .from("club_members")
-    .select("id,club_id,user_id,display_name,email,role,active")
-    .eq("club_id",state.club.id)
-    .eq("user_id",state.user.id)
-    .eq("active",true)
-    .maybeSingle();
-
-  if(response.error){
-    console.warn("Vérification club :",response.error.message);
-    return;
-  }
-
-  state.member=response.data||null;
-}
-
-function isManager(){
-  return Boolean(
-    state.member &&
-    MANAGER_ROLES.includes(
-      String(state.member.role||"").toLowerCase()
-    )
-  );
-}
-
-function renderEspaceClub(section){
-  const box=element("div","panel");
-  section.appendChild(box);
-
-  if(!state.user){
-    box.appendChild(
-      element(
-        "p",
-        "muted",
-        "Connectez-vous avec vos identifiants EAH Diving."
-      )
-    );
-
-    const form=element("form","form");
-
-    const email=element("input");
-    email.type="email";
-    email.placeholder="Adresse e-mail";
-    email.required=true;
-    email.autocomplete="email";
-
-    const password=element("input");
-    password.type="password";
-    password.placeholder="Mot de passe";
-    password.required=true;
-    password.autocomplete="current-password";
-
-    const submit=element("button","primary-button","Se connecter");
-    submit.type="submit";
-
-    const feedback=element("div");
-
-    form.append(email,password,submit,feedback);
-
-    form.addEventListener("submit",async event=>{
-      event.preventDefault();
-      submit.disabled=true;
-
-      const result=await sb.auth.signInWithPassword({
-        email:email.value.trim(),
-        password:password.value
-      });
-
-      submit.disabled=false;
-
-      if(result.error){
-        message(
-          feedback,
-          "Connexion impossible : "+result.error.message,
-          true
-        );
-        return;
-      }
-
-      await refreshMember();
-      renderPages("espace-club");
-    });
-
-    box.appendChild(form);
-    return;
-  }
-
-  if(!state.member){
-    box.appendChild(
-      element(
-        "p",
-        "status error",
-        "Votre compte est connecté, mais aucun accès actif "+
-        "à ce club n'a été confirmé."
-      )
-    );
-
-    box.appendChild(
-      button("Se déconnecter",async()=>{
-        await sb.auth.signOut();
-        await refreshMember();
-        renderPages("espace-club");
-      })
-    );
-    return;
-  }
-
-  box.appendChild(
-    element(
-      "h3",
-      "",
-      "Bienvenue "+(
-        state.member.display_name||
-        state.user.email||
-        "dans votre espace"
-      )
-    )
-  );
-
-  box.appendChild(
-    element(
-      "p",
-      "muted",
-      "Club : "+state.club.name+
-      " — Rôle : "+state.member.role
-    )
-  );
-
-  const actions=element("div","actions");
-
-  actions.appendChild(
-    button("Se déconnecter",async()=>{
-      await sb.auth.signOut();
-      await refreshMember();
-      renderPages("espace-club");
-    })
-  );
-
-  box.appendChild(actions);
-
-  if(isManager()){
-    renderManager(section);
-  }else{
-    section.appendChild(
-      element(
-        "div",
-        "panel",
-        "Votre compte club est reconnu. "+
-        "Les fonctions réservées aux responsables "+
-        "ne sont pas accessibles avec ce rôle."
-      )
-    );
-  }
-}
-
-/* =========================================
-   TABLEAU DE BORD RESPONSABLE
-========================================= */
-/* =====================================================
-   EAH DIVING — IMPORT LOGO CLUB
-   Supabase Storage
-   Réservé aux responsables connectés
-===================================================== */
-
-function EAH_LOGO_RENDER_UPLOAD(container) {
-
-  if (!isManager()) return;
-
-  const box = document.createElement("div");
-
-  box.className = "panel";
-
-  box.style.marginTop = "20px";
-
-  const title = document.createElement("h3");
-  title.textContent = "Personnaliser mon club";
-
-  const description = document.createElement("p");
-
-  description.textContent =
-    "Importez votre logo JPG, PNG ou WebP " +
-    "(maximum 3 Mo).";
-
-  const input = document.createElement("input");
-
-  input.type = "file";
-
-  input.accept = "image/png,image/jpeg,image/webp";
-
-  const preview = document.createElement("img");
-
-  preview.alt = "Aperçu du logo";
-
-  preview.style.maxWidth = "180px";
-  preview.style.maxHeight = "180px";
-  preview.style.objectFit = "contain";
-  preview.style.display = "none";
-  preview.style.margin = "15px 0";
-
-  const save = document.createElement("button");
-
-  save.type = "button";
-  save.className = "primary-button";
-  save.textContent = "Enregistrer mon logo";
-
-  const feedback = document.createElement("p");
-
-  let previewUrl = "";
-
-  input.addEventListener("change", () => {
-
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-      previewUrl = "";
-    }
-
-    const file = input.files[0];
-
-    preview.style.display = "none";
-
-    if (!file) return;
-
-    if (![
-      "image/png",
-      "image/jpeg",
-      "image/webp"
-    ].includes(file.type)) {
-
-      feedback.textContent =
-        "Format non accepté.";
-
-      input.value = "";
-      return;
-    }
-
-    if (file.size > 3 * 1024 * 1024) {
-
-      feedback.textContent =
-        "Image trop volumineuse. Maximum 3 Mo.";
-
-      input.value = "";
-      return;
-    }
-
-    previewUrl = URL.createObjectURL(file);
-
-    preview.src = previewUrl;
-    preview.style.display = "block";
-
-    feedback.textContent = "";
-
-  });
-
-  save.addEventListener("click", async () => {
-
-    const file = input.files[0];
-
-    if (!file) {
-
-      feedback.textContent =
-        "Sélectionnez d'abord une image.";
-
-      return;
-    }
-
-    if (![
-      "image/png",
-      "image/jpeg",
-      "image/webp"
-    ].includes(file.type)) {
-
-      feedback.textContent =
-        "Format non accepté.";
-
-      return;
-    }
-
-    if (file.size > 3 * 1024 * 1024) {
-
-      feedback.textContent =
-        "Image trop volumineuse.";
-
-      return;
-    }
-
-    save.disabled = true;
-
-    feedback.textContent =
-      "Enregistrement en cours...";
-
-    try {
-
-      await refreshMember();
-
-      if (!isManager()) {
-
-        throw new Error(
-          "Vous n'êtes pas autorisé à modifier ce club."
-        );
-
-      }
-
-      const clubId = state.club.id;
-
-      const extension = {
-        "image/png": "png",
-        "image/jpeg": "jpg",
-        "image/webp": "webp"
-      }[file.type];
-
-      // Nouveau nom à chaque import pour éviter
-      // les problèmes de cache navigateur.
-      const fileName =
-        clubId +
-        "/logo-" +
-        crypto.randomUUID() +
-        "." +
-        extension;
-
-      const upload = await sb.storage
-        .from("eah-club-logos")
-        .upload(fileName, file, {
-          contentType: file.type,
-          cacheControl: "3600",
-          upsert: false
-        });
-
-      if (upload.error) {
-        throw upload.error;
-      }
-
-      const publicResult = sb.storage
-        .from("eah-club-logos")
-        .getPublicUrl(fileName);
-
-      const logoUrl =
-        publicResult.data.publicUrl;
-
-      const update = await sb
-        .from("eah_club_site_config")
-        .update({
-          logo_url: logoUrl
-        })
-        .eq("club_id", clubId)
-        .select("club_id,logo_url");
-
-      if (update.error) {
-        throw update.error;
-      }
-
-      if (!update.data || update.data.length !== 1) {
-
-        throw new Error(
-          "Configuration du club non mise à jour. " +
-          "Vérifiez les autorisations Supabase."
-        );
-
-      }
-
-      state.config.logo_url = logoUrl;
-
-      const headerLogo =
-        document.getElementById("club-logo");
-
-      if (headerLogo) {
-
-        headerLogo.src = logoUrl;
-        headerLogo.hidden = false;
-
-        headerLogo.onerror = () => {
-          headerLogo.hidden = true;
-          feedback.textContent =
-            "Logo enregistré, mais image inaccessible.";
-        };
-
-      }
-
-      feedback.textContent =
-        "Logo enregistré avec succès !";
-
-    } catch (error) {
-
-      console.error(
-        "EAH LOGO :",
-        error
-      );
-
-      feedback.textContent =
-        "Erreur : " +
-        (error.message || "Enregistrement impossible");
-
-    } finally {
-
-      save.disabled = false;
-
-    }
-
-  });
-
-  box.appendChild(title);
-  box.appendChild(description);
-  box.appendChild(input);
-  box.appendChild(preview);
-  box.appendChild(save);
-  box.appendChild(feedback);
-
-  container.appendChild(box);
-
-}
-function renderManager(section){
-  EAH_LOGO_RENDER_UPLOAD(section);
-  const panel=element("div","panel");
-  panel.style.marginTop="20px";
-
-  panel.appendChild(
-    element("h3","","Administration du club")
-  );
-
-  panel.appendChild(
-    element(
-      "p",
-      "muted",
-      "Consultation des articles et des commandes. "+
-      "Les modifications seront activées après "+
-      "validation des autorisations."
-    )
-  );
-
-  const products=element("div");
-
-  products.appendChild(
-    element(
-      "h4",
-      "",
-      "Articles publics : "+state.products.length
-    )
-  );
-
-  state.products.forEach(p=>{
-    products.appendChild(
-      element(
-        "p",
-        "",
-        p.name+" — "+money(p.price)+
-        " — Stock : "+p.stock
-      )
-    );
-  });
-
-  panel.appendChild(products);
-
-  const orders=element("div");
-  orders.appendChild(
-    element("h4","","Dernières commandes")
-  );
-
-  panel.appendChild(orders);
-  section.appendChild(panel);
-
-  loadManagerOrders(orders);
-}
-
-async function loadManagerOrders(container){
-  const result=await sb
-    .from("eah_club_orders")
-    .select(
-      "id,customer_name,total,status,payment_status,created_at"
-    )
-    .eq("club_id",state.club.id)
-    .order("created_at",{ascending:false})
-    .limit(20);
-
-  if(result.error){
-    container.appendChild(
-      element(
-        "p",
-        "status error",
-        "Commandes indisponibles : "+result.error.message
-      )
-    );
-    return;
-  }
-
-  if(!result.data.length){
-    container.appendChild(
-      element("p","muted","Aucune commande.")
-    );
-    return;
-  }
-
-  result.data.forEach(order=>{
-    container.appendChild(
-      element(
-        "p",
-        "",
-        new Date(order.created_at).toLocaleDateString("fr-FR")+
-        " — "+order.customer_name+
-        " — "+money(order.total)+
-        " — "+order.status+
-        " — Paiement : "+order.payment_status
-      )
-    );
-  });
-}
-
-/* =========================================
-   MENU DYNAMIQUE
-========================================= */
-
-
-function showPage(slug) {
-  const target = String(slug || "").toLowerCase();
-
-  const page = state.pages.find(
-    p => String(p.slug).toLowerCase() === target
-  );
-
-  if (!page) {
-    console.warn("Page introuvable :", target);
-    return;
-  }
-
-  state.currentPage = target;
-
-  document.querySelectorAll(".page").forEach(el => {
-    el.classList.toggle(
-      "active",
-      el.dataset.slug === target
-    );
-  });
-
-  document.querySelectorAll("#menu button").forEach(btn => {
-    btn.classList.toggle(
-      "active",
-      btn.dataset.slug === target
-    );
-  });
-
-  renderHeader();
-
-  const hash = "#" + encodeURIComponent(target);
-
-  if (location.hash !== hash) {
-    history.replaceState(null, "", hash);
-  }
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-}
-
-
-function renderPages(preferredSlug){
-  const menu=$("menu");
-  const pages=$("pages");
-
-  menu.replaceChildren();
-  pages.replaceChildren();
-
-  state.pages.forEach(page=>{
-    const slug=String(page.slug||"").toLowerCase();
-    renderHeader();
-
-    const nav=button(
-      page.title||slug,
-      ()=>showPage(slug)
-    );
-
-    nav.dataset.slug=slug;
-    menu.appendChild(nav);
-
-    const section=element("section","page");
-    section.dataset.slug=slug;
-
-    section.appendChild(
-      element("h2","",page.title||slug)
-    );
-
-    if(slug==="boutique"){
-      renderBoutique(section);
-    }else if(slug==="espace-club"){
-      renderEspaceClub(section);
-    }else{
-      renderStandardPage(page,section);
-    }
-
-    pages.appendChild(section);
-  });
-
-  if(!state.pages.length){
-    pages.appendChild(
-      element("div","empty","Aucune page active.")
-    );
-    return;
-  }
-
-  const requested=preferredSlug||state.currentPage;
-
-  const exists=state.pages.some(
-    p=>String(p.slug).toLowerCase()===requested
-  );
-
-  showPage(
-    exists
-      ? requested
-      : String(state.pages[0].slug).toLowerCase()
-  );
-}
-
-/* =========================================
-   DEMARRAGE
-========================================= */
-
-async function start(){
-  try{
-    await loadClub();
-    await refreshMember();
-
-    renderHeader();
-    renderPages();
-
-    $("loading").hidden=true;
-    $("app").hidden=false;
-
-  }catch(error){
-    console.error("EAH CLUB V3 :",error);
-
-    $("loading").replaceChildren(
-      element(
-        "div",
-        "status error",
-        "Impossible de charger le club.\n"+
-        (error.message||"Erreur inconnue")
-      )
-    );
-  }
-}
-
-/* EAH V20 — Actualisation des données publiques */
-
-let EAH_REFRESH_BUSY = false;
-
-async function EAH_REFRESH_PUBLIC() {
-  if (EAH_REFRESH_BUSY || !state.club) return;
-
-  // Ne pas interrompre un panier ou un formulaire.
-  if (
-    state.cart.length ||
-    document.activeElement?.matches(
-      "input, textarea, select"
-    )
-  ) return;
-
-  EAH_REFRESH_BUSY = true;
-
-  try {
-    const previousPage = state.currentPage;
-
-    await loadClub();
-
-    renderHeader();
-    renderPages(previousPage);
-
-    console.info(
-      "EAH : données du club actualisées"
-    );
-  } catch (error) {
-    console.error(
-      "EAH : actualisation impossible",
-      error
-    );
-  } finally {
-    EAH_REFRESH_BUSY = false;
-  }
-}
-
-// Actualisation toutes les 5 secondes
-  
-// Actualisation automatique toutes les 60 secondes.
-// Evite de reconstruire le site toutes les 5 secondes.
-setInterval(() => {
-  if (!document.hidden) {
-    EAH_REFRESH_PUBLIC();
-  }
-}, 60000);
-
-
-// Actualisation au retour sur l'onglet.
-document.addEventListener(
-  "visibilitychange",
-  () => {
-    if (!document.hidden) {
-      EAH_REFRESH_PUBLIC();
-    }
-  }
-);
-
-/* EAH V21 - COULEURS PERSONNALISEES */
-
-const EAH21_COLORS = {
-  "bleu": "#0B6BFF",
-  "bleu marine": "#102040",
-  "bleu clair": "#70C8FF",
-  "orange": "#FF9800",
-  "vert": "#23A455",
-  "rouge": "#E53935",
-  "blanc": "#FFFFFF",
-  "noir": "#000000",
-  "gris": "#808080",
-  "jaune": "#FFD600",
-  "rose": "#FF69B4",
-  "violet": "#9333EA"
-};
-
-function EAH21_COLOR(value, fallback) {
-  const v = String(value || "").trim();
-  if (!v) return fallback;
-
-  const normalized = v.toLowerCase();
-
-  if (EAH21_COLORS[normalized]) {
-    return EAH21_COLORS[normalized];
-  }
-
-  if (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(v)) {
-    return v;
-  }
-
-  return fallback;
-}
-
-function EAH21_APPLY_THEME(config) {
-  if (!config) return;
-
-  const settings = config.settings || {};
-
-  const primary = EAH21_COLOR(
-    settings.PRIMARY_COLOR || config.primary_color,
-    "#0B6BFF"
-  );
-
-  const background = EAH21_COLOR(
-    settings.BACKGROUND_COLOR,
-    "#03131F"
-  );
-
-  const text = EAH21_COLOR(
-    settings.TEXT_COLOR,
-    "#FFFFFF"
-  );
-
-  const root = document.documentElement;
-
-  root.style.setProperty("--eah-primary", primary);
-  root.style.setProperty("--eah-background", background);
-  root.style.setProperty("--eah-text", text);
-
-  document.body.style.backgroundColor = background;
-  document.body.style.color = text;
-}
-
-/* ==========================================
-   EAH V23 - THEMES PREMIUM
-========================================== */
-
-const EAH23_THEMES = {
-  1: {
-    primary: "#1478FF",
-    secondary: "#10243A",
-    background: "#071725",
-    header: "#10243A",
-    text: "#E8F2FF",
-    title: "#FFFFFF",
-    card: "#15324C",
-    font: "Arial, sans-serif",
-    textSize: 16,
-    titleSize: 38,
-    heroSize: 52,
-    cardTitleSize: 23,
-    radius: 14
-  },
-  2: {
-    primary: "#C7A466",
-    secondary: "#171717",
-    background: "#101010",
-    header: "#171717",
-    text: "#EDE5D7",
-    title: "#F1D394",
-    card: "#24211C",
-    font: "Georgia, serif",
-    textSize: 17,
-    titleSize: 40,
-    heroSize: 56,
-    cardTitleSize: 24,
-    radius: 8
-  },
-  3: {
-    primary: "#087E8B",
-    secondary: "#183044",
-    background: "#F3F6F8",
-    header: "#FFFFFF",
-    text: "#263746",
-    title: "#183044",
-    card: "#FFFFFF",
-    font: "Helvetica, Arial, sans-serif",
-    textSize: 16,
-    titleSize: 36,
-    heroSize: 48,
-    cardTitleSize: 21,
-    radius: 18
-  },
-  4: {
-    primary: "#A855F7",
-    secondary: "#21152F",
-    background: "#140D1F",
-    header: "#21152F",
-    text: "#F5EFFF",
-    title: "#FFFFFF",
-    card: "#302041",
-    font: "'Trebuchet MS', Arial, sans-serif",
-    textSize: 17,
-    titleSize: 42,
-    heroSize: 58,
-    cardTitleSize: 24,
-    radius: 20
-  },
-  5: {
-    primary: "#7BC99C",
-    secondary: "#102C28",
-    background: "#0D211E",
-    header: "#102C28",
-    text: "#E6F5E9",
-    title: "#FFFFFF",
-    card: "#193B34",
-    font: "Verdana, sans-serif",
-    textSize: 16,
-    titleSize: 38,
-    heroSize: 50,
-    cardTitleSize: 22,
-    radius: 12
-  }
-};
-
-function EAH23_APPLIQUER_THEME(numero, overrides = {}) {
-  const theme = EAH23_THEMES[numero] || EAH23_THEMES[1];
-  const t = {...theme, ...overrides};
-
-  const root = document.documentElement;
-
-  const variables = {
-    "--eah-primary": t.primary,
-    "--eah-secondary": t.secondary,
-    "--eah-background": t.background,
-    "--eah-header": t.header,
-    "--eah-text": t.text,
-    "--eah-title": t.title,
-    "--eah-card": t.card,
-    "--eah-font": t.font,
-    "--eah-text-size": t.textSize + "px",
-    "--eah-title-size": t.titleSize + "px",
-    "--eah-hero-size": t.heroSize + "px",
-    "--eah-card-title-size": t.cardTitleSize + "px",
-    "--eah-radius": t.radius + "px"
-  };
-
-  Object.entries(variables).forEach(([key, value]) => {
-    root.style.setProperty(key, value);
-  });
-}
-
-/* ==========================================
-   EAH V24 - APPLICATION DU THEME
-========================================== */
-
-function EAH24_APPLIQUER_SITE(cfg) {
-  const s = cfg?.settings || {};
-  const numero = Number(s.STYLE_NUMERO || 1);
-
-  const root = document.documentElement;
-
-  const variables = {
-    "--eah-primary": cfg.primary_color,
-    "--eah-secondary": cfg.secondary_color,
-    "--eah-background": s.BACKGROUND_COLOR,
-    "--eah-header": s.HEADER_COLOR,
-    "--eah-text": s.TEXT_COLOR,
-    "--eah-title": s.TITLE_COLOR,
-    "--eah-card": s.CARD_COLOR,
-    "--eah-font": s.TEXT_FONT,
-    "--eah-text-size": s.TEXT_SIZE + "px",
-    "--eah-title-size": s.TITLE_SIZE + "px",
-    "--eah-hero-size": s.COVER_TEXT_SIZE + "px",
-    "--eah-hero-subtitle-size":
-      s.COVER_SUBTITLE_SIZE + "px",
-    "--eah-overlay": s.HERO_OVERLAY
-  };
-
-  Object.entries(variables).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      root.style.setProperty(key, value);
-    }
-  });
-
-  root.dataset.eahStyle = String(numero);
-}
-
-
-/* ============================================================
-   EAH DIVING CLUB — FICHES DETAILLEES V28
-   Compatible avec le club.html existant
-
-   - Couverture et illustration indépendantes
-   - Aucune illustration inventée
-   - Fiches disciplines
-   - Fiches blazons
-   - Fiches actualités
-   - Galerie boutique
-   - Prix, descriptions, vidéos, tailles
-   - Préservation du panier et de l'espace club
-============================================================ */
-
-const EAH28_STYLE = document.createElement("style");
-
-EAH28_STYLE.textContent = `
-  .eah28-clickable {
-    cursor: pointer;
-    transition: transform .2s ease, opacity .2s ease;
-  }
-
-  .eah28-clickable:hover {
-    transform: scale(1.015);
-    opacity: .92;
-  }
-
-  .eah28-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 99999;
-    background: rgba(0,0,0,.88);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 15px;
-  }
-
-  .eah28-window {
-    width: min(100%, 950px);
-    max-height: 94vh;
-    overflow-y: auto;
-    background: var(--eah-card, #102B42);
-    color: var(--eah-text, #FFFFFF);
-    border: 1px solid #ffffff30;
-    border-radius: 18px;
-    padding: 24px;
-    position: relative;
-  }
-
-  .eah28-close {
-    position: sticky;
-    top: 0;
-    float: right;
-    z-index: 2;
-    background: #162435;
-    border: 1px solid #ffffff50;
-    color: white;
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
-    font-size: 27px;
-    cursor: pointer;
-  }
-
-  .eah28-window h2 {
-    margin: 12px 0 20px;
-  }
-
-  .eah28-media {
-    width: 100%;
-    max-height: 65vh;
-    object-fit: contain;
-    border-radius: 12px;
-    background: #00000025;
-    margin: 12px 0;
-  }
-
-  .eah28-gallery {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin: 12px 0 20px;
-  }
-
-  .eah28-gallery button {
-    padding: 3px;
-    width: 85px;
-    height: 75px;
-    background: transparent;
-    border: 1px solid #ffffff50;
-    border-radius: 8px;
-  }
-
-  .eah28-gallery img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-
-  .eah28-description {
-    white-space: pre-wrap;
-    line-height: 1.7;
-    margin: 18px 0;
-  }
-
-  .eah28-price {
-    font-size: 22px;
-    font-weight: bold;
-    margin: 12px 0;
-  }
-
-  .eah28-tarif {
-    border-bottom: 1px solid #ffffff25;
-    padding: 12px 0;
-  }
-
-  .eah28-select {
-    max-width: 300px;
-    margin: 12px 0;
-  }
-
-  .eah28-card-image {
-    width: 100%;
-    height: 220px;
-    object-fit: contain;
-    cursor: pointer;
-  }
-
-  .eah28-coverless {
-    background-image: none !important;
-  }
-
-  @media(max-width:600px) {
-    .eah28-window {
-      padding: 14px;
-    }
-
-    .eah28-media {
-      max-height: 50vh;
-    }
-  }
-`;
-
-document.head.appendChild(EAH28_STYLE);
-
-
-/* ============================================================
-   OUTILS
-============================================================ */
-
-function EAH28_TEXT(value) {
-  return String(value == null ? "" : value).trim();
-}
-
-function EAH28_IMAGE(value) {
-  return safeImage(value);
-}
-
-function EAH28_APPEND_TEXT(parent, tag, text, className) {
-  if (!EAH28_TEXT(text)) return null;
-
-  const node = document.createElement(tag);
-  node.textContent = EAH28_TEXT(text);
-
-  if (className) node.className = className;
-
-  parent.appendChild(node);
-  return node;
-}
-
-function EAH28_IMAGE_NODE(url, alt, className) {
-  const img = document.createElement("img");
-  img.src = EAH28_IMAGE(url);
-  img.alt = alt || "";
-  img.className = className || "";
-  img.loading = "lazy";
-  return img;
-}
-
-function EAH28_VIDEO(parent, url) {
-  const videoUrl = EAH28_IMAGE(url);
-  if (!videoUrl) return;
-
-  if (
-    /\.(mp4|webm|ogg)(\?|#|$)/i.test(videoUrl)
-  ) {
-    const video = document.createElement("video");
-    video.src = videoUrl;
-    video.controls = true;
-    video.preload = "metadata";
-    video.className = "eah28-media";
-    parent.appendChild(video);
-  } else {
-    const link = document.createElement("a");
-    link.href = videoUrl;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.textContent = "Voir la vidéo";
-    parent.appendChild(link);
-  }
-}
-
-
-/* ============================================================
-   FENETRE DETAILLEE
-============================================================ */
-
-function EAH28_MODAL(title, contentBuilder) {
-  document.querySelector(".eah28-modal")?.remove();
-
-  const overlay = document.createElement("div");
-  overlay.className = "eah28-modal";
-
-  const windowBox = document.createElement("div");
-  windowBox.className = "eah28-window";
-  windowBox.setAttribute("role", "dialog");
-  windowBox.setAttribute("aria-modal", "true");
-  windowBox.setAttribute("aria-label", title);
-
-  const close = document.createElement("button");
-  close.className = "eah28-close";
-  close.textContent = "×";
-  close.setAttribute("aria-label", "Fermer");
-
-  close.onclick = () => overlay.remove();
-
-  windowBox.appendChild(close);
-
-  EAH28_APPEND_TEXT(windowBox, "h2", title);
-
-  contentBuilder(windowBox);
-
-  overlay.appendChild(windowBox);
-  document.body.appendChild(overlay);
-
-  overlay.addEventListener("click", event => {
-    if (event.target === overlay) overlay.remove();
-  });
-
-  const escapeHandler = event => {
-    if (event.key === "Escape") {
-      overlay.remove();
-      document.removeEventListener(
-        "keydown",
-        escapeHandler
-      );
-    }
-  };
-
-  document.addEventListener("keydown", escapeHandler);
-
-  close.focus();
-}
-
-
-/* ============================================================
-   GALERIE PHOTO
-============================================================ */
-
-function EAH28_GALLERY(parent, photos, title) {
-  const urls = [...new Set(
-    photos.map(EAH28_IMAGE).filter(Boolean)
-  )];
-
-  if (!urls.length) return;
-
-  const main = EAH28_IMAGE_NODE(
-    urls[0],
-    title,
-    "eah28-media"
-  );
-
-  main.loading = "eager";
-  parent.appendChild(main);
-
-  if (urls.length === 1) return;
-
-  const gallery = document.createElement("div");
-  gallery.className = "eah28-gallery";
-
-  urls.forEach((url, index) => {
-    const thumb = document.createElement("button");
-    thumb.type = "button";
-    thumb.setAttribute(
-      "aria-label",
-      "Afficher la photo " + (index + 1)
-    );
-
-    thumb.appendChild(
-      EAH28_IMAGE_NODE(url, title)
-    );
-
-    thumb.onclick = () => {
-      main.src = url;
-    };
-
-    gallery.appendChild(thumb);
-  });
-
-  parent.appendChild(gallery);
-}
-
-
-/* ============================================================
-   COUVERTURE INDEPENDANTE DE L'ILLUSTRATION
-============================================================ */
-
-const EAH28_ORIGINAL_HEADER = renderHeader;
-
-renderHeader = function() {
-  EAH28_ORIGINAL_HEADER();
-
-  const page = state.pages.find(
-    p => String(p.slug).toLowerCase() ===
-      String(state.currentPage).toLowerCase()
-  );
-
-  const hero = document.getElementById("hero");
-
-  if (!hero) return;
-
-  // Une couverture doit être explicitement renseignée.
-  // La photo d'illustration ne sert jamais de couverture.
-
-  const cover = EAH28_IMAGE(
-    page?.settings?.cover_url ||
-    page?.image_url ||
-    ""
-  );
-
-  if (cover) {
-    hero.style.backgroundImage = `url("${cover}")`;
-    hero.classList.remove("eah28-coverless");
-  } else {
-    hero.style.backgroundImage = "none";
-    hero.classList.add("eah28-coverless");
-  }
-};
-
-
-/* ============================================================
-   DISCIPLINES
-============================================================ */
-
-EAH_RENDER_DISCIPLINES = function(page, section) {
-  const disciplines =
-    page.settings?.disciplines || [];
-
-  if (!disciplines.length) {
-    EAH28_APPEND_TEXT(
-      section,
-      "p",
-      "Aucune discipline disponible."
-    );
-    return;
-  }
-
-  const grid = element("div", "cards");
-
-  disciplines.forEach(d => {
-    if (d.active === false) return;
-
-    const name = d.nom || d.name || "Discipline";
-    const card = element("article", "card");
-
-    const image = EAH28_IMAGE(
-      d.image_url || d.photo_illustration_url
-    );
-
-    const open = () => {
-      EAH28_MODAL(name, box => {
-        EAH28_GALLERY(box, [image], name);
-
-        EAH28_APPEND_TEXT(
-          box,
-          "p",
-          d.description || d.description_longue,
-          "eah28-description"
-        );
-
-        const tarifs = Array.isArray(d.tarifs)
-          ? d.tarifs
-          : [1, 2, 3].map(n => ({
-              titre: "Tarif " + n,
-              prix: d["tarif_" + n],
-              description: d["description_tarif_" + n]
-            }));
-
-        tarifs.forEach(t => {
-          if (!t.prix && !t.description) return;
-
-          const line = element("div", "eah28-tarif");
-
-          EAH28_APPEND_TEXT(
-            line,
-            "strong",
-            t.titre || "Tarif"
-          );
-
-          EAH28_APPEND_TEXT(
-            line,
-            "p",
-            t.prix ? String(t.prix) + " €" : ""
-          );
-
-          EAH28_APPEND_TEXT(
-            line,
-            "p",
-            t.description
-          );
-
-          box.appendChild(line);
-        });
-
-        EAH28_VIDEO(box, d.video_url);
-      });
-    };
-
-    if (image) {
-      const img = EAH28_IMAGE_NODE(
-        image,
-        name,
-        "eah28-card-image"
-      );
-
-      img.onclick = open;
-      card.appendChild(img);
-    }
-
-    EAH28_APPEND_TEXT(card, "h3", name);
-
-    card.appendChild(
-      button("Découvrir", open, true)
-    );
-
-    grid.appendChild(card);
-  });
-
-  section.appendChild(grid);
-};
-
-
-/* ============================================================
-   BLAZONS
-============================================================ */
-
-renderBadges = function(section) {
-  const page = state.pages.find(
-    p => p.slug === "blazons"
-  );
-
-  const settings = page?.settings || {};
-
-  const details =
-    settings.blazons_v21 ||
-    settings.blazons_details ||
-    [];
-
-  const grid = element("div", "cards");
-
-  state.badges.forEach(badge => {
-    const detail = details.find(
-      b => String(b.id) === String(badge.badge_key)
-    ) || {};
-
-    const name = detail.name || badge.name;
-
-    const image = EAH28_IMAGE(
-      detail.image_url || badge.image_url
-    );
-
-    const card = element("article", "card");
-
-    const open = () => {
-      EAH28_MODAL(name, box => {
-        EAH28_GALLERY(box, [image], name);
-
-        EAH28_APPEND_TEXT(
-          box,
-          "p",
-          detail.description,
-          "eah28-description"
-        );
-
-        let criteria = detail.criteres || [];
-
-        if (typeof criteria === "string") {
-          criteria = criteria.split(/\r?\n/);
-        }
-
-        if (!criteria.length) {
-          criteria = (
-            settings.criteres_blazons || []
-          )
-            .filter(c =>
-              String(c.blazon_id) ===
-              String(badge.badge_key)
-            )
-            .map(c =>
-              c.description +
-              (c.valeur ? " : " + c.valeur : "")
-            );
-        }
-
-        criteria.forEach(item => {
-          EAH28_APPEND_TEXT(
-            box,
-            "p",
-            "✓ " + item
-          );
-        });
-      });
-    };
-
-    if (image) {
-      const img = EAH28_IMAGE_NODE(
-        image,
-        name,
-        "eah28-card-image"
-      );
-      img.onclick = open;
-      card.appendChild(img);
-    }
-
-    EAH28_APPEND_TEXT(card, "h3", name);
-
-    card.appendChild(
-      button("Voir les critères", open, true)
-    );
-
-    grid.appendChild(card);
-  });
-
-  section.appendChild(grid);
-};
-
-
-/* ============================================================
-   ACTUALITES
-============================================================ */
-
-EAH_RENDER_ACTUALITES = function(page, section) {
-  const articles =
-    page.settings?.items_v21 ||
-    page.settings?.actualites ||
-    [];
-
-  const grid = element("div", "cards");
-
-  articles.forEach(article => {
-    if (article.active === false) return;
-
-    const title =
-      article.titre ||
-      article.nom ||
-      article.title ||
-      "Actualité";
-
-    const image = EAH28_IMAGE(
-      article.image_url ||
-      article.photo_illustration_url
-    );
-
-    const card = element("article", "card");
-
-    const open = () => {
-      EAH28_MODAL(title, box => {
-        EAH28_GALLERY(box, [image], title);
-
-        EAH28_APPEND_TEXT(
-          box,
-          "p",
-          article.contenu ||
-          article.texte ||
-          article.description_longue ||
-          article.description,
-          "eah28-description"
-        );
-
-        EAH28_VIDEO(box, article.video_url);
-      });
-    };
-
-    if (image) {
-      const img = EAH28_IMAGE_NODE(
-        image,
-        title,
-        "eah28-card-image"
-      );
-      img.onclick = open;
-      card.appendChild(img);
-    }
-
-    EAH28_APPEND_TEXT(card, "h3", title);
-
-    card.appendChild(
-      button("Lire l'article", open, true)
-    );
-
-    grid.appendChild(card);
-  });
-
-  section.appendChild(grid);
-};
-
-
-/* ============================================================
-   BOUTIQUE
-============================================================ */
-
-renderBoutique = function(section) {
-  const page = state.pages.find(
-    p => p.slug === "boutique"
-  );
-
-  const enriched = page?.settings?.products_v27 || [];
+  const enriched = array(s.products_v27);
 
   const products = enriched.length
-    ? enriched
-    : state.products;
+    ? enriched : state.products;
 
-  const grid = element("div", "cards");
+  const grid = el("div","cards");
 
-  const cartBox = element("div", "panel");
+  const cartBox = el("div","panel");
   cartBox.style.marginTop = "25px";
 
   products.forEach(product => {
-    if (product.active === false) return;
+    if(product.active === false) return;
 
     const name = product.name || "Produit";
 
-    const photos = Array.isArray(product.images)
+    const photos = array(product.images).length
       ? product.images
       : [product.image_url];
 
-    const card = element("article", "card");
+    const card = el("article","card");
 
     const open = () => {
-      EAH28_MODAL(name, box => {
-        EAH28_GALLERY(box, photos, name);
+      openModal(name,box => {
+        gallery(box,photos,name);
 
-        EAH28_APPEND_TEXT(
-          box,
-          "p",
-          product.description,
-          "eah28-description"
+        description(box,product.description);
+
+        box.appendChild(
+          el("p","price",money(product.price))
         );
 
-        EAH28_APPEND_TEXT(
-          box,
-          "p",
-          money(product.price),
-          "eah28-price"
-        );
+        video(box,product.video_url);
 
-        EAH28_VIDEO(box, product.video_url);
+        const sizes = array(product.sizes);
 
-        const sizes = Array.isArray(product.sizes)
-          ? product.sizes
-          : [];
-
-        const select = document.createElement("select");
-        select.className = "eah28-select";
+        const select = el("select");
 
         sizes.forEach(size => {
-          const option = document.createElement("option");
-          option.value = size;
-          option.textContent = size;
+          const option = el(
+            "option","",size
+          );
+          option.value = String(size);
           select.appendChild(option);
         });
 
-        if (sizes.length) {
-          EAH28_APPEND_TEXT(
-            box,
-            "p",
-            "Choisir une taille :"
+        if(sizes.length) {
+          box.appendChild(
+            el("p","","Choisir une taille :")
           );
           box.appendChild(select);
         }
 
-        EAH28_APPEND_TEXT(
-          box,
-          "p",
-          "Stock : " + product.stock
+        box.appendChild(
+          el(
+            "p","muted",
+            "Stock : " + (product.stock ?? 0)
+          )
         );
 
         const add = button(
           "Ajouter au panier",
           () => {
-            addToCart(
+            const added = addToCart(
               product,
               sizes.length ? select.value : ""
             );
 
-            renderCart(cartBox);
-
-            document.querySelector(
-              ".eah28-modal"
-            )?.remove();
+            if(added) {
+              renderCart(cartBox);
+              document.querySelector(
+                ".modal"
+              )?.remove();
+            }
           },
           true
         );
 
-        add.disabled = Number(product.stock) <= 0;
+        add.disabled =
+          Number(product.stock) <= 0;
+
         box.appendChild(add);
       });
     };
 
-    if (photos[0]) {
-      const img = EAH28_IMAGE_NODE(
-        photos[0],
-        name,
-        "eah28-card-image"
-      );
+    const img = image(
+      card,photos[0],name
+    );
 
-      img.onclick = open;
-      card.appendChild(img);
+    if(img) {
+      img.style.cursor = "pointer";
+      img.addEventListener("click",open);
     }
 
-    EAH28_APPEND_TEXT(card, "h3", name);
+    card.appendChild(el("h3","",name));
 
-    EAH28_APPEND_TEXT(
-      card,
-      "p",
-      money(product.price),
-      "eah28-price"
+    card.appendChild(
+      el("p","price",money(product.price))
     );
 
     card.appendChild(
-      button("Voir le produit", open, true)
+      button("Voir le produit",open,true)
     );
 
     grid.appendChild(card);
   });
 
-  section.appendChild(grid);
+  if(!grid.children.length) {
+    section.appendChild(
+      el("p","empty","Aucun article disponible.")
+    );
+  } else {
+    section.appendChild(grid);
+  }
+
   section.appendChild(cartBox);
-
   renderCart(cartBox);
-};
+}
 
+/* ==========================================
+   AUTHENTIFICATION
+========================================== */
 
-/* ============================================================
-   PAGES : ILLUSTRATION UNIQUEMENT SI RENSEIGNEE
-============================================================ */
+async function refreshMember() {
+  if(!state.sb || !state.club) return;
 
-renderStandardPage = function(page, section) {
-  if (page.description) {
-    EAH28_APPEND_TEXT(
-      section,
-      "p",
-      page.description,
-      "page-description"
+  const result = await state.sb.auth.getUser();
+
+  state.user = result.data?.user || null;
+  state.member = null;
+
+  if(!state.user) return;
+
+  const response = await state.sb
+    .from("club_members")
+    .select("*")
+    .eq("club_id",state.club.id)
+    .eq("user_id",state.user.id)
+    .eq("active",true)
+    .maybeSingle();
+
+  if(response.error) {
+    console.warn(
+      "Accès club :",response.error.message
     );
+    return;
   }
 
-  const settings = page.settings || {};
+  state.member = response.data;
+}
 
-  // L'illustration ne reprend jamais la couverture.
-  const illustration = EAH28_IMAGE(
-    settings.illustration_url || ""
+function isManager() {
+  return Boolean(
+    state.member &&
+    MANAGER_ROLES.includes(
+      String(
+        state.member.role || ""
+      ).toLowerCase()
+    )
   );
-
-  if (illustration) {
-    const img = EAH28_IMAGE_NODE(
-      illustration,
-      page.title,
-      "page-image"
-    );
-
-    section.appendChild(img);
-  }
-
-  const video = EAH28_IMAGE(
-    settings.video_v21 || page.video_url
-  );
-
-  if (video) {
-    EAH28_VIDEO(section, video);
-  }
-
-  if (page.slug === "disciplines") {
-    EAH_RENDER_DISCIPLINES(page, section);
-  }
-
-  if (page.slug === "blazons") {
-    renderBadges(section);
-  }
-
-  if (page.slug === "actualites") {
-    EAH_RENDER_ACTUALITES(page, section);
-  }
-
-  if (
-    !page.description &&
-    !illustration &&
-    !video &&
-    ![
-      "disciplines",
-      "blazons",
-      "actualites"
-    ].includes(page.slug)
-  ) {
-    EAH28_APPEND_TEXT(
-      section,
-      "p",
-      "Contenu bientôt disponible."
-    );
-  }
-};
-
-console.log("EAH V28 : fiches détaillées chargées.");
-
-
-/* ======================================================
- EAH DIVING - NFC V5
- Page d'activation isolée
- Profil public après activation
- Confirmation e-mail et reconnexion
-====================================================== */
-
-/* =====================================================
-   EAH DIVING CLUB - CONFIRMATION EMAIL NFC V6
-   Site de test uniquement
-===================================================== */
-
-function EAH_NFC_REDIRECT_URL() {
-  const url = new URL(window.location.href);
-
-  // Conserve le club et le lien NFC après confirmation.
-  url.hash = "";
-  url.searchParams.delete("code");
-
-  return url.toString();
 }
 
-function EAH_NFC_EMAIL_NORMALISE(value) {
-  return String(value || "").trim().toLowerCase();
-}
+function field(parent,title,type,required=true) {
+  const label = el("label","",title);
+  const input = el("input");
 
-async function EAH_NFC_INSCRIPTION_EMAIL({
-  email,
-  password,
-  firstName,
-  lastName,
-  customEahId
-}) {
-  const adresse = EAH_NFC_EMAIL_NORMALISE(email);
-
-  if (!adresse || !adresse.includes("@")) {
-    throw new Error("Adresse e-mail invalide.");
-  }
-
-  if (!password || password.length < 8) {
-    throw new Error(
-      "Le mot de passe doit contenir au moins 8 caractères."
-    );
-  }
-
-  const { data, error } = await sb.auth.signUp({
-    email: adresse,
-    password: password,
-    options: {
-      emailRedirectTo: EAH_NFC_REDIRECT_URL(),
-      data: {
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        eah_id_requested: customEahId.trim(),
-        nfc_club_slug: CLUB_SLUG
-      }
-    }
-  });
-
-  if (error) {
-    throw new Error(
-      "Inscription impossible : " + error.message
-    );
-  }
-
-  return data;
-}
-
-async function EAH_NFC_RENVOYER_EMAIL(email) {
-  const adresse = EAH_NFC_EMAIL_NORMALISE(email);
-
-  if (!adresse || !adresse.includes("@")) {
-    throw new Error(
-      "Saisissez votre adresse e-mail."
-    );
-  }
-
-  const { error } = await sb.auth.resend({
-    type: "signup",
-    email: adresse,
-    options: {
-      emailRedirectTo: EAH_NFC_REDIRECT_URL()
-    }
-  });
-
-  if (error) {
-    throw new Error(
-      "Impossible de demander le renvoi : " +
-      error.message
-    );
-  }
-
-  return true;
-}
-
-function EAH_NFC_AJOUTER_RENVOI(
-  parent,
-  emailInput,
-  messageElement
-) {
-  const button = document.createElement("button");
-
-  button.type = "button";
-  button.className = "secondary-button";
-  button.textContent = "Renvoyer le mail de confirmation";
-  button.style.marginTop = "14px";
-
-  parent.appendChild(button);
-
-  button.addEventListener("click", async () => {
-    button.disabled = true;
-
-    try {
-      await EAH_NFC_RENVOYER_EMAIL(
-        emailInput.value
-      );
-
-      EAH_NFC_MESSAGE(
-        messageElement,
-        "Demande de confirmation transmise. " +
-        "Vérifiez votre boîte mail et les spams. " +
-        "Si rien n'arrive, contactez le club."
-      );
-
-    } catch (error) {
-      EAH_NFC_MESSAGE(
-        messageElement,
-        error.message,
-        true
-      );
-
-    } finally {
-      button.disabled = false;
-    }
-  });
-}
-
-const EAH_NFC_TOKEN =
-  new URLSearchParams(location.search).get("nfc");
-
-function EAH_NFC_FIELD(parent, title, type, required = true) {
-  const label = document.createElement("label");
-  label.textContent = title;
-
-  const input = document.createElement("input");
   input.type = type;
   input.required = required;
 
@@ -3376,436 +1518,1077 @@ function EAH_NFC_FIELD(parent, title, type, required = true) {
   return input;
 }
 
-function EAH_NFC_MESSAGE(target, message, error = false) {
-  target.textContent = message;
-  target.className = "status " +
-    (error ? "error" : "success");
-}
+function renderClubSpace(section) {
+  const box = el("div","panel");
+  section.appendChild(box);
 
-function EAH_NFC_MODE() {
-  document.getElementById("loading").hidden = true;
-
-  const app = document.getElementById("app");
-  app.hidden = false;
-
-  app.querySelector("header").hidden = true;
-  app.querySelector("#hero").hidden = true;
-  app.querySelector("footer").hidden = true;
-
-  const pages = document.getElementById("pages");
-  pages.replaceChildren();
-  pages.style.maxWidth = "700px";
-  pages.style.margin = "auto";
-  pages.style.padding = "35px 16px";
-
-  return pages;
-}
-
-async function EAH_NFC_ACTIVER(
-  prenom, nom, eahId, message
-) {
-  const { data, error } = await sb.rpc(
-    "eah_nfc_activate",
-    {
-      p_club_slug: CLUB_SLUG,
-      p_token: EAH_NFC_TOKEN,
-      p_first_name: prenom,
-      p_last_name: nom,
-      p_eah_id: eahId || null
-    }
-  );
-
-  if (error) throw error;
-
-  EAH_NFC_MESSAGE(
-    message,
-    "Votre profil est activé. EAH ID : " + data
-  );
-
-  await EAH_NFC_AFFICHER();
-}
-
-async function EAH_NFC_AFFICHER() {
-  const pages = EAH_NFC_MODE();
-
-  const panel = document.createElement("section");
-  panel.className = "panel";
-  panel.style.padding = "28px";
-
-  pages.appendChild(panel);
-
-  const heading = document.createElement("h2");
-  panel.appendChild(heading);
-
-  const message = document.createElement("div");
-  panel.appendChild(message);
-
-  const { data, error } = await sb.rpc(
-    "eah_nfc_lookup",
-    {
-      p_club_slug: CLUB_SLUG,
-      p_token: EAH_NFC_TOKEN
-    }
-  );
-
-  if (error || !data?.length) {
-    heading.textContent = "Carte NFC inconnue";
-    EAH_NFC_MESSAGE(
-      message,
-      error?.message || "Lien invalide.",
+  if(!state.sb) {
+    message(
+      box,
+      "Service de connexion indisponible.",
       true
     );
     return;
   }
 
-  const card = data[0];
+  if(!state.user) {
+    description(
+      box,
+      "Connectez-vous avec vos identifiants EAH Diving."
+    );
 
-  // CARTE DÉJÀ ACTIVÉE : PROFIL PUBLIC
-  if (card.card_status === "ACTIVE") {
-    heading.textContent =
-      card.profile_name || "Profil EAH Diving";
+    const form = el("form","form");
 
-    const club = document.createElement("p");
-    club.textContent = card.club_name || "";
-    panel.appendChild(club);
+    const email = field(
+      form,"Adresse e-mail","email"
+    );
 
-    const id = document.createElement("h3");
-    id.textContent =
-      "EAH ID : " + (card.profile_eah_id || "");
-    panel.appendChild(id);
+    const password = field(
+      form,"Mot de passe","password"
+    );
 
-/* PHOTO DE PROFIL */
-const photo = EAH_NFC_FIELD(
-  form,
-  "Photo de profil",
-  "file",
-  false
-);
+    const submit = el(
+      "button","primary-button","Se connecter"
+    );
 
-photo.accept = "image/jpeg,image/png,image/webp";
+    submit.type = "submit";
 
-/* GROUPE */
-const groupLabel = document.createElement("label");
-groupLabel.textContent = "Groupe";
+    const feedback = el("div");
 
-const groupSelect = document.createElement("select");
-groupSelect.innerHTML =
-  '<option value="">Choisir un groupe</option>';
+    form.append(submit,feedback);
+    box.appendChild(form);
 
-groupLabel.appendChild(groupSelect);
-form.appendChild(groupLabel);
+    form.addEventListener(
+      "submit",
+      async event => {
+        event.preventDefault();
+        submit.disabled = true;
 
-/* COACH */
-const coachLabel = document.createElement("label");
-coachLabel.textContent = "Coach";
+        try {
+          const result =
+            await state.sb.auth.signInWithPassword({
+              email:email.value.trim(),
+              password:password.value
+            });
 
-const coachSelect = document.createElement("select");
-coachSelect.innerHTML =
-  '<option value="">Aucun coach sélectionné</option>';
+          if(result.error)
+            throw result.error;
 
-coachLabel.appendChild(coachSelect);
-form.appendChild(coachLabel);
+          await refreshMember();
+          renderPages("espace-club");
 
-/* CHARGEMENT DES LISTES DU CLUB */
-async function EAH_NFC_CHARGER_LISTES() {
-  const clubId = state.club?.id;
-  if (!clubId) return;
-
-  const { data: groups, error: groupsError } =
-    await sb
-      .from("groups")
-      .select("id,name")
-      .eq("club_id", clubId)
-      .eq("active", true)
-      .order("name");
-
-  if (groupsError) {
-    console.error("Groupes :", groupsError.message);
-  } else {
-    for (const group of groups || []) {
-      groupSelect.add(
-        new Option(group.name, group.id)
-      );
-    }
-  }
-
-  const { data: coaches, error: coachesError } =
-    await sb
-      .from("club_members")
-      .select("id,display_name")
-      .eq("club_id", clubId)
-      .eq("role", "coach")
-      .eq("active", true)
-      .order("display_name");
-
-  if (coachesError) {
-    console.error("Coachs :", coachesError.message);
-  } else {
-    for (const coach of coaches || []) {
-      coachSelect.add(
-        new Option(
-          coach.display_name || "Coach",
-          coach.id
-        )
-      );
-    }
-  }
-}
-
-EAH_NFC_CHARGER_LISTES();
-
-    const description = document.createElement("p");
-    description.textContent =
-      "Carte EAH n° " + card.card_number +
-      " — profil activé.";
-    panel.appendChild(description);
-
-    const espace = document.createElement("a");
-    espace.className = "primary-button";
-    espace.style.display = "inline-block";
-    espace.style.marginTop = "18px";
-    espace.style.textDecoration = "none";
-    espace.href =
-      location.pathname +
-      "?club=" + encodeURIComponent(CLUB_SLUG) +
-      "#espace-club";
-    espace.textContent = "Accéder à l'espace club";
-    panel.appendChild(espace);
+        } catch(error) {
+          message(
+            feedback,error.message,true
+          );
+        } finally {
+          submit.disabled = false;
+        }
+      }
+    );
 
     return;
   }
 
-  // CARTE DISPONIBLE : FORMULAIRE SEUL
-  heading.textContent = "Activez votre profil EAH";
+  if(!state.member) {
+    message(
+      box,
+      "Votre compte est connecté, mais aucun " +
+      "accès actif à ce club n'a été confirmé.",
+      true
+    );
 
-  const info = document.createElement("p");
-  info.textContent =
-    "Carte n° " + card.card_number +
-    " — " + card.club_name;
-  panel.appendChild(info);
+    box.appendChild(
+      button("Se déconnecter",async () => {
+        await state.sb.auth.signOut();
+        await refreshMember();
+        renderPages("espace-club");
+      })
+    );
 
-  const form = document.createElement("form");
-  form.className = "form";
-  panel.appendChild(form);
+    return;
+  }
 
-  const prenom = EAH_NFC_FIELD(
-    form, "Prénom", "text"
+  box.appendChild(
+    el(
+      "h3","",
+      "Bienvenue " +
+      (
+        state.member.display_name ||
+        state.user.email ||
+        ""
+      )
+    )
   );
 
-  const nom = EAH_NFC_FIELD(
-    form, "Nom", "text"
+  description(
+    box,
+    "Club : " + state.club.name +
+    " — Rôle : " + state.member.role
   );
 
-  const eahId = EAH_NFC_FIELD(
-    form, "EAH ID personnalisé (facultatif)",
-    "text", false
+  box.appendChild(
+    button("Se déconnecter",async () => {
+      await state.sb.auth.signOut();
+      await refreshMember();
+      renderPages("espace-club");
+    })
   );
 
-  eahId.placeholder =
+  if(isManager()) {
+    renderManager(section);
+  }
+}
+
+/* ==========================================
+   ADMINISTRATION CLUB
+========================================== */
+
+function renderManager(section) {
+  const box = el("div","panel");
+  box.style.marginTop = "20px";
+
+  box.appendChild(
+    el("h3","","Personnaliser mon club")
+  );
+
+  description(
+    box,
+    "Importez votre logo JPG, PNG ou WebP " +
+    "(maximum 3 Mo)."
+  );
+
+  const input = el("input");
+  input.type = "file";
+  input.accept = "image/png,image/jpeg,image/webp";
+
+  const preview = el("img");
+  preview.style.maxWidth = "180px";
+  preview.style.maxHeight = "180px";
+  preview.hidden = true;
+
+  const feedback = el("div");
+
+  input.addEventListener("change",() => {
+    const file = input.files?.[0];
+    if(!file) return;
+
+    preview.src = URL.createObjectURL(file);
+    preview.hidden = false;
+  });
+
+  const save = button(
+    "Enregistrer mon logo",
+    async () => {
+      const file = input.files?.[0];
+
+      if(!file) {
+        message(
+          feedback,"Sélectionnez une image.",true
+        );
+        return;
+      }
+
+      if(![
+        "image/png",
+        "image/jpeg",
+        "image/webp"
+      ].includes(file.type)) {
+        message(
+          feedback,"Format incorrect.",true
+        );
+        return;
+      }
+
+      if(file.size > 3*1024*1024) {
+        message(
+          feedback,"Fichier supérieur à 3 Mo.",true
+        );
+        return;
+      }
+
+      save.disabled = true;
+
+      try {
+        await refreshMember();
+
+        if(!isManager())
+          throw new Error("Accès non autorisé.");
+
+        const ext = {
+          "image/png":"png",
+          "image/jpeg":"jpg",
+          "image/webp":"webp"
+        }[file.type];
+
+        const unique =
+          typeof crypto.randomUUID === "function"
+            ? crypto.randomUUID()
+            : String(Date.now());
+
+        const path =
+          state.club.id +
+          "/logo-" + unique + "." + ext;
+
+        const upload = await state.sb.storage
+          .from("eah-club-logos")
+          .upload(path,file,{
+            contentType:file.type,
+            upsert:false
+          });
+
+        if(upload.error)
+          throw upload.error;
+
+        const publicUrl = state.sb.storage
+          .from("eah-club-logos")
+          .getPublicUrl(path).data.publicUrl;
+
+        const update = await state.sb
+          .from("eah_club_site_config")
+          .update({logo_url:publicUrl})
+          .eq("club_id",state.club.id)
+          .select("club_id,logo_url");
+
+        if(update.error)
+          throw update.error;
+
+        if(!update.data?.length)
+          throw new Error(
+            "Mise à jour refusée. Vérifiez les autorisations RLS."
+          );
+
+        state.config.logo_url = publicUrl;
+        renderHeader();
+
+        message(
+          feedback,"Logo enregistré avec succès."
+        );
+
+      } catch(error) {
+        message(feedback,error.message,true);
+      } finally {
+        save.disabled = false;
+      }
+    },
+    true
+  );
+
+  box.append(
+    input,preview,save,feedback
+  );
+
+  section.appendChild(box);
+
+  const admin = el("div","panel");
+  admin.style.marginTop = "20px";
+
+  admin.appendChild(
+    el("h3","","Administration du club")
+  );
+
+  description(
+    admin,
+    "Articles publics : " + state.products.length
+  );
+
+  const orders = el("div");
+
+  orders.appendChild(
+    el("h4","","Dernières commandes")
+  );
+
+  admin.appendChild(orders);
+  section.appendChild(admin);
+
+  state.sb
+    .from("eah_club_orders")
+    .select(
+      "id,customer_name,total,status,payment_status,created_at"
+    )
+    .eq("club_id",state.club.id)
+    .order("created_at",{ascending:false})
+    .limit(20)
+    .then(result => {
+      if(result.error) {
+        orders.appendChild(
+          el(
+            "p","status error",
+            result.error.message
+          )
+        );
+        return;
+      }
+
+      if(!result.data?.length) {
+        orders.appendChild(
+          el("p","muted","Aucune commande.")
+        );
+        return;
+      }
+
+      result.data.forEach(order => {
+        orders.appendChild(
+          el(
+            "p","",
+            new Date(
+              order.created_at
+            ).toLocaleDateString("fr-FR") +
+            " — " + order.customer_name +
+            " — " + money(order.total) +
+            " — " + order.status
+          )
+        );
+      });
+    });
+}
+
+/* ==========================================
+   PAGES STANDARD
+========================================== */
+
+function renderStandard(page,section) {
+  const s = object(page.settings);
+
+  description(section,page.description);
+
+  const illustration = safeImage(
+    s.illustration_url ||
+    s.photo_illustration_url ||
+    ""
+  );
+
+  if(illustration) {
+    image(
+      section,
+      illustration,
+      page.title,
+      "page-image"
+    );
+  }
+
+  video(
+    section,
+    s.video_v21 || page.video_url
+  );
+
+  const slug = String(
+    page.slug || ""
+  ).toLowerCase();
+
+  if(slug === "disciplines") {
+    renderDisciplines(page,section);
+  }
+
+  if(slug === "blazons") {
+    renderBadges(page,section);
+  }
+
+  if(slug === "actualites") {
+    renderActualites(page,section);
+  }
+
+  if(
+    !page.description &&
+    !illustration &&
+    ![
+      "disciplines","blazons","actualites"
+    ].includes(slug)
+  ) {
+    section.appendChild(
+      el(
+        "p","empty",
+        "Contenu bientôt disponible."
+      )
+    );
+  }
+}
+
+/* ==========================================
+   MENU ET NAVIGATION
+========================================== */
+
+function showPage(slug) {
+  const target = String(
+    slug || ""
+  ).toLowerCase();
+
+  const exists = state.pages.some(
+    p => String(p.slug).toLowerCase() === target
+  );
+
+  if(!exists) return;
+
+  state.currentPage = target;
+
+  document.querySelectorAll(".page")
+    .forEach(section => {
+      section.classList.toggle(
+        "active",
+        section.dataset.slug === target
+      );
+    });
+
+  document.querySelectorAll("#menu button")
+    .forEach(b => {
+      b.classList.toggle(
+        "active",
+        b.dataset.slug === target
+      );
+    });
+
+  renderHeader();
+
+  const hash = "#" + encodeURIComponent(target);
+
+  if(location.hash !== hash) {
+    history.replaceState(
+      null,"",
+      location.pathname + location.search + hash
+    );
+  }
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+}
+
+function renderPages(preferred) {
+  const menu = $("menu");
+  const pages = $("pages");
+
+  menu.replaceChildren();
+  pages.replaceChildren();
+
+  state.pages.forEach(page => {
+    const slug = String(
+      page.slug || ""
+    ).toLowerCase();
+
+    const nav = button(
+      page.title || slug,
+      () => showPage(slug)
+    );
+
+    nav.dataset.slug = slug;
+    menu.appendChild(nav);
+
+    const section = el("section","page");
+    section.dataset.slug = slug;
+
+    section.appendChild(
+      el("h2","",page.title || slug)
+    );
+
+    try {
+      if(slug === "boutique") {
+        renderBoutique(page,section);
+      } else if(slug === "espace-club") {
+        renderClubSpace(section);
+      } else {
+        renderStandard(page,section);
+      }
+    } catch(error) {
+      console.error("Page :",slug,error);
+
+      section.appendChild(
+        el(
+          "p","status error",
+          "Erreur dans cette rubrique : " +
+          error.message
+        )
+      );
+    }
+
+    pages.appendChild(section);
+  });
+
+  let requested =
+    preferred ||
+    state.currentPage ||
+    decodeURIComponent(
+      location.hash.slice(1)
+    );
+
+  const exists = state.pages.some(
+    p => String(p.slug).toLowerCase() === requested
+  );
+
+  if(!exists) {
+    requested = String(
+      state.pages[0].slug
+    ).toLowerCase();
+  }
+
+  showPage(requested);
+}
+
+/* ==========================================
+   NFC - ACTIVATION ET PROFIL
+========================================== */
+
+function nfcMode() {
+  $("loading").hidden = true;
+  $("app").hidden = false;
+
+  $("app").querySelector("header").hidden = true;
+  $("hero").hidden = true;
+  $("app").querySelector("footer").hidden = true;
+
+  const pages = $("pages");
+
+  pages.replaceChildren();
+  pages.style.maxWidth = "720px";
+  pages.style.margin = "auto";
+
+  return pages;
+}
+
+function nfcRedirect() {
+  const url = new URL(location.href);
+
+  url.hash = "";
+  url.searchParams.delete("code");
+
+  return url.toString();
+}
+
+async function nfcLookup() {
+  const result = await state.sb.rpc(
+    "eah_nfc_lookup",
+    {
+      p_club_slug:CLUB_SLUG,
+      p_token:NFC_TOKEN
+    }
+  );
+
+  if(result.error)
+    throw result.error;
+
+  return Array.isArray(result.data)
+    ? result.data[0]
+    : result.data;
+}
+
+async function nfcActivate(first,last,id) {
+  const result = await state.sb.rpc(
+    "eah_nfc_activate",
+    {
+      p_club_slug:CLUB_SLUG,
+      p_token:NFC_TOKEN,
+      p_first_name:first,
+      p_last_name:last,
+      p_eah_id:id || null
+    }
+  );
+
+  if(result.error)
+    throw result.error;
+
+  return result.data;
+}
+
+async function renderNfc() {
+  const pages = nfcMode();
+
+  const panel = el("section","panel");
+  const heading = el(
+    "h2","","Carte NFC EAH Diving"
+  );
+  const feedback = el("div");
+
+  panel.append(heading,feedback);
+  pages.appendChild(panel);
+
+  if(!state.sb) {
+    message(
+      feedback,
+      "Connexion Supabase indisponible.",
+      true
+    );
+    return;
+  }
+
+  let card;
+
+  try {
+    card = await nfcLookup();
+  } catch(error) {
+    message(
+      feedback,
+      "Impossible de consulter la carte : " +
+      error.message,
+      true
+    );
+    return;
+  }
+
+  if(!card) {
+    message(
+      feedback,
+      "Carte NFC inconnue ou inaccessible.",
+      true
+    );
+    return;
+  }
+
+  /* CARTE DEJA ACTIVEE */
+
+  if(
+    String(card.card_status).toUpperCase() ===
+    "ACTIVE"
+  ) {
+    heading.textContent =
+      card.profile_name ||
+      "Profil EAH Diving";
+
+    description(panel,card.club_name);
+
+    panel.appendChild(
+      el(
+        "h3","",
+        "EAH ID : " +
+        (card.profile_eah_id || "")
+      )
+    );
+
+    description(
+      panel,
+      "Carte EAH n° " +
+      (card.card_number || "") +
+      " — profil activé."
+    );
+
+    const link = el(
+      "a","primary-button",
+      "Accéder à l'espace club"
+    );
+
+    link.href =
+      location.pathname +
+      "?club=" +
+      encodeURIComponent(CLUB_SLUG) +
+      "#espace-club";
+
+    link.style.display = "inline-block";
+
+    panel.appendChild(link);
+    return;
+  }
+
+  /* FORMULAIRE ACTIVATION */
+
+  heading.textContent =
+    "Activez votre profil EAH";
+
+  description(
+    panel,
+    "Carte n° " +
+    (card.card_number || "") +
+    " — " + (card.club_name || "")
+  );
+
+  const form = el("form","form");
+
+  const first = field(
+    form,"Prénom","text"
+  );
+
+  const last = field(
+    form,"Nom","text"
+  );
+
+  const id = field(
+    form,
+    "EAH ID personnalisé (facultatif)",
+    "text",
+    false
+  );
+
+  id.placeholder =
     card.default_identifier || "";
-  eahId.pattern = "[A-Za-z0-9_-]{4,32}";
-  eahId.maxLength = 32;
 
-  const email = EAH_NFC_FIELD(
-    form, "Adresse e-mail", "email"
+  id.pattern = "[A-Za-z0-9_-]{4,32}";
+  id.maxLength = 32;
+
+  const email = field(
+    form,"Adresse e-mail","email"
   );
 
-  const password = EAH_NFC_FIELD(
-    form, "Mot de passe", "password"
+  const password = field(
+    form,"Mot de passe","password"
   );
 
   password.minLength = 8;
   password.autocomplete = "new-password";
 
-  const submit = document.createElement("button");
+  const submit = el(
+    "button",
+    "primary-button",
+    "Créer mon profil"
+  );
+
   submit.type = "submit";
-  submit.className = "primary-button";
-  submit.textContent = "Créer mon profil";
   form.appendChild(submit);
+  panel.appendChild(form);
 
-  form.addEventListener("submit", async event => {
-    event.preventDefault();
-    submit.disabled = true;
+  form.addEventListener(
+    "submit",
+    async event => {
+      event.preventDefault();
+      submit.disabled = true;
 
-    try {
-      const first = prenom.value.trim();
-      const last = nom.value.trim();
-      const custom = eahId.value.trim();
+      try {
+        const f = first.value.trim();
+        const l = last.value.trim();
+        const custom = id.value.trim();
+        const adresse =
+          email.value.trim().toLowerCase();
 
-      const { data: authData } = await sb.auth.getUser();
+        if(!f || !l)
+          throw new Error(
+            "Prénom et nom obligatoires."
+          );
 
-      if (authData?.user) {
-        await EAH_NFC_ACTIVER(
-          first, last, custom, message
-        );
-        return;
-      }
+        const current =
+          await state.sb.auth.getUser();
 
-      const { data: signup, error: signupError } =
-        await sb.auth.signUp({
-          email: email.value.trim(),
-          password: password.value,
-          options: {
-            emailRedirectTo: location.href,
-            data: {
-              first_name: first,
-              last_name: last,
-              eah_id_requested: custom,
-              nfc_club_slug: CLUB_SLUG
-            }
+        if(current.data?.user) {
+          if(
+            String(
+              current.data.user.email || ""
+            ).toLowerCase() !== adresse
+          ) {
+            throw new Error(
+              "Un autre compte est connecté."
+            );
           }
-        });
 
-      if (signupError) throw signupError;
+          if(
+            !current.data.user.email_confirmed_at
+          ) {
+            throw new Error(
+              "Confirmez votre adresse e-mail."
+            );
+          }
 
-      if (signup.session) {
-        await EAH_NFC_ACTIVER(
-          first, last, custom, message
+          await nfcActivate(f,l,custom);
+          await renderNfc();
+          return;
+        }
+
+        const result =
+          await state.sb.auth.signUp({
+            email:adresse,
+            password:password.value,
+            options:{
+              emailRedirectTo:nfcRedirect(),
+              data:{
+                first_name:f,
+                last_name:l,
+                eah_id_requested:custom,
+                nfc_club_slug:CLUB_SLUG
+              }
+            }
+          });
+
+        if(result.error)
+          throw result.error;
+
+        if(result.data.session) {
+          await nfcActivate(f,l,custom);
+          await renderNfc();
+        } else {
+          message(
+            feedback,
+            "Inscription reçue. Vérifiez votre " +
+            "e-mail de confirmation, puis " +
+            "revenez sur ce lien NFC."
+          );
+        }
+
+      } catch(error) {
+        message(
+          feedback,error.message,true
         );
-      } else {
-        EAH_NFC_MESSAGE(
-          message,
-          "Inscription reçue. Confirmez votre " +
-          "adresse e-mail, puis revenez sur " +
-          "ce lien NFC et connectez-vous ci-dessous."
-        );
+      } finally {
+        submit.disabled = false;
       }
-    } catch (e) {
-      EAH_NFC_MESSAGE(
-        message, e.message, true
-      );
-    } finally {
-      submit.disabled = false;
     }
-  });
-
-  const existing = document.createElement("details");
-  existing.style.marginTop = "25px";
-
-  const summary = document.createElement("summary");
-  summary.textContent =
-    "Déjà inscrit ? Se connecter et activer";
-  existing.appendChild(summary);
-  panel.appendChild(existing);
-
-  const loginForm = document.createElement("form");
-  loginForm.className = "form";
-  loginForm.style.marginTop = "20px";
-  existing.appendChild(loginForm);
-
-  const loginEmail = EAH_NFC_FIELD(
-    loginForm, "E-mail", "email"
   );
 
-  const loginPassword = EAH_NFC_FIELD(
-    loginForm, "Mot de passe", "password"
+  /* RENVOI EMAIL */
+
+  const resend = button(
+    "Renvoyer le mail de confirmation",
+    async () => {
+      resend.disabled = true;
+
+      try {
+        if(!email.value.trim())
+          throw new Error(
+            "Saisissez votre adresse e-mail."
+          );
+
+        const result =
+          await state.sb.auth.resend({
+            type:"signup",
+            email:email.value.trim(),
+            options:{
+              emailRedirectTo:nfcRedirect()
+            }
+          });
+
+        if(result.error)
+          throw result.error;
+
+        message(
+          feedback,
+          "Demande de renvoi transmise. " +
+          "Vérifiez aussi les spams."
+        );
+
+      } catch(error) {
+        message(
+          feedback,error.message,true
+        );
+      } finally {
+        resend.disabled = false;
+      }
+    }
   );
 
-  const loginButton = document.createElement("button");
+  panel.appendChild(resend);
+
+  /* CONNEXION COMPTE EXISTANT */
+
+  const details = el("details");
+  details.style.marginTop = "25px";
+
+  details.appendChild(
+    el(
+      "summary","",
+      "Déjà inscrit ? Se connecter et activer"
+    )
+  );
+
+  const login = el("form","form");
+
+  const loginEmail = field(
+    login,"E-mail","email"
+  );
+
+  const loginPassword = field(
+    login,"Mot de passe","password"
+  );
+
+  const loginButton = el(
+    "button",
+    "primary-button",
+    "Se connecter"
+  );
+
   loginButton.type = "submit";
-  loginButton.className = "primary-button";
-  loginButton.textContent = "Se connecter";
-  loginForm.appendChild(loginButton);
 
-  login
-form.addEventListener("submit", async event => {
-  event.preventDefault();
+  login.appendChild(loginButton);
+  details.appendChild(login);
+  panel.appendChild(details);
 
-  submit.disabled = true;
-  submit.textContent = "Inscription en cours...";
+  login.addEventListener(
+    "submit",
+    async event => {
+      event.preventDefault();
+      loginButton.disabled = true;
+
+      try {
+        const result =
+          await state.sb.auth.signInWithPassword({
+            email:loginEmail.value.trim(),
+            password:loginPassword.value
+          });
+
+        if(result.error)
+          throw result.error;
+
+        if(
+          first.value.trim() &&
+          last.value.trim()
+        ) {
+          await nfcActivate(
+            first.value.trim(),
+            last.value.trim(),
+            id.value.trim()
+          );
+
+          await renderNfc();
+        } else {
+          message(
+            feedback,
+            "Connexion réussie. Renseignez " +
+            "votre prénom et votre nom dans " +
+            "le formulaire pour activer la carte."
+          );
+        }
+
+      } catch(error) {
+        message(
+          feedback,error.message,true
+        );
+      } finally {
+        loginButton.disabled = false;
+      }
+    }
+  );
+}
+
+/* ==========================================
+   ACTUALISATION
+========================================== */
+
+let refreshBusy = false;
+
+async function refreshPublic() {
+  if(
+    refreshBusy ||
+    NFC_TOKEN ||
+    !state.club ||
+    state.cart.length ||
+    document.activeElement?.matches(
+      "input,textarea,select"
+    )
+  ) return;
+
+  refreshBusy = true;
 
   try {
-    const first = prenom.value.trim();
-    const last = nom.value.trim();
-    const custom = eahId.value.trim();
-    const adresse = email.value.trim();
+    const page = state.currentPage;
 
-    if (!first || !last) {
-      throw new Error(
-        "Le prénom et le nom sont obligatoires."
-      );
-    }
+    await loadClub();
+    renderPages(page);
 
-    const { data: current, error: userError } =
-      await sb.auth.getUser();
-
-    if (userError && userError.status !== 400) {
-      console.warn(userError.message);
-    }
-
-    if (current?.user) {
-      if (
-        EAH_NFC_EMAIL_NORMALISE(current.user.email) !==
-        EAH_NFC_EMAIL_NORMALISE(adresse)
-      ) {
-        throw new Error(
-          "Un autre compte est connecté. " +
-          "Déconnectez-vous avant de continuer."
-        );
-      }
-
-      if (!current.user.email_confirmed_at) {
-        throw new Error(
-          "Confirmez d'abord votre adresse e-mail."
-        );
-      }
-
-      await EAH_NFC_ACTIVER(
-        first, last, custom, message
-      );
-
-      return;
-    }
-
-    const result = await EAH_NFC_INSCRIPTION_EMAIL({
-      email: adresse,
-      password: password.value,
-      firstName: first,
-      lastName: last,
-      customEahId: custom
-    });
-
-    if (result.session) {
-      await EAH_NFC_ACTIVER(
-        first, last, custom, message
-      );
-
-      return;
-    }
-
-    EAH_NFC_MESSAGE(
-      message,
-      "Votre demande d'inscription est enregistrée. " +
-      "Un e-mail de confirmation a été demandé à " +
-      adresse +
-      ". Vérifiez également vos spams. " +
-      "Si vous avez déjà un compte, utilisez " +
-      "la connexion ou le renvoi de confirmation."
+  } catch(error) {
+    console.warn(
+      "Actualisation impossible :",
+      error.message
     );
-
-  } catch (error) {
-    EAH_NFC_MESSAGE(
-      message,
-      error.message || "Erreur d'inscription.",
-      true
-    );
-
   } finally {
-    submit.disabled = false;
-    submit.textContent = "Créer mon profil";
+    refreshBusy = false;
   }
-});
+}
 
-// Bouton de renvoi du mail sous le formulaire
-EAH_NFC_AJOUTER_RENVOI(
-  panel,
-  email,
-  message
-);
+/* ==========================================
+   DEMARRAGE CORRIGE
+========================================== */
 
+async function start() {
+  try {
+    if(window.supabase?.createClient) {
+      state.sb = window.supabase.createClient(
+        SUPABASE_URL,
+        PUBLIC_KEY,
+        {
+          auth:{
+            persistSession:true,
+            autoRefreshToken:true,
+            detectSessionInUrl:true
+          }
+        }
+      );
+    } else {
+      console.warn(
+        "Bibliothèque Supabase indisponible."
+      );
+    }
+
+    /* MODE NFC PRIORITAIRE */
+
+    if(NFC_TOKEN) {
+      await renderNfc();
+      return;
+    }
+
+    /* CHARGEMENT DU CLUB */
+
+    await loadClub();
+
+    $("loading").hidden = true;
+    $("app").hidden = false;
+
+    renderPages();
+
+    /* AUTH NON BLOQUANTE */
+
+    if(state.sb) {
+      refreshMember()
+        .then(() => {
+          if(
+            state.currentPage === "espace-club"
+          ) {
+            renderPages("espace-club");
+          }
+        })
+        .catch(error => {
+          console.warn(
+            "Authentification :",error
+          );
+        });
+    }
+
+    /* ACTUALISATION TOUTES LES 60 SEC */
+
+    setInterval(() => {
+      if(!document.hidden) {
+        refreshPublic();
+      }
+    },60000);
+
+    document.addEventListener(
+      "visibilitychange",
+      () => {
+        if(!document.hidden) {
+          refreshPublic();
+        }
+      }
+    );
+
+    window.addEventListener(
+      "hashchange",
+      () => {
+        const slug = decodeURIComponent(
+          location.hash.slice(1)
+        );
+
+        if(slug) showPage(slug);
+      }
+    );
+
+    console.info(
+      "EAH Diving Club : démarrage terminé."
+    );
+
+  } catch(error) {
+    console.error(
+      "EAH démarrage :",error
+    );
+
+    $("loading").replaceChildren(
+      el(
+        "div",
+        "status error",
+        "Impossible de charger le club.\n" +
+        (error.message || "Erreur inconnue") +
+        "\nVérifiez le slug, Supabase et les autorisations RLS."
+      )
+    );
+  }
+}
+
+/* LANCEMENT EFFECTIF */
+
+start();
 
 })();
 </script>
-
 </body>
 </html>
