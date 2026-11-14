@@ -2496,135 +2496,196 @@ async function renderNfc() {
       await renderNfc();
     }
 
-    /* CREATION DU COMPTE */
+    
+/* ==========================================================
+   EAH DIVING CLUB — AUTHENTIFICATION SIMPLIFIÉE
+   Version : lien magique Supabase
+   Nouveaux comptes + comptes existants
+   Compatible NFC et activation de profil
+========================================================== */
 
-    form.addEventListener("submit", async event => {
-      event.preventDefault();
-      submit.disabled = true;
+const EAH_AUTH_REDIRECT = nfcRedirect();
 
-      try {
-        const f = first.value.trim();
-        const l = last.value.trim();
-        const adresse = email.value.trim().toLowerCase();
+async function EAH_SEND_ACCESS_LINK() {
+  if (!state.sb) {
+    throw new Error("Connexion Supabase indisponible.");
+  }
 
-        if (!f || !l || !adresse) {
-          throw new Error("Complétez les champs obligatoires.");
-        }
+  const adresse = email.value.trim().toLowerCase();
 
-        savePendingForm();
+  if (!adresse || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adresse)) {
+    throw new Error("Saisissez une adresse e-mail valide.");
+  }
 
-        const current = await state.sb.auth.getUser();
+  savePendingForm();
 
-        if (current.data?.user) {
-          if (current.data.user.email?.toLowerCase() !== adresse) {
-            throw new Error(
-              "Un autre compte est connecté. Déconnectez-le avant de continuer."
-            );
-          }
+  const { data: currentData, error: currentError } =
+    await state.sb.auth.getUser();
 
-          await finishActivation();
-          return;
-        }
+  if (currentError && currentError.name !== "AuthSessionMissingError") {
+    throw currentError;
+  }
 
-        const { data, error } = await state.sb.auth.signUp({
-          email: adresse,
-          password: password.value,
-          options: {
-            emailRedirectTo: nfcRedirect(),
-            data: {
-              first_name: f,
-              last_name: l,
-              eah_id_requested: id.value.trim(),
-              nfc_club_slug: CLUB_SLUG
-            }
-          }
-        });
+  const currentUser = currentData?.user;
 
-        if (error) throw error;
+  if (currentUser) {
+    if (currentUser.email?.toLowerCase() !== adresse) {
+      throw new Error(
+        "Un autre compte est connecté. Déconnectez-le d'abord."
+      );
+    }
 
-        if (data.session) {
-          await finishActivation();
-        } else {
-          message(
-            feedback,
-            "Demande d'inscription enregistrée. " +
-            "Si cette adresse n'a pas encore de compte, " +
-            "un e-mail de confirmation a été demandé. " +
-            "Si le compte existe déjà, utilisez le bouton " +
-            "« Recevoir un lien pour accéder à mon compte »."
-          );
-        }
+    await finishActivation();
+    return "activated";
+  }
 
-      } catch (error) {
-        message(feedback, error.message, true);
-      } finally {
-        submit.disabled = false;
+  const { error } = await state.sb.auth.signInWithOtp({
+    email: adresse,
+    options: {
+      shouldCreateUser: true,
+      emailRedirectTo: EAH_AUTH_REDIRECT,
+      data: {
+        first_name: first.value.trim(),
+        last_name: last.value.trim(),
+        eah_id_requested: id.value.trim(),
+        nfc_club_slug: CLUB_SLUG
       }
-    });
+    }
+  });
 
-    /* RENVOI POUR NOUVEAU COMPTE */
+  if (error) {
+    if (error.status === 429) {
+      throw new Error(
+        "Trop de demandes. Attendez quelques minutes."
+      );
+    }
 
-    panel.appendChild(
-      button("Renvoyer le mail de confirmation", async () => {
-        try {
-          const adresse = email.value.trim().toLowerCase();
-          if (!adresse) throw new Error("Saisissez votre e-mail.");
-
-          savePendingForm();
-
-          const { error } = await state.sb.auth.resend({
-            type: "signup",
-            email: adresse,
-            options: {
-              emailRedirectTo: nfcRedirect()
-            }
-          });
-
-          if (error) throw error;
-
-          message(
-            feedback,
-            "Demande de confirmation acceptée par Supabase. " +
-            "Vérifiez votre boîte de réception et les spams."
-          );
-        } catch (error) {
-          message(feedback, error.message, true);
-        }
-      })
+    throw new Error(
+      "Impossible de demander le lien : " + error.message
     );
+  }
 
-    /* COMPTE DEJA EXISTANT */
+  return "sent";
+}
 
-    panel.appendChild(
-      button(
-        "Recevoir un lien pour accéder à mon compte",
-        async () => {
-          try {
-            const adresse = email.value.trim().toLowerCase();
-            if (!adresse) throw new Error("Saisissez votre e-mail.");
+/* ==========================================================
+   FORMULAIRE DE CRÉATION / ACCÈS
+========================================================== */
 
-            savePendingForm();
+password.required = false;
+password.disabled = true;
 
-            const { error } =
-              await state.sb.auth.resetPasswordForEmail(adresse, {
-                redirectTo: nfcRedirect()
-              });
+const passwordLabel = password.closest("label");
+if (passwordLabel) passwordLabel.hidden = true;
 
-            if (error) throw error;
+submit.textContent = "Recevoir mon lien de connexion";
 
-            message(
-              feedback,
-              "Si cette adresse possède un compte, " +
-              "un e-mail de récupération a été demandé. " +
-              "Ouvrez le lien reçu pour définir votre nouveau mot de passe."
-            );
-          } catch (error) {
-            message(feedback, error.message, true);
-          }
-        },
-        true
-      )
+form.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  submit.disabled = true;
+
+  try {
+    const f = first.value.trim();
+    const l = last.value.trim();
+
+    if (!f || !l) {
+      throw new Error("Indiquez votre prénom et votre nom.");
+    }
+
+    const result = await EAH_SEND_ACCESS_LINK();
+
+    if (result === "sent") {
+      message(
+        feedback,
+        "Votre demande a été enregistrée.\n\n" +
+        "Si l'envoi est autorisé, vous recevrez un lien " +
+        "sécurisé EAH Diving par e-mail.\n\n" +
+        "Consultez également vos courriers indésirables.\n\n" +
+        "Ouvrez le lien sur cet appareil pour terminer " +
+        "l'activation de votre carte NFC."
+      );
+    }
+  } catch (error) {
+    message(feedback, error.message, true);
+  } finally {
+    submit.disabled = false;
+  }
+});
+
+/* ==========================================================
+   RENVOYER LE LIEN
+========================================================== */
+
+const resendButton = button(
+  "Renvoyer mon lien de connexion",
+  async () => {
+    resendButton.disabled = true;
+
+    try {
+      const result = await EAH_SEND_ACCESS_LINK();
+
+      if (result === "sent") {
+        message(
+          feedback,
+          "Nouvelle demande de lien envoyée à Supabase. " +
+          "Vérifiez votre boîte mail et les spams."
+        );
+      }
+    } catch (error) {
+      message(feedback, error.message, true);
+    } finally {
+      resendButton.disabled = false;
+    }
+  }
+);
+
+panel.appendChild(resendButton);
+
+/* ==========================================================
+   REPRISE APRÈS CONNEXION PAR E-MAIL
+========================================================== */
+
+async function EAH_COMPLETE_MAGIC_LINK() {
+  if (!state.sb) return;
+
+  const { data, error } = await state.sb.auth.getUser();
+
+  if (error || !data?.user) return;
+
+  const pending = nfcReadPending();
+
+  if (!pending) return;
+
+  if (
+    data.user.email?.toLowerCase() !==
+    String(pending.email || "").toLowerCase()
+  ) {
+    return;
+  }
+
+  try {
+    await finishActivation();
+  } catch (error) {
+    message(
+      feedback,
+      "Compte connecté. Finalisez votre profil : " +
+      error.message,
+      true
     );
+  }
+}
+
+EAH_COMPLETE_MAGIC_LINK().catch(error => {
+  console.warn("EAH Auth :", error.message);
+});
+
+/* ==========================================================
+   FIN DU MODULE
+========================================================== */
+
+
+          
 
     /* CONNEXION EXISTANTE */
 
