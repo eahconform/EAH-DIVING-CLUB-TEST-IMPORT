@@ -3474,6 +3474,86 @@ async function EAH_NFC_AFFICHER() {
       "EAH ID : " + (card.profile_eah_id || "");
     panel.appendChild(id);
 
+/* PHOTO DE PROFIL */
+const photo = EAH_NFC_FIELD(
+  form,
+  "Photo de profil",
+  "file",
+  false
+);
+
+photo.accept = "image/jpeg,image/png,image/webp";
+
+/* GROUPE */
+const groupLabel = document.createElement("label");
+groupLabel.textContent = "Groupe";
+
+const groupSelect = document.createElement("select");
+groupSelect.innerHTML =
+  '<option value="">Choisir un groupe</option>';
+
+groupLabel.appendChild(groupSelect);
+form.appendChild(groupLabel);
+
+/* COACH */
+const coachLabel = document.createElement("label");
+coachLabel.textContent = "Coach";
+
+const coachSelect = document.createElement("select");
+coachSelect.innerHTML =
+  '<option value="">Aucun coach sélectionné</option>';
+
+coachLabel.appendChild(coachSelect);
+form.appendChild(coachLabel);
+
+/* CHARGEMENT DES LISTES DU CLUB */
+async function EAH_NFC_CHARGER_LISTES() {
+  const clubId = state.club?.id;
+  if (!clubId) return;
+
+  const { data: groups, error: groupsError } =
+    await sb
+      .from("groups")
+      .select("id,name")
+      .eq("club_id", clubId)
+      .eq("active", true)
+      .order("name");
+
+  if (groupsError) {
+    console.error("Groupes :", groupsError.message);
+  } else {
+    for (const group of groups || []) {
+      groupSelect.add(
+        new Option(group.name, group.id)
+      );
+    }
+  }
+
+  const { data: coaches, error: coachesError } =
+    await sb
+      .from("club_members")
+      .select("id,display_name")
+      .eq("club_id", clubId)
+      .eq("role", "coach")
+      .eq("active", true)
+      .order("display_name");
+
+  if (coachesError) {
+    console.error("Coachs :", coachesError.message);
+  } else {
+    for (const coach of coaches || []) {
+      coachSelect.add(
+        new Option(
+          coach.display_name || "Coach",
+          coach.id
+        )
+      );
+    }
+  }
+}
+
+EAH_NFC_CHARGER_LISTES();
+
     const description = document.createElement("p");
     description.textContent =
       "Carte EAH n° " + card.card_number +
