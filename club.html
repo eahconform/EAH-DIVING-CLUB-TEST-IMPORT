@@ -4624,5 +4624,463 @@ EAH DIVING CLUB — COACH PREMIUM V1
 })();
 </script>
 
+<!-- ==================================================
+EAH DIVING — RESEAU SOCIAL PREMIUM V1
+Likes et abonnements aux profils
+================================================== -->
+
+<style>
+.eah-social-premium {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+  gap:12px;
+  margin:18px auto;
+  padding:18px;
+  border:1px solid #315b76;
+  border-radius:16px;
+  background:#102b42;
+  color:#eaf6ff;
+}
+
+.eah-social-premium button {
+  padding:12px 18px;
+  border:1px solid #47718a;
+  border-radius:12px;
+  background:#173d58;
+  color:white;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.eah-social-premium button.active {
+  background:#137eaf;
+  border-color:#7bdcff;
+}
+
+.eah-social-premium button:disabled {
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+.eah-social-premium .eah-social-count {
+  width:100%;
+  text-align:center;
+  color:#92ddff;
+  font-weight:700;
+}
+
+.eah-social-premium .eah-social-notice {
+  width:100%;
+  text-align:center;
+  color:#c4d8e6;
+  font-size:13px;
+}
+</style>
+
+<script>
+(function () {
+  "use strict";
+
+  const SB_URL =
+    "https://limyeqpdzjjwsdximehp.supabase.co";
+
+  const SB_KEY =
+    "sb_publishable_K9iUm_0Qhea65P1Zt6rbXQ_BXQCzJ9w";
+
+  let activeProfileId = null;
+  let activeUserId = null;
+  let busy = false;
+
+  function getSb() {
+    if (
+      typeof state !== "undefined" &&
+      state.sb
+    ) {
+      return state.sb;
+    }
+
+    return null;
+  }
+
+  function make(tag, text) {
+    const node = document.createElement(tag);
+
+    if (text !== undefined) {
+      node.textContent = String(text);
+    }
+
+    return node;
+  }
+
+  async function findProfile() {
+
+    const sb = getSb();
+
+    if (!sb) {
+      return null;
+    }
+
+    const params = new URLSearchParams(
+      location.search
+    );
+
+    const clubSlug = params.get("club");
+    const nfcToken = params.get("nfc");
+
+    if (!clubSlug || !nfcToken) {
+      return null;
+    }
+
+    const { data: clubs, error: clubError } =
+      await sb
+        .from("clubs")
+        .select("id")
+        .eq("slug", clubSlug)
+        .limit(1);
+
+    if (clubError || !clubs?.length) {
+      return null;
+    }
+
+    /*
+      La recherche par identifiant EAH
+      doit rester limitée au club.
+    */
+
+    const { data: profile, error: profileError } =
+      await sb.rpc(
+        "eah_nfc_profile_v7",
+        {
+          p_club_slug: clubSlug,
+          p_token: nfcToken
+        }
+      );
+
+    if (profileError || !profile?.eah_id) {
+      return null;
+    }
+
+    const { data: divers, error: diverError } =
+      await sb
+        .from("divers")
+        .select("id,profile_visibility")
+        .eq("club_id", clubs[0].id)
+        .eq("eah_id", profile.eah_id)
+        .limit(1);
+
+    if (diverError || !divers?.length) {
+      return null;
+    }
+
+    return divers[0];
+  }
+
+  async function getUser() {
+    const sb = getSb();
+
+    if (!sb) {
+      return null;
+    }
+
+    const { data } = await sb.auth.getUser();
+
+    return data?.user || null;
+  }
+
+  async function loadSocialCounts() {
+
+    const sb = getSb();
+
+    const { data, error } = await sb.rpc(
+      "eah_public_profile_social",
+      {
+        p_diver_id: activeProfileId
+      }
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    return data || {
+      likes: 0,
+      followers: 0
+    };
+  }
+
+  async function hasInteraction(table) {
+
+    if (!activeUserId) {
+      return false;
+    }
+
+    const { data, error } =
+      await getSb()
+        .from(table)
+        .select("diver_id")
+        .eq("user_id", activeUserId)
+        .eq("diver_id", activeProfileId)
+        .limit(1);
+
+    if (error) {
+      throw error;
+    }
+
+    return !!data?.length;
+  }
+
+  async function toggleInteraction(
+    table,
+    currentlyActive
+  ) {
+
+    if (busy || !activeUserId) {
+      return;
+    }
+
+    busy = true;
+
+    try {
+
+      const sb = getSb();
+
+      let result;
+
+      if (currentlyActive) {
+        result = await sb
+          .from(table)
+          .delete()
+          .eq("user_id", activeUserId)
+          .eq("diver_id", activeProfileId);
+
+      } else {
+        result = await sb
+          .from(table)
+          .insert({
+            user_id: activeUserId,
+            diver_id: activeProfileId
+          });
+      }
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      await renderSocial();
+
+    } catch (error) {
+      alert(
+        "Action impossible : " +
+        error.message
+      );
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function renderSocial() {
+
+    const root = document.querySelector(
+      ".eah-premium-root"
+    );
+
+    if (!root) {
+      return;
+    }
+
+    const profile = await findProfile();
+
+    if (!profile) {
+      return;
+    }
+
+    activeProfileId = profile.id;
+
+    const existing = document.getElementById(
+      "eah-social-premium"
+    );
+
+    if (existing) {
+      existing.remove();
+    }
+
+    const social = make("div");
+    social.id = "eah-social-premium";
+    social.className = "eah-social-premium";
+
+    const hero = root.querySelector(
+      ".ep-hero"
+    );
+
+    if (!hero) {
+      return;
+    }
+
+    hero.insertAdjacentElement(
+      "afterend",
+      social
+    );
+
+    const counts = make(
+      "div",
+      "Chargement..."
+    );
+
+    counts.className = "eah-social-count";
+    social.appendChild(counts);
+
+    try {
+
+      const stats = await loadSocialCounts();
+
+      counts.textContent =
+        (stats.likes || 0) +
+        " J'aime · " +
+        (stats.followers || 0) +
+        " abonnés";
+
+      const user = await getUser();
+
+      activeUserId = user?.id || null;
+
+      if (!user) {
+
+        const notice = make(
+          "div",
+          "Connectez-vous à votre compte " +
+          "pour aimer ou suivre ce profil."
+        );
+
+        notice.className =
+          "eah-social-notice";
+
+        social.appendChild(notice);
+        return;
+      }
+
+      const liked = await hasInteraction(
+        "eah_premium_profile_likes"
+      );
+
+      const followed = await hasInteraction(
+        "eah_premium_follows"
+      );
+
+      const likeButton = make(
+        "button",
+        liked
+          ? "♥ J'aime déjà"
+          : "♡ J'aime"
+      );
+
+      likeButton.classList.toggle(
+        "active",
+        liked
+      );
+
+      likeButton.addEventListener(
+        "click",
+        () => toggleInteraction(
+          "eah_premium_profile_likes",
+          liked
+        )
+      );
+
+      social.appendChild(likeButton);
+
+      const followButton = make(
+        "button",
+        followed
+          ? "✓ Abonné"
+          : "+ Suivre"
+      );
+
+      followButton.classList.toggle(
+        "active",
+        followed
+      );
+
+      followButton.addEventListener(
+        "click",
+        () => toggleInteraction(
+          "eah_premium_follows",
+          followed
+        )
+      );
+
+      social.appendChild(followButton);
+
+    } catch (error) {
+
+      counts.textContent =
+        "Réseau social indisponible : " +
+        error.message;
+    }
+  }
+
+  /*
+    Le profil NFC est rendu dynamiquement.
+    Un MutationObserver permet d'afficher
+    les boutons après son chargement.
+  */
+
+  let scheduled = false;
+
+  const observer = new MutationObserver(
+    function () {
+
+      if (scheduled) {
+        return;
+      }
+
+      const root = document.querySelector(
+        ".eah-premium-root"
+      );
+
+      if (
+        !root ||
+        document.getElementById(
+          "eah-social-premium"
+        )
+      ) {
+        return;
+      }
+
+      scheduled = true;
+
+      setTimeout(async function () {
+        scheduled = false;
+
+        try {
+          await renderSocial();
+        } catch (error) {
+          console.warn(
+            "EAH Social :",
+            error.message
+          );
+        }
+      }, 150);
+    }
+  );
+
+  observer.observe(
+    document.documentElement,
+    {
+      childList: true,
+      subtree: true
+    }
+  );
+
+  if (document.querySelector(
+    ".eah-premium-root"
+  )) {
+    renderSocial().catch(console.error);
+  }
+
+})();
+</script>
+
 </body>
 </html>
