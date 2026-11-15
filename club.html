@@ -2178,90 +2178,1183 @@ async function nfcCreateProfile(data){
    NFC - AFFICHAGE PROFIL
 ===================================================== */
 
-function nfcRenderProfile(panel,profile,card){
+
+/* ======================================================
+   EAH DIVING CLUB — PROFIL PREMIUM V1
+   Remplacement de nfcRenderProfile uniquement.
+
+   Compatible avec :
+   - state.sb
+   - nfcPhotoUrl()
+   - nfcProfile()
+   - nfcLookup()
+   - CLUB_SLUG
+   - NFC_TOKEN
+
+   Les fonctions privées nécessiteront ensuite
+   une association sécurisée du profil.
+====================================================== */
+
+function nfcRenderProfile(panel, profile, card) {
+
   panel.replaceChildren();
-  panel.classList.add("nfc-profile");
+  panel.classList.add("eah-premium-root");
 
-  panel.appendChild(
-    el("div","nfc-logo","EAH DIVING")
-  );
+  /* ================================================
+     DESIGN PREMIUM
+  ================================================= */
 
-  panel.appendChild(
-    el("h2","nfc-title",
-      profile?.name ||
-      card?.profile_name ||
-      "Profil EAH Diving")
-  );
+  if (!document.getElementById(
+    "eah-premium-style"
+  )) {
 
-  if(profile?.photo_url){
-    image(
-      panel,
-      nfcPhotoUrl(profile.photo_url),
-      "Photo du profil",
-      "nfc-profile-photo"
+    const style = document.createElement("style");
+    style.id = "eah-premium-style";
+
+    style.textContent = `
+      .eah-premium-root {
+        width:100%;
+        max-width:1120px;
+        margin:0 auto;
+        padding:0!important;
+        background:transparent!important;
+        border:0!important;
+        box-shadow:none!important;
+        color:#eaf6ff;
+        font-family:Arial,sans-serif;
+      }
+
+      .eah-premium-root * {
+        box-sizing:border-box;
+      }
+
+      .ep-hero {
+        position:relative;
+        overflow:hidden;
+        padding:36px 24px;
+        border:1px solid #2c5b7b;
+        border-radius:24px;
+        background:
+          radial-gradient(
+            circle at 85% 10%,
+            #19618b 0%,
+            transparent 40%
+          ),
+          linear-gradient(
+            145deg,
+            #143b58,
+            #071927 75%
+          );
+        text-align:center;
+      }
+
+      .ep-brand {
+        color:#73d7ff;
+        font-size:13px;
+        font-weight:800;
+        letter-spacing:3px;
+        text-transform:uppercase;
+      }
+
+      .ep-kicker {
+        margin-top:10px;
+        color:#9abbd0;
+        font-size:12px;
+        letter-spacing:2px;
+      }
+
+      .ep-avatar {
+        width:138px;
+        height:138px;
+        margin:28px auto 16px;
+        border:4px solid #76d9ff;
+        border-radius:50%;
+        overflow:hidden;
+        background:#244861;
+        box-shadow:0 0 35px #26a9ee35;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:#a8e7ff;
+        font-size:46px;
+        font-weight:800;
+      }
+
+      .ep-avatar img {
+        width:100%;
+        height:100%;
+        object-fit:cover;
+      }
+
+      .ep-name {
+        margin:0;
+        color:#fff;
+        font-size:clamp(26px,5vw,42px);
+        font-weight:800;
+        line-height:1.2;
+      }
+
+      .ep-identifier {
+        margin-top:12px;
+        color:#80ddff;
+        font-weight:700;
+        letter-spacing:1px;
+        overflow-wrap:anywhere;
+      }
+
+      .ep-club {
+        margin-top:14px;
+        color:#c4d9e7;
+      }
+
+      .ep-active {
+        display:inline-flex;
+        margin-top:20px;
+        padding:9px 16px;
+        border:1px solid #36bd92;
+        border-radius:30px;
+        background:#0d5c4630;
+        color:#8df1ca;
+        font-size:13px;
+        font-weight:700;
+      }
+
+      .ep-actions {
+        display:flex;
+        flex-wrap:wrap;
+        justify-content:center;
+        gap:10px;
+        margin-top:22px;
+      }
+
+      .ep-button {
+        border:1px solid #39718f;
+        border-radius:12px;
+        padding:12px 17px;
+        background:#163a53;
+        color:#fff;
+        font-size:14px;
+        font-weight:700;
+        cursor:pointer;
+        transition:.2s;
+      }
+
+      .ep-button:hover {
+        background:#205779;
+      }
+
+      .ep-button-primary {
+        background:#0b82c5;
+        border-color:#0b82c5;
+      }
+
+      .ep-button-primary:hover {
+        background:#149cde;
+      }
+
+      .ep-stats {
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+        gap:12px;
+        margin-top:18px;
+      }
+
+      .ep-stat {
+        padding:20px 10px;
+        border:1px solid #284b66;
+        border-radius:16px;
+        background:#102b42;
+        text-align:center;
+      }
+
+      .ep-stat-number {
+        font-size:27px;
+        color:#7cdaff;
+        font-weight:800;
+      }
+
+      .ep-stat-label {
+        margin-top:6px;
+        color:#b7cfde;
+        font-size:12px;
+      }
+
+      .ep-tabs {
+        display:flex;
+        gap:9px;
+        margin:24px 0;
+        padding:6px;
+        overflow-x:auto;
+        border:1px solid #29465d;
+        border-radius:16px;
+        background:#0d2437;
+        scrollbar-width:thin;
+      }
+
+      .ep-tab {
+        flex:1 0 auto;
+        min-width:110px;
+        padding:13px;
+        border:0;
+        border-radius:11px;
+        background:transparent;
+        color:#b5d0e1;
+        font-size:13px;
+        font-weight:700;
+        cursor:pointer;
+      }
+
+      .ep-tab.active {
+        background:#157db8;
+        color:white;
+      }
+
+      .ep-section {
+        display:none;
+        animation:epFade .2s ease;
+      }
+
+      .ep-section.active {
+        display:block;
+      }
+
+      @keyframes epFade {
+        from {
+          opacity:0;
+          transform:translateY(6px);
+        }
+        to {
+          opacity:1;
+          transform:translateY(0);
+        }
+      }
+
+      .ep-card {
+        margin-bottom:16px;
+        padding:24px;
+        border:1px solid #2a4c67;
+        border-radius:19px;
+        background:#102b42;
+      }
+
+      .ep-card h3 {
+        margin:0 0 16px;
+        color:#82dcff;
+        font-size:20px;
+      }
+
+      .ep-card p {
+        color:#c2d4e0;
+        line-height:1.7;
+      }
+
+      .ep-subtitle {
+        margin-bottom:16px;
+        color:#a5c0d2;
+        font-size:13px;
+      }
+
+      .ep-row {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:12px;
+        padding:13px 0;
+        border-bottom:1px solid #ffffff18;
+      }
+
+      .ep-row:last-child {
+        border-bottom:0;
+      }
+
+      .ep-muted {
+        color:#a8c3d5;
+      }
+
+      .ep-value {
+        color:#fff;
+        font-weight:700;
+        text-align:right;
+        overflow-wrap:anywhere;
+      }
+
+      .ep-announcement {
+        margin-bottom:12px;
+        padding:17px;
+        border:1px solid #365e78;
+        border-radius:14px;
+        background:#173a53;
+      }
+
+      .ep-announcement.urgent {
+        border-color:#df9b63;
+      }
+
+      .ep-announcement h4 {
+        margin:0 0 10px;
+        color:#a5e8ff;
+      }
+
+      .ep-announcement p {
+        margin:0;
+        white-space:pre-wrap;
+      }
+
+      .ep-announcement a {
+        display:inline-block;
+        margin-top:12px;
+        color:#8edfff;
+      }
+
+      .ep-empty {
+        padding:28px 18px;
+        border:1px dashed #41647d;
+        border-radius:14px;
+        text-align:center;
+        color:#b3cede;
+      }
+
+      .ep-feature {
+        display:flex;
+        gap:14px;
+        align-items:flex-start;
+        padding:17px;
+        margin-bottom:12px;
+        border:1px solid #2d526b;
+        border-radius:14px;
+        background:#17384f;
+      }
+
+      .ep-feature-icon {
+        font-size:25px;
+        line-height:1;
+      }
+
+      .ep-feature strong {
+        color:#fff;
+      }
+
+      .ep-feature p {
+        margin:7px 0 0;
+        font-size:13px;
+      }
+
+      .ep-note {
+        margin-top:16px;
+        padding:15px;
+        border-radius:12px;
+        background:#19374a;
+        color:#b9d2e1;
+        font-size:13px;
+        line-height:1.6;
+      }
+
+      .ep-footer {
+        margin:28px 0;
+        color:#7597ad;
+        text-align:center;
+        font-size:12px;
+      }
+
+      @media(max-width:600px) {
+        .ep-hero {
+          padding:27px 15px;
+          border-radius:17px;
+        }
+
+        .ep-avatar {
+          width:115px;
+          height:115px;
+        }
+
+        .ep-stats {
+          gap:7px;
+        }
+
+        .ep-stat {
+          padding:16px 5px;
+        }
+
+        .ep-stat-number {
+          font-size:22px;
+        }
+
+        .ep-card {
+          padding:17px;
+        }
+
+        .ep-tab {
+          min-width:100px;
+          padding:12px 9px;
+        }
+      }
+    `;
+
+    document.head.appendChild(style);
+  }
+
+  /* ================================================
+     OUTILS DE CREATION DOM SECURISEE
+  ================================================= */
+
+  function node(tag, className, text) {
+    const item = document.createElement(tag);
+
+    if (className) {
+      item.className = className;
+    }
+
+    if (text !== undefined && text !== null) {
+      item.textContent = String(text);
+    }
+
+    return item;
+  }
+
+  function add(parent, tag, className, text) {
+    const item = node(tag, className, text);
+    parent.appendChild(item);
+    return item;
+  }
+
+  function row(parent, label, value) {
+    const line = add(parent, "div", "ep-row");
+
+    add(line, "span", "ep-muted", label);
+    add(
+      line,
+      "span",
+      "ep-value",
+      value || "Non renseigné"
+    );
+
+    return line;
+  }
+
+  function card(parent, title) {
+    const item = add(parent, "div", "ep-card");
+    add(item, "h3", "", title);
+    return item;
+  }
+
+  function buttonPremium(
+    parent,
+    title,
+    action,
+    primary = false
+  ) {
+    const btn = add(
+      parent,
+      "button",
+      primary
+        ? "ep-button ep-button-primary"
+        : "ep-button",
+      title
+    );
+
+    btn.type = "button";
+    btn.addEventListener("click", action);
+
+    return btn;
+  }
+
+  function empty(parent, text) {
+    return add(
+      parent,
+      "div",
+      "ep-empty",
+      text
     );
   }
 
-  const info = el("div","nfc-info");
+  function feature(parent, icon, title, text) {
+    const wrapper = add(
+      parent,
+      "div",
+      "ep-feature"
+    );
 
-  info.appendChild(
-    el("p","",
-      profile?.club_name ||
-      card?.club_name ||
-      "")
-  );
+    add(
+      wrapper,
+      "div",
+      "ep-feature-icon",
+      icon
+    );
+
+    const content = add(wrapper, "div");
+    add(content, "strong", "", title);
+    add(content, "p", "", text);
+
+    return wrapper;
+  }
+
+  function validUrl(value) {
+    try {
+      const url = new URL(value);
+
+      if (
+        url.protocol !== "https:" &&
+        url.protocol !== "http:"
+      ) {
+        return "";
+      }
+
+      return url.href;
+    } catch (_) {
+      return "";
+    }
+  }
+
+  /* ================================================
+     INFORMATIONS DU PROFIL
+  ================================================= */
+
+  const fullName =
+    profile?.name ||
+    card?.profile_name ||
+    "Profil EAH Diving";
 
   const eahId =
     profile?.eah_id ||
     card?.profile_eah_id ||
     "";
 
-  panel.appendChild(info);
+  const clubName =
+    profile?.club_name ||
+    card?.club_name ||
+    "EAH Diving Club";
 
-  panel.appendChild(
-    el("div","nfc-id","EAH ID : " + eahId)
+  const groupName =
+    profile?.group_name || "";
+
+  const coachName =
+    profile?.coach_name || "";
+
+  const blazon =
+    profile?.blazon ||
+    profile?.current_blazon ||
+    "";
+
+  const photo =
+    profile?.photo_url
+      ? nfcPhotoUrl(profile.photo_url)
+      : "";
+
+  /* ================================================
+     EN-TETE
+  ================================================= */
+
+  const hero = add(panel, "section", "ep-hero");
+
+  add(
+    hero,
+    "div",
+    "ep-brand",
+    "EAH DIVING"
   );
 
-  if(profile?.group_name){
-    panel.appendChild(
-      el("p","","Groupe : " + profile.group_name)
-    );
-  }
-
-  if(profile?.blazon){
-    panel.appendChild(
-      el("p","","Blazon : " + profile.blazon)
-    );
-  }
-
-  panel.appendChild(
-    el("p","status success",
-      "Profil EAH Diving actif.")
+  add(
+    hero,
+    "div",
+    "ep-kicker",
+    "DIGITAL ATHLETE PASSPORT"
   );
 
-  const actions = el("div","nfc-actions");
+  const avatar = add(
+    hero,
+    "div",
+    "ep-avatar"
+  );
 
-  actions.appendChild(
-    button("Copier le lien du profil",async () => {
-      try{
-        await navigator.clipboard.writeText(
-          location.href.split("#")[0]
-        );
-        alert("Lien copié.");
-      }catch(error){
-        alert("Copie impossible.");
+  if (photo) {
+    const img = node("img");
+
+    img.src = photo;
+    img.alt = "Photo du profil";
+    img.loading = "lazy";
+
+    img.onerror = function () {
+      avatar.replaceChildren();
+      avatar.textContent =
+        fullName.slice(0, 1).toUpperCase();
+    };
+
+    avatar.appendChild(img);
+
+  } else {
+    avatar.textContent =
+      fullName.slice(0, 1).toUpperCase();
+  }
+
+  add(
+    hero,
+    "h1",
+    "ep-name",
+    fullName
+  );
+
+  add(
+    hero,
+    "div",
+    "ep-identifier",
+    "EAH ID · " + eahId
+  );
+
+  add(
+    hero,
+    "div",
+    "ep-club",
+    clubName
+  );
+
+  add(
+    hero,
+    "div",
+    "ep-active",
+    "✓ Profil EAH actif"
+  );
+
+  const heroActions = add(
+    hero,
+    "div",
+    "ep-actions"
+  );
+
+  buttonPremium(
+    heroActions,
+    "Partager mon profil",
+    async function () {
+
+      const url =
+        location.origin +
+        location.pathname +
+        location.search;
+
+      try {
+        if (navigator.share) {
+          await navigator.share({
+            title:
+              "Profil EAH Diving - " +
+              fullName,
+            url
+          });
+        } else {
+          await navigator.clipboard.writeText(
+            url
+          );
+          alert("Lien copié !");
+        }
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          alert(
+            "Impossible de partager ce lien."
+          );
+        }
       }
-    })
+    },
+    true
   );
 
-  panel.appendChild(actions);
+  /* ================================================
+     STATISTIQUES
+  ================================================= */
 
-  panel.appendChild(
-    el("p","nfc-help",
-      "Cette carte NFC est associée à ce profil. " +
-      "Chaque nouveau scan ouvre cette page.")
+  const stats = add(
+    panel,
+    "div",
+    "ep-stats"
+  );
+
+  [
+    ["—", "Évaluations"],
+    ["—", "Vidéos"],
+    [blazon || "—", "Blazon"]
+  ].forEach(item => {
+
+    const stat = add(
+      stats,
+      "div",
+      "ep-stat"
+    );
+
+    add(
+      stat,
+      "div",
+      "ep-stat-number",
+      item[0]
+    );
+
+    add(
+      stat,
+      "div",
+      "ep-stat-label",
+      item[1]
+    );
+  });
+
+  /* ================================================
+     NAVIGATION
+  ================================================= */
+
+  const tabs = [
+    ["overview", "Mon profil"],
+    ["progress", "Progression"],
+    ["videos", "Vidéos"],
+    ["messages", "Messages"],
+    ["advice", "Conseils"]
+  ];
+
+  const navigation = add(
+    panel,
+    "div",
+    "ep-tabs"
+  );
+
+  const sections = {};
+  const tabButtons = {};
+
+  const content = add(
+    panel,
+    "div",
+    "ep-content"
+  );
+
+  tabs.forEach(([id, title]) => {
+
+    const btn = add(
+      navigation,
+      "button",
+      "ep-tab",
+      title
+    );
+
+    btn.type = "button";
+
+    const section = add(
+      content,
+      "section",
+      "ep-section"
+    );
+
+    sections[id] = section;
+    tabButtons[id] = btn;
+
+    btn.addEventListener("click", () => {
+      selectTab(id);
+    });
+  });
+
+  function selectTab(id) {
+    tabs.forEach(([tabId]) => {
+      sections[tabId].classList.toggle(
+        "active",
+        tabId === id
+      );
+
+      tabButtons[tabId].classList.toggle(
+        "active",
+        tabId === id
+      );
+    });
+  }
+
+  /* ================================================
+     ONGLET MON PROFIL
+  ================================================= */
+
+  const overview = sections.overview;
+
+  const identityCard = card(
+    overview,
+    "Mon identité sportive"
+  );
+
+  row(identityCard, "Nom", fullName);
+  row(identityCard, "Identifiant EAH", eahId);
+  row(identityCard, "Club", clubName);
+  row(identityCard, "Groupe", groupName);
+  row(identityCard, "Entraîneur", coachName);
+  row(identityCard, "Blazon", blazon);
+  row(identityCard, "Statut", "Actif");
+
+  const accessCard = card(
+    overview,
+    "Mon espace personnel"
+  );
+
+  add(
+    accessCard,
+    "p",
+    "",
+    "Retrouvez ici vos informations, " +
+    "vos demandes de grading, " +
+    "vos échanges avec les entraîneurs " +
+    "et votre progression."
+  );
+
+  add(
+    accessCard,
+    "div",
+    "ep-note",
+    "Les modifications personnelles et " +
+    "les conversations privées nécessitent " +
+    "une connexion sécurisée au profil. " +
+    "Le lien NFC seul donne accès " +
+    "à la partie publique."
+  );
+
+  /* ================================================
+     ONGLET PROGRESSION
+  ================================================= */
+
+  const progress = sections.progress;
+
+  const blazonCard = card(
+    progress,
+    "Mon parcours EAH Diving"
+  );
+
+  row(
+    blazonCard,
+    "Blazon actuel",
+    blazon
+  );
+
+  row(
+    blazonCard,
+    "Club",
+    clubName
+  );
+
+  row(
+    blazonCard,
+    "Groupe",
+    groupName
+  );
+
+  const evaluationsCard = card(
+    progress,
+    "Mes évaluations"
+  );
+
+  empty(
+    evaluationsCard,
+    "L'historique des évaluations " +
+    "sera affiché ici après le " +
+    "raccordement des données EVALUATIONS."
+  );
+
+  const gradingCard = card(
+    progress,
+    "EAH Grading"
+  );
+
+  feature(
+    gradingCard,
+    "🏅",
+    "Progression technique",
+    "Suivi des critères, notes et " +
+    "blazons de votre discipline."
+  );
+
+  feature(
+    gradingCard,
+    "📄",
+    "Rapports d'évaluation",
+    "Consultation des rapports et " +
+    "commentaires des entraîneurs."
+  );
+
+  /* ================================================
+     ONGLET VIDEOS
+  ================================================= */
+
+  const videos = sections.videos;
+
+  const videoCard = card(
+    videos,
+    "Mes vidéos de plongeon"
+  );
+
+  feature(
+    videoCard,
+    "🎬",
+    "Soumettre une vidéo",
+    "Choisir la discipline, le plongeon, " +
+    "la hauteur et transmettre la vidéo " +
+    "pour une évaluation."
+  );
+
+  feature(
+    videoCard,
+    "📋",
+    "Suivre mes demandes",
+    "Retrouver le statut des vidéos : " +
+    "en attente, en cours ou évaluée."
+  );
+
+  add(
+    videoCard,
+    "div",
+    "ep-note",
+    "L'envoi de vidéos sera activé " +
+    "après la connexion sécurisée " +
+    "de ce profil à son propriétaire. " +
+    "Aucune vidéo ne peut être envoyée " +
+    "depuis la vue publique."
+  );
+
+  /* ================================================
+     ONGLET MESSAGES
+  ================================================= */
+
+  const messages = sections.messages;
+
+  const announcementsCard = card(
+    messages,
+    "Informations de mon club"
+  );
+
+  const announcementsList = add(
+    announcementsCard,
+    "div",
+    "",
+    "Chargement des annonces..."
+  );
+
+  const privateCard = card(
+    messages,
+    "Mes conversations privées"
+  );
+
+  feature(
+    privateCard,
+    "💬",
+    "Échanger avec mon entraîneur",
+    "Envoyer et recevoir des messages " +
+    "avec son coach."
+  );
+
+  feature(
+    privateCard,
+    "👥",
+    "Échanger avec les adhérents",
+    "Discuter avec d'autres membres " +
+    "du club dans un espace privé."
+  );
+
+  add(
+    privateCard,
+    "div",
+    "ep-note",
+    "Les conversations ne seront " +
+    "accessibles qu'aux participants " +
+    "authentifiés. La messagerie " +
+    "privée n'est pas encore activée " +
+    "dans cette version."
+  );
+
+  /* ================================================
+     ONGLET CONSEILS
+  ================================================= */
+
+  const advice = sections.advice;
+
+  const adviceCard = card(
+    advice,
+    "Conseils de mon entraîneur"
+  );
+
+  feature(
+    adviceCard,
+    "🎯",
+    "Mes objectifs",
+    "Objectifs techniques et sportifs " +
+    "fixés avec mon entraîneur."
+  );
+
+  feature(
+    adviceCard,
+    "📈",
+    "Axes de progression",
+    "Points à travailler lors des " +
+    "prochaines séances."
+  );
+
+  feature(
+    adviceCard,
+    "⭐",
+    "Conseils personnalisés",
+    "Retours techniques et " +
+    "recommandations du coach."
+  );
+
+  add(
+    adviceCard,
+    "div",
+    "ep-note",
+    "Les conseils individualisés " +
+    "seront chargés depuis la feuille " +
+    "CONSEIL une fois leur accès " +
+    "privé raccordé."
+  );
+
+  /* ================================================
+     CHARGER LES ANNONCES REELLES DU CLUB
+  ================================================= */
+
+  async function loadAnnouncements() {
+
+    announcementsList.textContent =
+      "Chargement des annonces...";
+
+    try {
+
+      if (!state.sb) {
+        throw new Error(
+          "Supabase indisponible"
+        );
+      }
+
+      const { data: clubs, error: clubError } =
+        await state.sb
+          .from("clubs")
+          .select("id")
+          .eq("slug", CLUB_SLUG)
+          .eq("active", true)
+          .limit(1);
+
+      if (clubError) {
+        throw clubError;
+      }
+
+      if (!clubs || !clubs.length) {
+        throw new Error(
+          "Club introuvable"
+        );
+      }
+
+      const { data, error } =
+        await state.sb
+          .from("eah_club_announcements")
+          .select(
+            "title,message,photo_url," +
+            "video_url,link_url," +
+            "author_name,urgent,published_at"
+          )
+          .eq("club_id", clubs[0].id)
+          .eq("active", true)
+          .order(
+            "published_at",
+            { ascending: false }
+          )
+          .limit(30);
+
+      if (error) {
+        throw error;
+      }
+
+      announcementsList.replaceChildren();
+
+      if (!data || !data.length) {
+        empty(
+          announcementsList,
+          "Aucune annonce publiée pour " +
+          "le moment."
+        );
+        return;
+      }
+
+      data.forEach(info => {
+
+        const item = add(
+          announcementsList,
+          "article",
+          info.urgent
+            ? "ep-announcement urgent"
+            : "ep-announcement"
+        );
+
+        if (info.urgent) {
+          add(
+            item,
+            "strong",
+            "",
+            "⚠ Information importante"
+          );
+        }
+
+        add(
+          item,
+          "h4",
+          "",
+          info.title || "Information"
+        );
+
+        add(
+          item,
+          "p",
+          "",
+          info.message || ""
+        );
+
+        if (info.author_name) {
+          add(
+            item,
+            "p",
+            "ep-muted",
+            "Publié par " + info.author_name
+          );
+        }
+
+        const url = validUrl(info.link_url);
+
+        if (url) {
+          const link = add(
+            item,
+            "a",
+            "",
+            "Voir les détails"
+          );
+
+          link.href = url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+        }
+      });
+
+    } catch (error) {
+
+      announcementsList.replaceChildren();
+
+      empty(
+        announcementsList,
+        "Impossible de charger les annonces : " +
+        (error.message || "Erreur inconnue")
+      );
+    }
+  }
+
+  loadAnnouncements();
+
+  /* ================================================
+     ACTIVER PREMIER ONGLET
+  ================================================= */
+
+  selectTab("overview");
+
+  add(
+    panel,
+    "div",
+    "ep-footer",
+    "EAH DIVING · DIGITAL ATHLETE PASSPORT"
   );
 }
+
+/* ======================================================
+   FIN PROFIL PREMIUM V1
+====================================================== */
+
 
 /* =====================================================
    NFC - FORMULAIRE SANS EMAIL
