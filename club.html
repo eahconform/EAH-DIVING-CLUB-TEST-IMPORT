@@ -7,15 +7,10 @@
 <meta name="theme-color" content="#03131f">
 <title>EAH Diving Club</title>
 <style>
-:root {
-  --primary:#0b6bff;
-  --secondary:#03131f;
-  --text:#ffffff;
-  --muted:#b8cadb;
-  --card:#102b42;
-  --radius:14px;
-  --overlay:.58;
-  --font:Arial,sans-serif;
+:root{
+ --primary:#0b6bff;--secondary:#03131f;
+ --text:#fff;--muted:#b8cadb;--card:#102b42;
+ --radius:14px;--overlay:.58;--font:Arial,sans-serif
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -37,8 +32,7 @@ button.active,.primary-button{background:var(--primary);border-color:var(--prima
 .hero h1{margin:0;color:#fff;font-size:clamp(30px,5vw,56px);overflow-wrap:anywhere;text-shadow:0 3px 15px #000}
 .hero p{font-size:20px;color:#fff;text-shadow:0 2px 10px #000}
 main{max-width:1250px;min-height:250px;margin:auto;padding:35px 20px 80px}
-.page{display:none}
-.page.active{display:block}
+.page{display:none}.page.active{display:block}
 .page h2{font-size:clamp(26px,4vw,40px)}
 .description{white-space:pre-wrap;line-height:1.7}
 .muted{color:var(--muted)}
@@ -68,51 +62,52 @@ footer{text-align:center;padding:28px;border-top:1px solid #ffffff20;color:var(-
 .gallery button{width:80px;height:70px;padding:3px}
 .gallery img{width:100%;height:100%;object-fit:contain}
 .detail-line{border-bottom:1px solid #ffffff25;padding:10px 0}
-.nfc-photo{width:180px;height:180px;object-fit:cover;border-radius:50%;display:block;margin:20px auto}
-.nfc-id{font-size:22px;font-weight:800;overflow-wrap:anywhere;color:#70c8ff}
+.nfc-photo{display:block;width:180px;height:180px;object-fit:cover;border-radius:50%;margin:20px auto}
+.nfc-id{font-size:23px;font-weight:800;color:#70c8ff;overflow-wrap:anywhere}
 .nfc-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
 .nfc-actions button{flex:1;min-width:150px}
 .nfc-divider{border:0;border-top:1px solid #ffffff30;margin:25px 0}
+details summary{cursor:pointer;padding:12px 0;font-weight:bold}
 @media(max-width:650px){
-  header{padding:10px}
-  .header-inner,nav{justify-content:center}
-  nav button{font-size:13px;padding:9px}
-  .hero{min-height:260px}
-  .cards{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-  .card{padding:12px}
+ header{padding:10px}
+ .header-inner,nav{justify-content:center}
+ nav button{font-size:13px;padding:9px}
+ .hero{min-height:260px}
+ .cards{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+ .card{padding:12px}
 }
 </style>
 </head>
 <body>
 
 <div id="loading">
-  <div>
-    <h2>EAH DIVING</h2>
-    <p>Chargement du club...</p>
-  </div>
+ <div>
+  <h2>EAH DIVING</h2>
+  <p>Chargement du club...</p>
+ </div>
 </div>
 
 <div id="app" hidden>
-  <header>
-    <div class="header-inner">
-      <div class="brand">
-        <img id="club-logo" alt="Logo" hidden>
-        <span id="club-brand">EAH Diving Club</span>
-      </div>
-      <nav id="menu"></nav>
-    </div>
-  </header>
-  <section class="hero" id="hero">
-    <div class="hero-content">
-      <h1 id="hero-title"></h1>
-      <p id="hero-tagline"></p>
-    </div>
-  </section>
-  <main id="pages"></main>
-  <footer>
-    <span id="footer-name"></span>
-    <p id="footer-text">Propulsé par EAH Diving</p>
-  </footer>
+ <header>
+  <div class="header-inner">
+   <div class="brand">
+    <img id="club-logo" alt="Logo" hidden>
+    <span id="club-brand">EAH Diving Club</span>
+   </div>
+   <nav id="menu"></nav>
+  </div>
+ </header>
+ <section class="hero" id="hero">
+  <div class="hero-content">
+   <h1 id="hero-title"></h1>
+   <p id="hero-tagline"></p>
+  </div>
+ </section>
+ <main id="pages"></main>
+ <footer>
+  <span id="footer-name"></span>
+  <p id="footer-text">Propulsé par EAH Diving</p>
+ </footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -122,446 +117,407 @@ footer{text-align:center;padding:28px;border-top:1px solid #ffffff20;color:var(-
 "use strict";
 
 /* ==========================================
-   EAH DIVING CLUB - VERSION NFC CORRIGEE
+   CONFIGURATION EAH DIVING
 ========================================== */
 
 const SUPABASE_URL =
-  "https://limyeqpdzjjwsdximehp.supabase.co";
+ "https://limyeqpdzjjwsdximehp.supabase.co";
 
 const PUBLIC_KEY =
-  "sb_publishable_K9iUm_0Qhea65P1Zt6rbXQ_BXQCzJ9w";
+ "sb_publishable_K9iUm_0Qhea65P1Zt6rbXQ_BXQCzJ9w";
 
 const DEFAULT_CLUB =
-  "eah-club-demo-1793054157740";
+ "eah-club-demo-1793054157740";
 
-const params = new URLSearchParams(location.search);
+const params=new URLSearchParams(location.search);
 
-const CLUB_SLUG =
-  params.get("club") ||
-  params.get("eah_club_preview") ||
-  DEFAULT_CLUB;
+const CLUB_SLUG=
+ params.get("club")||
+ params.get("eah_club_preview")||
+ DEFAULT_CLUB;
 
-const NFC_TOKEN = params.get("nfc");
+const NFC_TOKEN=params.get("nfc");
 
-const $ = id => document.getElementById(id);
+const $=id=>document.getElementById(id);
 
-const state = {
-  club:null,
-  config:{},
-  pages:[],
-  badges:[],
-  products:[],
-  cart:[],
-  user:null,
-  member:null,
-  currentPage:"",
-  sb:null
+const state={
+ club:null,config:{},pages:[],badges:[],
+ products:[],cart:[],user:null,member:null,
+ currentPage:"",sb:null
 };
 
-const MANAGER_ROLES = [
-  "admin","owner","manager","responsable"
+const MANAGER_ROLES=[
+ "admin","owner","manager","responsable"
 ];
 
 /* ==========================================
-   OUTILS GENERAUX
+   OUTILS
 ========================================== */
 
 function el(tag,cls="",value){
-  const e=document.createElement(tag);
-  if(cls)e.className=cls;
-  if(value!==undefined)e.textContent=String(value??"");
-  return e;
+ const e=document.createElement(tag);
+ if(cls)e.className=cls;
+ if(value!==undefined)e.textContent=String(value??"");
+ return e;
 }
 
 function button(label,handler,primary=false){
-  const b=el("button",primary?"primary-button":"",label);
-  b.type="button";
-  b.addEventListener("click",handler);
-  return b;
+ const b=el("button",primary?"primary-button":"",label);
+ b.type="button";
+ b.addEventListener("click",handler);
+ return b;
 }
 
 function message(parent,text,error=false){
-  parent.replaceChildren(
-    el("div","status "+(error?"error":"success"),text)
-  );
+ parent.replaceChildren(
+  el("div","status "+(error?"error":"success"),text)
+ );
 }
 
 function money(value){
-  return Number(value||0).toLocaleString(
-    "fr-FR",{style:"currency",currency:"EUR"}
-  );
+ return Number(value||0).toLocaleString(
+  "fr-FR",{style:"currency",currency:"EUR"}
+ );
 }
 
-function array(value){
-  return Array.isArray(value)?value:[];
-}
+function array(v){return Array.isArray(v)?v:[]}
 
-function object(value){
-  return value&&typeof value==="object"&&!Array.isArray(value)
-    ?value:{};
+function object(v){
+ return v&&typeof v==="object"&&!Array.isArray(v)?v:{};
 }
 
 function description(parent,text){
-  if(!text)return;
-  parent.appendChild(el("p","description",text));
+ if(text)parent.appendChild(el("p","description",text));
 }
 
 function safeImage(value){
-  if(!value)return "";
-  const raw=String(value).trim();
-  let match=raw.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
-  if(!match)match=raw.match(/[?&]id=([\w-]{20,})/);
-  if(!match&&/^[\w-]{20,}$/.test(raw))match=[raw,raw];
-  if(match){
-    return "https://drive.google.com/thumbnail?id="+
-      encodeURIComponent(match[1])+"&sz=w1000";
-  }
-  try{
-    const url=new URL(raw,location.href);
-    if(["https:","http:"].includes(url.protocol))return url.href;
-  }catch(e){}
-  return "";
+ if(!value)return "";
+ const raw=String(value).trim();
+ let m=raw.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
+ if(!m)m=raw.match(/[?&]id=([\w-]{20,})/);
+ if(!m&&/^[\w-]{20,}$/.test(raw))m=[raw,raw];
+ if(m)return "https://drive.google.com/thumbnail?id="+
+  encodeURIComponent(m[1])+"&sz=w1000";
+ try{
+  const u=new URL(raw,location.href);
+  if(["https:","http:"].includes(u.protocol))return u.href;
+ }catch(e){}
+ return "";
 }
 
 function image(parent,url,alt,cls=""){
-  const src=safeImage(url);
-  if(!src)return null;
-  const img=el("img",cls);
-  img.src=src;
-  img.alt=alt||"";
-  img.loading="lazy";
-  img.onerror=()=>{img.hidden=true};
-  parent.appendChild(img);
-  return img;
+ const src=safeImage(url);
+ if(!src)return null;
+ const img=el("img",cls);
+ img.src=src;img.alt=alt||"";img.loading="lazy";
+ img.onerror=()=>img.hidden=true;
+ parent.appendChild(img);
+ return img;
 }
 
 function video(parent,url){
-  const src=safeImage(url);
-  if(!src)return;
-  if(/\.(mp4|webm|ogg)([?#]|$)/i.test(src)){
-    const v=el("video","page-video");
-    v.src=src;
-    v.controls=true;
-    v.preload="metadata";
-    parent.appendChild(v);
-  }else{
-    const a=el("a","","Voir la vidéo");
-    a.href=src;
-    a.target="_blank";
-    a.rel="noopener noreferrer";
-    parent.appendChild(a);
-  }
+ const src=safeImage(url);
+ if(!src)return;
+ if(/\.(mp4|webm|ogg)([?#]|$)/i.test(src)){
+  const v=el("video","page-video");
+  v.src=src;v.controls=true;v.preload="metadata";
+  parent.appendChild(v);
+ }else{
+  const a=el("a","","Voir la vidéo");
+  a.href=src;a.target="_blank";a.rel="noopener noreferrer";
+  parent.appendChild(a);
+ }
 }
 
 function safeColor(value,fallback){
-  const colors={
-    "bleu":"#0b6bff",
-    "bleu marine":"#102040",
-    "bleu clair":"#70c8ff",
-    "orange":"#ff9800",
-    "vert":"#23a455",
-    "rouge":"#e53935",
-    "blanc":"#ffffff",
-    "noir":"#000000",
-    "gris":"#808080",
-    "jaune":"#ffd600",
-    "rose":"#ff69b4",
-    "violet":"#9333ea"
-  };
-  const text=String(value||"").trim();
-  return colors[text.toLowerCase()]||
-    (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(text)?text:fallback);
+ const colors={
+  "bleu":"#0b6bff","bleu marine":"#102040",
+  "bleu clair":"#70c8ff","orange":"#ff9800",
+  "vert":"#23a455","rouge":"#e53935",
+  "blanc":"#ffffff","noir":"#000000",
+  "gris":"#808080","jaune":"#ffd600",
+  "rose":"#ff69b4","violet":"#9333ea"
+ };
+ const t=String(value||"").trim();
+ return colors[t.toLowerCase()]||
+  (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(t)?t:fallback);
 }
 
 function numeric(value,fallback,min,max){
-  const n=Number(value);
-  return value!==""&&value!=null&&Number.isFinite(n)&&n>=min&&n<=max
-    ?n:fallback;
+ const n=Number(value);
+ return value!==""&&value!=null&&
+  Number.isFinite(n)&&n>=min&&n<=max?n:fallback;
+}
+
+function field(parent,title,type,required=true){
+ const label=el("label","",title);
+ const input=el("input");
+ input.type=type;input.required=required;
+ label.appendChild(input);parent.appendChild(label);
+ return input;
 }
 
 /* ==========================================
-   SUPABASE - LECTURE PUBLIQUE
+   CHARGEMENT PUBLIC SUPABASE
 ========================================== */
 
 async function publicQuery(table,extra=""){
-  const url=SUPABASE_URL+"/rest/v1/"+
-    encodeURIComponent(table)+"?select=*"+extra;
+ const url=SUPABASE_URL+"/rest/v1/"+
+  encodeURIComponent(table)+"?select=*"+extra;
 
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),12000);
+ const controller=new AbortController();
+ const timeout=setTimeout(()=>controller.abort(),12000);
 
-  try{
-    const response=await fetch(url,{
-      headers:{
-        apikey:PUBLIC_KEY,
-        Authorization:"Bearer "+PUBLIC_KEY,
-        Accept:"application/json"
-      },
-      signal:controller.signal,
-      cache:"no-store"
-    });
+ try{
+  const response=await fetch(url,{
+   headers:{
+    apikey:PUBLIC_KEY,
+    Authorization:"Bearer "+PUBLIC_KEY,
+    Accept:"application/json"
+   },
+   signal:controller.signal,
+   cache:"no-store"
+  });
 
-    if(!response.ok){
-      const body=await response.text();
-      throw new Error(
-        table+" : HTTP "+response.status+" "+body.slice(0,150)
-      );
-    }
-    return await response.json();
-  }finally{
-    clearTimeout(timeout);
+  if(!response.ok){
+   const body=await response.text();
+   throw new Error(
+    table+" : HTTP "+response.status+" "+body.slice(0,150)
+   );
   }
+  return await response.json();
+ }finally{
+  clearTimeout(timeout);
+ }
 }
 
 async function loadClub(){
-  const clubs=await publicQuery(
-    "clubs",
-    "&slug=eq."+encodeURIComponent(CLUB_SLUG)+"&limit=1"
-  );
+ const clubs=await publicQuery(
+  "clubs","&slug=eq."+encodeURIComponent(CLUB_SLUG)+"&limit=1"
+ );
 
-  if(!clubs.length){
-    throw new Error(
-      "Club introuvable ou non accessible : "+CLUB_SLUG
-    );
-  }
+ if(!clubs.length)throw new Error(
+  "Club introuvable : "+CLUB_SLUG
+ );
 
-  const club=clubs[0];
-  const id=encodeURIComponent(club.id);
+ const club=clubs[0],id=encodeURIComponent(club.id);
 
-  const requests=[
-    ["config","eah_club_site_config","&club_id=eq."+id],
-    ["pages","eah_club_pages",
-      "&club_id=eq."+id+"&active=eq.true&order=sort_order.asc"],
-    ["badges","eah_club_badges",
-      "&club_id=eq."+id+"&active=eq.true&order=sort_order.asc"],
-    ["products","eah_club_products",
-      "&club_id=eq."+id+"&active=eq.true&order=sort_order.asc"]
-  ];
+ const requests=[
+  ["config","eah_club_site_config","&club_id=eq."+id],
+  ["pages","eah_club_pages","&club_id=eq."+id+
+   "&active=eq.true&order=sort_order.asc"],
+  ["badges","eah_club_badges","&club_id=eq."+id+
+   "&active=eq.true&order=sort_order.asc"],
+  ["products","eah_club_products","&club_id=eq."+id+
+   "&active=eq.true&order=sort_order.asc"]
+ ];
 
-  const results=await Promise.allSettled(
-    requests.map(r=>publicQuery(r[1],r[2]))
-  );
+ const results=await Promise.allSettled(
+  requests.map(r=>publicQuery(r[1],r[2]))
+ );
 
-  const data={};
+ const data={};
+ results.forEach((r,i)=>{
+  const key=requests[i][0];
+  data[key]=r.status==="fulfilled"?r.value:[];
+  if(r.status!=="fulfilled")
+   console.warn("Chargement "+key,r.reason);
+ });
 
-  results.forEach((result,index)=>{
-    const key=requests[index][0];
-    if(result.status==="fulfilled"){
-      data[key]=result.value;
-    }else{
-      console.warn("EAH chargement "+key,result.reason);
-      data[key]=[];
-    }
-  });
+ state.club=club;
+ state.config=data.config[0]||{};
+ state.pages=data.pages;
+ state.badges=data.badges;
+ state.products=data.products;
 
-  state.club=club;
-  state.config=data.config[0]||{};
-  state.pages=data.pages;
-  state.badges=data.badges;
-  state.products=data.products;
-
-  if(!state.pages.length){
-    state.pages=[{
-      slug:"accueil",
-      title:"Accueil",
-      description:club.welcome_text||
-        "Bienvenue sur le site de votre club.",
-      settings:{}
-    }];
-  }
+ if(!state.pages.length){
+  state.pages=[{
+   slug:"accueil",title:"Accueil",
+   description:club.welcome_text||
+    "Bienvenue sur le site de votre club.",
+   settings:{}
+  }];
+ }
 }
 
 /* ==========================================
-   THEMES ET PERSONNALISATION
+   PERSONNALISATION
 ========================================== */
 
 function applyTheme(){
-  const cfg=state.config;
-  const s=object(cfg.settings);
-  const c=state.club||{};
+ const cfg=state.config,s=object(cfg.settings);
+ const c=state.club||{};
 
-  const themes={
-    1:["#1478ff","#071725","#10243a","#e8f2ff","#ffffff","#15324c"],
-    2:["#c7a466","#101010","#171717","#ede5d7","#f1d394","#24211c"],
-    3:["#087e8b","#f3f6f8","#ffffff","#263746","#183044","#ffffff"],
-    4:["#a855f7","#140d1f","#21152f","#f5efff","#ffffff","#302041"],
-    5:["#7bc99c","#0d211e","#102c28","#e6f5e9","#ffffff","#193b34"]
-  };
+ const themes={
+  1:["#1478ff","#071725","#10243a","#e8f2ff","#ffffff","#15324c"],
+  2:["#c7a466","#101010","#171717","#ede5d7","#f1d394","#24211c"],
+  3:["#087e8b","#f3f6f8","#ffffff","#263746","#183044","#ffffff"],
+  4:["#a855f7","#140d1f","#21152f","#f5efff","#ffffff","#302041"],
+  5:["#7bc99c","#0d211e","#102c28","#e6f5e9","#ffffff","#193b34"]
+ };
 
-  const theme=themes[Number(s.STYLE_NUMERO)]||themes[1];
-  const root=document.documentElement;
+ const theme=themes[Number(s.STYLE_NUMERO)]||themes[1];
+ const root=document.documentElement;
 
-  const vars={
-    "--primary":safeColor(
-      s.PRIMARY_COLOR||cfg.primary_color||c.primary_color,theme[0]
-    ),
-    "--secondary":safeColor(
-      s.BACKGROUND_COLOR||cfg.secondary_color,theme[1]
-    ),
-    "--text":safeColor(s.TEXT_COLOR,theme[3]),
-    "--card":safeColor(s.CARD_COLOR,theme[5]),
-    "--radius":numeric(s.CARD_RADIUS,14,0,40)+"px",
-    "--overlay":numeric(s.HERO_OVERLAY,.58,0,1)
-  };
+ const vars={
+  "--primary":safeColor(
+   s.PRIMARY_COLOR||cfg.primary_color||c.primary_color,theme[0]
+  ),
+  "--secondary":safeColor(
+   s.BACKGROUND_COLOR||cfg.secondary_color,theme[1]
+  ),
+  "--text":safeColor(s.TEXT_COLOR,theme[3]),
+  "--card":safeColor(s.CARD_COLOR,theme[5]),
+  "--radius":numeric(s.CARD_RADIUS,14,0,40)+"px",
+  "--overlay":numeric(s.HERO_OVERLAY,.58,0,1)
+ };
 
-  Object.entries(vars).forEach(([key,value])=>{
-    root.style.setProperty(key,value);
-  });
+ Object.entries(vars).forEach(([k,v])=>
+  root.style.setProperty(k,v)
+ );
 
-  const fonts={
-    "Arial":"Arial,sans-serif",
-    "Roboto":"Roboto,Arial,sans-serif",
-    "Verdana":"Verdana,sans-serif",
-    "Georgia":"Georgia,serif",
-    "Tahoma":"Tahoma,sans-serif",
-    "Times New Roman":"Times New Roman,serif"
-  };
+ const fonts={
+  Arial:"Arial,sans-serif",
+  Roboto:"Roboto,Arial,sans-serif",
+  Verdana:"Verdana,sans-serif",
+  Georgia:"Georgia,serif",
+  Tahoma:"Tahoma,sans-serif",
+  "Times New Roman":"Times New Roman,serif"
+ };
 
-  root.style.setProperty(
-    "--font",
-    fonts[s.FONT_FAMILY||s.TEXT_FONT]||
-      "Arial,sans-serif"
-  );
+ root.style.setProperty(
+  "--font",
+  fonts[s.FONT_FAMILY||s.TEXT_FONT]||"Arial,sans-serif"
+ );
 
-  document.body.style.fontSize=
-    numeric(s.TEXT_SIZE,16,10,32)+"px";
+ document.body.style.fontSize=
+  numeric(s.TEXT_SIZE,16,10,32)+"px";
 
-  const header=document.querySelector("header");
-  if(header){
-    header.style.backgroundColor=
-      safeColor(s.HEADER_COLOR,theme[2]);
-  }
+ const header=document.querySelector("header");
+ if(header)header.style.backgroundColor=
+  safeColor(s.HEADER_COLOR,theme[2]);
 
-  const background=safeImage(s.BACKGROUND_IMAGE_URL);
-  document.body.style.backgroundImage=
-    background?`url("${background}")`:"none";
-  document.body.style.backgroundSize="cover";
-  document.body.style.backgroundAttachment="fixed";
+ const background=safeImage(s.BACKGROUND_IMAGE_URL);
+ document.body.style.backgroundImage=
+  background?`url("${background}")`:"none";
+ document.body.style.backgroundSize="cover";
+ document.body.style.backgroundAttachment="fixed";
 
-  let style=$("eah-dynamic-style");
-  if(!style){
-    style=el("style");
-    style.id="eah-dynamic-style";
-    document.head.appendChild(style);
-  }
+ let style=$("eah-dynamic-style");
+ if(!style){
+  style=el("style");
+  style.id="eah-dynamic-style";
+  document.head.appendChild(style);
+ }
 
-  const titleColor=safeColor(s.TITLE_COLOR,theme[4]);
-  const titleSize=numeric(s.TITLE_SIZE,38,18,72);
-  const heroSize=numeric(
-    s.HERO_TITLE_SIZE||s.COVER_TEXT_SIZE,52,24,100
-  );
-  const cardSize=numeric(s.CARD_TITLE_SIZE,23,12,42);
+ const titleColor=safeColor(s.TITLE_COLOR,theme[4]);
+ const titleSize=numeric(s.TITLE_SIZE,38,18,72);
+ const heroSize=numeric(
+  s.HERO_TITLE_SIZE||s.COVER_TEXT_SIZE,52,24,100
+ );
+ const cardSize=numeric(s.CARD_TITLE_SIZE,23,12,42);
 
-  style.textContent=`
-    .page h2{color:${titleColor};font-size:${titleSize}px}
-    .card h3{color:${titleColor};font-size:${cardSize}px}
-    .hero h1{font-size:clamp(30px,5vw,${heroSize}px)}
-  `;
+ style.textContent=`
+ .page h2{color:${titleColor};font-size:${titleSize}px}
+ .card h3{color:${titleColor};font-size:${cardSize}px}
+ .hero h1{font-size:clamp(30px,5vw,${heroSize}px)}
+ `;
 }
 
 function renderHeader(){
-  if(!state.club)return;
+ if(!state.club)return;
 
-  const cfg=state.config;
-  const c=state.club;
-  const s=object(cfg.settings);
+ const cfg=state.config,c=state.club;
+ const s=object(cfg.settings);
 
-  applyTheme();
+ applyTheme();
 
-  const title=cfg.site_title||c.name||"EAH Diving Club";
-  document.title=title;
-  $("club-brand").textContent=title;
-  $("footer-name").textContent=title;
-  $("footer-text").textContent=
-    s.FOOTER_TEXT||"Propulsé par EAH Diving";
+ const title=cfg.site_title||c.name||"EAH Diving Club";
+ document.title=title;
+ $("club-brand").textContent=title;
+ $("footer-name").textContent=title;
+ $("footer-text").textContent=
+  s.FOOTER_TEXT||"Propulsé par EAH Diving";
 
-  const logo=safeImage(cfg.logo_url||c.logo_url);
-  const logoEl=$("club-logo");
-  logoEl.hidden=!logo;
-  if(logo)logoEl.src=logo;
-  logoEl.onerror=()=>{logoEl.hidden=true};
+ const logo=safeImage(cfg.logo_url||c.logo_url);
+ const logoEl=$("club-logo");
+ logoEl.hidden=!logo;
+ if(logo)logoEl.src=logo;
+ logoEl.onerror=()=>logoEl.hidden=true;
 
-  const heroTitle=String(s.HERO_TITLE||"").trim();
-  $("hero-title").textContent=heroTitle;
-  $("hero-title").hidden=!heroTitle;
+ const heroTitle=String(s.HERO_TITLE||"").trim();
+ $("hero-title").textContent=heroTitle;
+ $("hero-title").hidden=!heroTitle;
+ $("hero-tagline").textContent=
+  cfg.tagline||c.welcome_text||"";
 
-  $("hero-tagline").textContent=
-    cfg.tagline||c.welcome_text||"";
+ const page=state.pages.find(
+  p=>String(p.slug).toLowerCase()===state.currentPage
+ );
+ const ps=object(page?.settings);
+ const cover=safeImage(
+  ps.cover_url||ps.cover_image_url||cfg.hero_url||""
+ );
 
-  const page=state.pages.find(
-    p=>String(p.slug).toLowerCase()===state.currentPage
-  );
-  const ps=object(page?.settings);
-
-  const cover=safeImage(
-    ps.cover_url||ps.cover_image_url||cfg.hero_url||""
-  );
-
-  $("hero").style.backgroundImage=
-    cover?`url("${cover}")`:"none";
-  $("hero").style.minHeight=
-    numeric(s.HERO_HEIGHT,360,200,1000)+"px";
+ $("hero").style.backgroundImage=
+  cover?`url("${cover}")`:"none";
+ $("hero").style.minHeight=
+  numeric(s.HERO_HEIGHT,360,200,1000)+"px";
 }
 
 /* ==========================================
-   MODALES ET GALERIES
+   MODALES
 ========================================== */
 
 function openModal(title,builder){
-  document.querySelector(".modal")?.remove();
+ document.querySelector(".modal")?.remove();
 
-  const overlay=el("div","modal");
-  const box=el("div","modal-window");
-  box.setAttribute("role","dialog");
-  box.setAttribute("aria-modal","true");
+ const overlay=el("div","modal");
+ const box=el("div","modal-window");
 
-  const close=button("✕",()=>overlay.remove());
-  close.className="modal-close";
+ box.setAttribute("role","dialog");
+ box.setAttribute("aria-modal","true");
 
-  box.appendChild(close);
-  box.appendChild(el("h2","",title));
-  builder(box);
+ const close=button("✕",()=>overlay.remove());
+ close.className="modal-close";
 
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
+ box.appendChild(close);
+ box.appendChild(el("h2","",title));
+ builder(box);
+ overlay.appendChild(box);
+ document.body.appendChild(overlay);
 
-  overlay.addEventListener("click",event=>{
-    if(event.target===overlay)overlay.remove();
-  });
+ overlay.addEventListener("click",e=>{
+  if(e.target===overlay)overlay.remove();
+ });
 
-  const escapeHandler=event=>{
-    if(event.key==="Escape"){
-      overlay.remove();
-      document.removeEventListener("keydown",escapeHandler);
-    }
-  };
-
-  document.addEventListener("keydown",escapeHandler);
-  close.focus();
+ const esc=e=>{
+  if(e.key==="Escape"){
+   overlay.remove();
+   document.removeEventListener("keydown",esc);
+  }
+ };
+ document.addEventListener("keydown",esc);
+ close.focus();
 }
 
 function gallery(parent,photos,title){
-  const urls=[...new Set(
-    array(photos).map(safeImage).filter(Boolean)
-  )];
+ const urls=[...new Set(
+  array(photos).map(safeImage).filter(Boolean)
+ )];
+ if(!urls.length)return;
 
-  if(!urls.length)return;
+ const main=image(parent,urls[0],title,"modal-media");
+ if(urls.length<2)return;
 
-  const main=image(parent,urls[0],title,"modal-media");
-  if(urls.length<2)return;
-
-  const thumbs=el("div","gallery");
-
-  urls.forEach((url,index)=>{
-    const b=button("Photo "+(index+1),()=>{
-      main.src=url;
-    });
-    b.textContent="";
-    image(b,url,"Photo "+(index+1));
-    thumbs.appendChild(b);
-  });
-
-  parent.appendChild(thumbs);
+ const thumbs=el("div","gallery");
+ urls.forEach((url,index)=>{
+  const b=button("Photo "+(index+1),()=>main.src=url);
+  b.textContent="";
+  image(b,url,"Photo "+(index+1));
+  thumbs.appendChild(b);
+ });
+ parent.appendChild(thumbs);
 }
 
 /* ==========================================
@@ -569,85 +525,73 @@ function gallery(parent,photos,title){
 ========================================== */
 
 function renderDisciplines(page,section){
-  const disciplines=array(
-    object(page.settings).disciplines
+ const disciplines=array(
+  object(page.settings).disciplines
+ );
+
+ if(!disciplines.length){
+  section.appendChild(
+   el("p","empty","Aucune discipline disponible.")
   );
+  return;
+ }
 
-  if(!disciplines.length){
-    section.appendChild(
-      el("p","empty","Aucune discipline disponible.")
+ const grid=el("div","cards");
+
+ disciplines.forEach(d=>{
+  if(d.active===false)return;
+
+  const name=d.nom||d.name||"Discipline";
+  const picture=
+   d.image_url||d.photo_illustration_url||d.photo_url;
+
+  const card=el("article","card");
+
+  const open=()=>openModal(name,box=>{
+   gallery(box,[picture],name);
+   description(box,d.description_longue||d.description);
+
+   const tarifs=array(d.tarifs).length
+    ?d.tarifs
+    :[1,2,3].map(n=>({
+      titre:"Tarif "+n,
+      prix:d["tarif_"+n],
+      description:d["description_tarif_"+n]
+     }));
+
+   tarifs.forEach(t=>{
+    if(!t.prix&&!t.description)return;
+    const line=el("div","detail-line");
+    line.appendChild(el("h3","",t.titre||"Tarif"));
+    if(t.prix)line.appendChild(
+     el("p","price",String(t.prix)+" €")
     );
-    return;
-  }
+    description(line,t.description);
+    box.appendChild(line);
+   });
 
-  const grid=el("div","cards");
+   if(d.tarif||d.prix)box.appendChild(
+    el("p","price","Tarif : "+(d.tarif||d.prix))
+   );
 
-  disciplines.forEach(d=>{
-    if(d.active===false)return;
-
-    const name=d.nom||d.name||"Discipline";
-    const picture=
-      d.image_url||
-      d.photo_illustration_url||
-      d.photo_url;
-
-    const card=el("article","card");
-
-    const open=()=>{
-      openModal(name,box=>{
-        gallery(box,[picture],name);
-        description(
-          box,d.description_longue||d.description
-        );
-
-        const tarifs=array(d.tarifs).length
-          ?d.tarifs
-          :[1,2,3].map(n=>({
-            titre:"Tarif "+n,
-            prix:d["tarif_"+n],
-            description:d["description_tarif_"+n]
-          }));
-
-        tarifs.forEach(t=>{
-          if(!t.prix&&!t.description)return;
-          const line=el("div","detail-line");
-          line.appendChild(
-            el("h3","",t.titre||"Tarif")
-          );
-          if(t.prix){
-            line.appendChild(
-              el("p","price",String(t.prix)+" €")
-            );
-          }
-          description(line,t.description);
-          box.appendChild(line);
-        });
-
-        if(d.tarif||d.prix){
-          box.appendChild(
-            el("p","price","Tarif : "+(d.tarif||d.prix))
-          );
-        }
-
-        video(box,d.video_url);
-      });
-    };
-
-    const img=image(card,picture,name);
-    if(img){
-      img.style.cursor="pointer";
-      img.addEventListener("click",open);
-    }
-
-    card.appendChild(el("h3","",name));
-    if(d.description){
-      card.appendChild(el("p","muted",d.description));
-    }
-    card.appendChild(button("Découvrir",open,true));
-    grid.appendChild(card);
+   video(box,d.video_url);
   });
 
-  section.appendChild(grid);
+  const img=image(card,picture,name);
+  if(img){
+   img.style.cursor="pointer";
+   img.addEventListener("click",open);
+  }
+
+  card.appendChild(el("h3","",name));
+  if(d.description)card.appendChild(
+   el("p","muted",d.description)
+  );
+  card.appendChild(button("Découvrir",open,true));
+  grid.appendChild(card);
+ });
+
+ section.appendChild(grid);
 }
 
 /* ==========================================
@@ -655,72 +599,65 @@ function renderDisciplines(page,section){
 ========================================== */
 
 function renderBadges(page,section){
-  const s=object(page.settings);
-  const details=array(
-    s.blazons_v21||s.blazons_details
+ const s=object(page.settings);
+ const details=array(s.blazons_v21||s.blazons_details);
+ const criteres=array(s.criteres_blazons);
+
+ if(!state.badges.length){
+  section.appendChild(
+   el("p","empty","Aucun blazon disponible.")
   );
-  const criteres=array(s.criteres_blazons);
+  return;
+ }
 
-  if(!state.badges.length){
-    section.appendChild(
-      el("p","empty","Aucun blazon disponible.")
+ const grid=el("div","cards");
+
+ state.badges.forEach(badge=>{
+  const detail=details.find(
+   x=>String(x.id)===String(badge.badge_key)
+  )||{};
+
+  const name=detail.name||badge.name||"Blazon";
+  const picture=detail.image_url||badge.image_url;
+  const card=el("article","card");
+
+  const open=()=>openModal(name,box=>{
+   gallery(box,[picture],name);
+   description(box,detail.description);
+
+   let items=detail.criteres||[];
+   if(typeof items==="string")items=items.split(/\r?\n/);
+
+   if(!array(items).length){
+    items=criteres.filter(
+     x=>String(x.blazon_id)===
+      String(badge.badge_key)&&x.active!==false
     );
-    return;
-  }
+   }
 
-  const grid=el("div","cards");
-
-  state.badges.forEach(badge=>{
-    const detail=details.find(
-      x=>String(x.id)===String(badge.badge_key)
-    )||{};
-
-    const name=detail.name||badge.name||"Blazon";
-    const picture=detail.image_url||badge.image_url;
-    const card=el("article","card");
-
-    const open=()=>{
-      openModal(name,box=>{
-        gallery(box,[picture],name);
-        description(box,detail.description);
-
-        let items=detail.criteres||[];
-        if(typeof items==="string"){
-          items=items.split(/\r?\n/);
-        }
-
-        if(!array(items).length){
-          items=criteres.filter(
-            x=>String(x.blazon_id)===
-              String(badge.badge_key)&&
-              x.active!==false
-          );
-        }
-
-        array(items).forEach(item=>{
-          const text=typeof item==="string"
-            ?item
-            :(item.description||"")+
-              (item.valeur?" : "+item.valeur:"");
-          box.appendChild(el("p","","✓ "+text));
-        });
-      });
-    };
-
-    const img=image(card,picture,name);
-    if(img){
-      img.style.cursor="pointer";
-      img.addEventListener("click",open);
-    }
-
-    card.appendChild(el("h3","",name));
-    card.appendChild(
-      button("Voir les critères",open,true)
-    );
-    grid.appendChild(card);
+   array(items).forEach(item=>{
+    const text=typeof item==="string"
+     ?item
+     :(item.description||"")+
+      (item.valeur?" : "+item.valeur:"");
+    box.appendChild(el("p","","✓ "+text));
+   });
   });
 
-  section.appendChild(grid);
+  const img=image(card,picture,name);
+  if(img){
+   img.style.cursor="pointer";
+   img.addEventListener("click",open);
+  }
+
+  card.appendChild(el("h3","",name));
+  card.appendChild(
+   button("Voir les critères",open,true)
+  );
+  grid.appendChild(card);
+ });
+
+ section.appendChild(grid);
 }
 
 /* ==========================================
@@ -728,79 +665,66 @@ function renderBadges(page,section){
 ========================================== */
 
 function renderActualites(page,section){
-  const s=object(page.settings);
-  const articles=array(
-    s.items_v21||s.actualites||s.articles
+ const s=object(page.settings);
+ const articles=array(
+  s.items_v21||s.actualites||s.articles
+ );
+
+ if(!articles.length){
+  section.appendChild(
+   el("p","empty","Aucune actualité disponible.")
   );
+  return;
+ }
 
-  if(!articles.length){
-    section.appendChild(
-      el("p","empty","Aucune actualité disponible.")
-    );
-    return;
-  }
+ const grid=el("div","cards");
 
-  const grid=el("div","cards");
+ articles.forEach(article=>{
+  if(article.active===false)return;
 
-  articles.forEach(article=>{
-    if(article.active===false)return;
+  const title=
+   article.titre||article.title||
+   article.nom||"Actualité";
 
-    const title=
-      article.titre||
-      article.title||
-      article.nom||
-      "Actualité";
+  const picture=
+   article.image_url||
+   article.photo_illustration_url||
+   article.photo_url;
 
-    const picture=
-      article.image_url||
-      article.photo_illustration_url||
-      article.photo_url;
+  const card=el("article","card");
 
-    const card=el("article","card");
-
-    const open=()=>{
-      openModal(title,box=>{
-        gallery(box,[picture],title);
-
-        if(article.date){
-          box.appendChild(
-            el("p","muted",article.date)
-          );
-        }
-
-        description(
-          box,
-          article.contenu||
-          article.texte||
-          article.description_longue||
-          article.description
-        );
-
-        video(box,article.video_url);
-      });
-    };
-
-    const img=image(card,picture,title);
-    if(img){
-      img.style.cursor="pointer";
-      img.addEventListener("click",open);
-    }
-
-    card.appendChild(el("h3","",title));
-
-    if(article.date){
-      card.appendChild(
-        el("p","muted",article.date)
-      );
-    }
-
-    card.appendChild(
-      button("Lire l'article",open,true)
-    );
-    grid.appendChild(card);
+  const open=()=>openModal(title,box=>{
+   gallery(box,[picture],title);
+   if(article.date)box.appendChild(
+    el("p","muted",article.date)
+   );
+   description(
+    box,
+    article.contenu||
+    article.texte||
+    article.description_longue||
+    article.description
+   );
+   video(box,article.video_url);
   });
 
-  section.appendChild(grid);
+  const img=image(card,picture,title);
+  if(img){
+   img.style.cursor="pointer";
+   img.addEventListener("click",open);
+  }
+
+  card.appendChild(el("h3","",title));
+  if(article.date)card.appendChild(
+   el("p","muted",article.date)
+  );
+  card.appendChild(
+   button("Lire l'article",open,true)
+  );
+  grid.appendChild(card);
+ });
+
+ section.appendChild(grid);
 }
 
 /* ==========================================
@@ -808,392 +732,339 @@ function renderActualites(page,section){
 ========================================== */
 
 function addToCart(product,size){
-  const stock=Number(product.stock);
-  const available=
-    Number.isFinite(stock)&&stock>=0?stock:0;
+ const stock=Number(product.stock);
+ const available=
+  Number.isFinite(stock)&&stock>=0?stock:0;
 
-  const id=product.id||product.name;
+ const id=product.id||product.name;
 
-  const already=state.cart
-    .filter(x=>x.id===id)
-    .reduce((sum,x)=>sum+x.quantity,0);
+ const already=state.cart
+  .filter(x=>x.id===id)
+  .reduce((sum,x)=>sum+x.quantity,0);
 
-  if(already>=available){
-    alert("Stock disponible atteint.");
-    return false;
-  }
+ if(already>=available){
+  alert("Stock disponible atteint.");
+  return false;
+ }
 
-  const existing=state.cart.find(
-    x=>x.id===id&&x.size===size
-  );
+ const existing=state.cart.find(
+  x=>x.id===id&&x.size===size
+ );
 
-  if(existing){
-    existing.quantity++;
-  }else{
-    state.cart.push({
-      id,
-      name:product.name,
-      price:Number(product.price||0),
-      size,
-      quantity:1
-    });
-  }
+ if(existing)existing.quantity++;
+ else state.cart.push({
+  id,name:product.name,
+  price:Number(product.price||0),
+  size,quantity:1
+ });
 
-  return true;
+ return true;
 }
 
 function renderCart(container){
-  container.replaceChildren();
-  container.appendChild(el("h3","","Mon panier"));
+ container.replaceChildren();
+ container.appendChild(el("h3","","Mon panier"));
 
-  if(!state.cart.length){
-    container.appendChild(
-      el("p","muted","Votre panier est vide.")
-    );
-    return;
-  }
-
-  state.cart.forEach((item,index)=>{
-    const line=el("div","cart-line");
-
-    line.appendChild(
-      el("span","",
-        item.name+
-        (item.size?" — "+item.size:"")+
-        " × "+item.quantity+
-        " : "+money(item.price*item.quantity)
-      )
-    );
-
-    line.appendChild(
-      button("Retirer",()=>{
-        state.cart.splice(index,1);
-        renderCart(container);
-      })
-    );
-
-    container.appendChild(line);
-  });
-
-  const total=state.cart.reduce(
-    (sum,x)=>sum+x.price*x.quantity,0
-  );
-
+ if(!state.cart.length){
   container.appendChild(
-    el("h3","","Total indicatif : "+money(total))
+   el("p","muted","Votre panier est vide.")
   );
+  return;
+ }
 
-  container.appendChild(
-    el("p","muted",
-      "La validation des commandes nécessite "+
-      "un contrôle serveur des prix et des stocks."
-    )
-  );
+ state.cart.forEach((item,index)=>{
+  const line=el("div","cart-line");
+  line.appendChild(el("span","",
+   item.name+
+   (item.size?" — "+item.size:"")+
+   " × "+item.quantity+
+   " : "+money(item.price*item.quantity)
+  ));
+  line.appendChild(button("Retirer",()=>{
+   state.cart.splice(index,1);
+   renderCart(container);
+  }));
+  container.appendChild(line);
+ });
+
+ const total=state.cart.reduce(
+  (sum,x)=>sum+x.price*x.quantity,0
+ );
+
+ container.appendChild(
+  el("h3","","Total indicatif : "+money(total))
+ );
+
+ container.appendChild(
+  el("p","muted",
+   "La validation des commandes nécessite "+
+   "un contrôle serveur des prix et des stocks."
+  )
+ );
 }
 
 function renderBoutique(page,section){
-  const s=object(page.settings);
-  const enriched=array(s.products_v27);
-  const products=enriched.length
-    ?enriched:state.products;
+ const s=object(page.settings);
+ const enriched=array(s.products_v27);
+ const products=enriched.length?enriched:state.products;
 
-  const grid=el("div","cards");
-  const cartBox=el("div","panel");
-  cartBox.style.marginTop="25px";
+ const grid=el("div","cards");
+ const cartBox=el("div","panel");
+ cartBox.style.marginTop="25px";
 
-  products.forEach(product=>{
-    if(product.active===false)return;
+ products.forEach(product=>{
+  if(product.active===false)return;
 
-    const name=product.name||"Produit";
-    const photos=array(product.images).length
-      ?product.images:[product.image_url];
+  const name=product.name||"Produit";
+  const photos=array(product.images).length
+   ?product.images:[product.image_url];
 
-    const card=el("article","card");
+  const card=el("article","card");
 
-    const open=()=>{
-      openModal(name,box=>{
-        gallery(box,photos,name);
-        description(box,product.description);
-        box.appendChild(
-          el("p","price",money(product.price))
-        );
-        video(box,product.video_url);
+  const open=()=>openModal(name,box=>{
+   gallery(box,photos,name);
+   description(box,product.description);
+   box.appendChild(
+    el("p","price",money(product.price))
+   );
+   video(box,product.video_url);
 
-        const sizes=array(product.sizes);
-        const select=el("select");
+   const sizes=array(product.sizes);
+   const select=el("select");
 
-        sizes.forEach(size=>{
-          const option=el("option","",size);
-          option.value=String(size);
-          select.appendChild(option);
-        });
+   sizes.forEach(size=>{
+    const option=el("option","",size);
+    option.value=String(size);
+    select.appendChild(option);
+   });
 
-        if(sizes.length){
-          box.appendChild(
-            el("p","","Choisir une taille :")
-          );
-          box.appendChild(select);
-        }
+   if(sizes.length){
+    box.appendChild(
+     el("p","","Choisir une taille :")
+    );
+    box.appendChild(select);
+   }
 
-        box.appendChild(
-          el("p","muted",
-            "Stock : "+(product.stock??0)
-          )
-        );
+   box.appendChild(
+    el("p","muted","Stock : "+(product.stock??0))
+   );
 
-        const add=button(
-          "Ajouter au panier",
-          ()=>{
-            const added=addToCart(
-              product,
-              sizes.length?select.value:""
-            );
-            if(added){
-              renderCart(cartBox);
-              document.querySelector(".modal")?.remove();
-            }
-          },
-          true
-        );
-
-        add.disabled=Number(product.stock)<=0;
-        box.appendChild(add);
-      });
-    };
-
-    const img=image(card,photos[0],name);
-    if(img){
-      img.style.cursor="pointer";
-      img.addEventListener("click",open);
+   const add=button("Ajouter au panier",()=>{
+    const added=addToCart(
+     product,sizes.length?select.value:""
+    );
+    if(added){
+     renderCart(cartBox);
+     document.querySelector(".modal")?.remove();
     }
+   },true);
 
-    card.appendChild(el("h3","",name));
-    card.appendChild(
-      el("p","price",money(product.price))
-    );
-    card.appendChild(
-      button("Voir le produit",open,true)
-    );
-    grid.appendChild(card);
+   add.disabled=Number(product.stock)<=0;
+   box.appendChild(add);
   });
 
-  if(!grid.children.length){
-    section.appendChild(
-      el("p","empty","Aucun article disponible.")
-    );
-  }else{
-    section.appendChild(grid);
+  const img=image(card,photos[0],name);
+  if(img){
+   img.style.cursor="pointer";
+   img.addEventListener("click",open);
   }
 
-  section.appendChild(cartBox);
-  renderCart(cartBox);
+  card.appendChild(el("h3","",name));
+  card.appendChild(
+   el("p","price",money(product.price))
+  );
+  card.appendChild(
+   button("Voir le produit",open,true)
+  );
+  grid.appendChild(card);
+ });
+
+ if(!grid.children.length){
+  section.appendChild(
+   el("p","empty","Aucun article disponible.")
+  );
+ }else section.appendChild(grid);
+
+ section.appendChild(cartBox);
+ renderCart(cartBox);
 }
 
 /* ==========================================
-   AUTHENTIFICATION GENERALE
+   CONNEXION
 ========================================== */
 
 async function refreshMember(){
-  if(!state.sb||!state.club)return;
+ if(!state.sb||!state.club)return;
 
-  const result=await state.sb.auth.getUser();
-  state.user=result.data?.user||null;
-  state.member=null;
+ const result=await state.sb.auth.getUser();
+ state.user=result.data?.user||null;
+ state.member=null;
 
-  if(!state.user)return;
+ if(!state.user)return;
 
-  const response=await state.sb
-    .from("club_members")
-    .select("*")
-    .eq("club_id",state.club.id)
-    .eq("user_id",state.user.id)
-    .eq("active",true)
-    .maybeSingle();
+ const response=await state.sb
+  .from("club_members")
+  .select("*")
+  .eq("club_id",state.club.id)
+  .eq("user_id",state.user.id)
+  .eq("active",true)
+  .maybeSingle();
 
-  if(response.error){
-    console.warn(
-      "Accès club :",response.error.message
-    );
-    return;
-  }
-
-  state.member=response.data;
+ if(response.error){
+  console.warn("Accès club :",response.error.message);
+  return;
+ }
+ state.member=response.data;
 }
 
 function isManager(){
-  return Boolean(
-    state.member&&MANAGER_ROLES.includes(
-      String(state.member.role||"").toLowerCase()
-    )
-  );
+ return Boolean(
+  state.member&&MANAGER_ROLES.includes(
+   String(state.member.role||"").toLowerCase()
+  )
+ );
 }
-
-function field(parent,title,type,required=true){
-  const label=el("label","",title);
-  const input=el("input");
-  input.type=type;
-  input.required=required;
-  label.appendChild(input);
-  parent.appendChild(label);
-  return input;
-}
-
-/* ==========================================
-   CONNEXION EMAIL OU IDENTIFIANT EAH
-========================================== */
 
 async function eahSignIn(identifier,password){
-  const value=String(identifier||"").trim();
+ const value=String(identifier||"").trim();
 
-  if(!value||!password){
-    throw new Error(
-      "Indiquez votre e-mail ou identifiant et votre mot de passe."
-    );
-  }
+ if(!value||!password)throw new Error(
+  "Indiquez votre identifiant et votre mot de passe."
+ );
 
-  if(value.includes("@")){
-    const {data,error}=
-      await state.sb.auth.signInWithPassword({
-        email:value.toLowerCase(),
-        password
-      });
-
-    if(error)throw error;
-    return data;
-  }
-
-  const response=await fetch(
-    SUPABASE_URL+"/functions/v1/eah-login",
-    {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        apikey:PUBLIC_KEY
-      },
-      body:JSON.stringify({
-        identifier:value,
-        password,
-        clubSlug:CLUB_SLUG
-      })
-    }
-  );
-
-  const result=await response.json();
-
-  if(!response.ok||!result.session){
-    throw new Error(
-      result.error||
-      "Connexion par identifiant indisponible. "+
-      "Vérifiez la fonction eah-login dans Supabase."
-    );
-  }
-
-  const {data,error}=await state.sb.auth.setSession({
-    access_token:result.session.access_token,
-    refresh_token:result.session.refresh_token
-  });
-
+ if(value.includes("@")){
+  const {data,error}=
+   await state.sb.auth.signInWithPassword({
+    email:value.toLowerCase(),password
+   });
   if(error)throw error;
   return data;
+ }
+
+ /*
+  Connexion par identifiant :
+  nécessite une fonction serveur eah-login.
+  Aucun mot de passe n'est exposé dans une
+  requête publique de recherche d'utilisateur.
+ */
+
+ const response=await fetch(
+  SUPABASE_URL+"/functions/v1/eah-login",{
+   method:"POST",
+   headers:{
+    "Content-Type":"application/json",
+    apikey:PUBLIC_KEY
+   },
+   body:JSON.stringify({
+    identifier:value,
+    password,
+    clubSlug:CLUB_SLUG
+   })
+  }
+ );
+
+ let result={};
+ try{result=await response.json()}catch(e){}
+
+ if(!response.ok||!result.session){
+  throw new Error(
+   result.error||
+   "Connexion par identifiant indisponible. "+
+   "Utilisez votre e-mail ou configurez "+
+   "la fonction serveur eah-login."
+  );
+ }
+
+ const {data,error}=await state.sb.auth.setSession({
+  access_token:result.session.access_token,
+  refresh_token:result.session.refresh_token
+ });
+
+ if(error)throw error;
+ return data;
 }
 
 function renderClubSpace(section){
-  const box=el("div","panel");
-  section.appendChild(box);
+ const box=el("div","panel");
+ section.appendChild(box);
 
-  if(!state.sb){
-    message(
-      box,"Service de connexion indisponible.",true
-    );
-    return;
-  }
+ if(!state.sb){
+  message(box,"Connexion indisponible.",true);
+  return;
+ }
 
-  if(!state.user){
-    description(
-      box,
-      "Connectez-vous avec votre adresse e-mail "+
-      "ou votre identifiant EAH Diving."
-    );
-
-    const form=el("form","form");
-    const identifier=field(
-      form,"E-mail ou identifiant EAH","text"
-    );
-    const password=field(
-      form,"Mot de passe","password"
-    );
-
-    const submit=el(
-      "button","primary-button","Se connecter"
-    );
-    submit.type="submit";
-
-    const feedback=el("div");
-    form.append(submit,feedback);
-    box.appendChild(form);
-
-    form.addEventListener("submit",async event=>{
-      event.preventDefault();
-      submit.disabled=true;
-
-      try{
-        await eahSignIn(
-          identifier.value,
-          password.value
-        );
-        await refreshMember();
-        renderPages("espace-club");
-      }catch(error){
-        message(feedback,error.message,true);
-      }finally{
-        submit.disabled=false;
-      }
-    });
-
-    return;
-  }
-
-  if(!state.member){
-    message(
-      box,
-      "Votre compte est connecté, mais aucun "+
-      "accès actif à ce club n'a été confirmé.",
-      true
-    );
-
-    box.appendChild(
-      button("Se déconnecter",async()=>{
-        await state.sb.auth.signOut();
-        await refreshMember();
-        renderPages("espace-club");
-      })
-    );
-    return;
-  }
-
-  box.appendChild(
-    el("h3","",
-      "Bienvenue "+
-      (state.member.display_name||
-       state.user.email||"")
-    )
-  );
-
+ if(!state.user){
   description(
-    box,
-    "Club : "+state.club.name+
-    " — Rôle : "+state.member.role
+   box,"Connectez-vous avec votre e-mail "+
+   "ou votre identifiant EAH."
   );
 
-  box.appendChild(
-    button("Se déconnecter",async()=>{
-      await state.sb.auth.signOut();
-      await refreshMember();
-      renderPages("espace-club");
-    })
+  const form=el("form","form");
+  const identifier=field(
+   form,"E-mail ou identifiant EAH","text"
+  );
+  const password=field(
+   form,"Mot de passe","password"
   );
 
-  if(isManager())renderManager(section);
+  const submit=el(
+   "button","primary-button","Se connecter"
+  );
+  submit.type="submit";
+
+  const feedback=el("div");
+  form.append(submit,feedback);
+  box.appendChild(form);
+
+  form.addEventListener("submit",async event=>{
+   event.preventDefault();
+   submit.disabled=true;
+   try{
+    await eahSignIn(identifier.value,password.value);
+    await refreshMember();
+    renderPages("espace-club");
+   }catch(error){
+    message(feedback,error.message,true);
+   }finally{
+    submit.disabled=false;
+   }
+  });
+  return;
+ }
+
+ if(!state.member){
+  message(
+   box,
+   "Compte connecté, mais aucun accès actif "+
+   "à ce club n'a été confirmé.",
+   true
+  );
+
+  box.appendChild(button("Se déconnecter",async()=>{
+   await state.sb.auth.signOut();
+   await refreshMember();
+   renderPages("espace-club");
+  }));
+  return;
+ }
+
+ box.appendChild(el("h3","",
+  "Bienvenue "+
+  (state.member.display_name||state.user.email||"")
+ ));
+
+ description(
+  box,"Club : "+state.club.name+
+  " — Rôle : "+state.member.role
+ );
+
+ box.appendChild(button("Se déconnecter",async()=>{
+  await state.sb.auth.signOut();
+  await refreshMember();
+  renderPages("espace-club");
+ }));
+
+ if(isManager())renderManager(section);
 }
 
 /* ==========================================
@@ -1201,180 +1072,158 @@ function renderClubSpace(section){
 ========================================== */
 
 function renderManager(section){
-  const box=el("div","panel");
-  box.style.marginTop="20px";
+ const box=el("div","panel");
+ box.style.marginTop="20px";
 
-  box.appendChild(
-    el("h3","","Personnaliser mon club")
-  );
+ box.appendChild(
+  el("h3","","Personnaliser mon club")
+ );
 
-  description(
-    box,
-    "Importez votre logo JPG, PNG ou WebP "+
-    "(maximum 3 Mo)."
-  );
+ description(
+  box,"Importez votre logo JPG, PNG ou WebP "+
+  "(maximum 3 Mo)."
+ );
 
-  const input=el("input");
-  input.type="file";
-  input.accept="image/png,image/jpeg,image/webp";
+ const input=el("input");
+ input.type="file";
+ input.accept="image/png,image/jpeg,image/webp";
 
-  const preview=el("img");
-  preview.style.maxWidth="180px";
-  preview.style.maxHeight="180px";
-  preview.hidden=true;
+ const preview=el("img");
+ preview.style.maxWidth="180px";
+ preview.style.maxHeight="180px";
+ preview.hidden=true;
 
-  const feedback=el("div");
+ const feedback=el("div");
 
-  input.addEventListener("change",()=>{
-    const file=input.files?.[0];
-    if(!file)return;
-    preview.src=URL.createObjectURL(file);
-    preview.hidden=false;
-  });
+ input.addEventListener("change",()=>{
+  const file=input.files?.[0];
+  if(!file)return;
+  preview.src=URL.createObjectURL(file);
+  preview.hidden=false;
+ });
 
-  const save=button(
-    "Enregistrer mon logo",
-    async()=>{
-      const file=input.files?.[0];
+ const save=button("Enregistrer mon logo",async()=>{
+  const file=input.files?.[0];
 
-      if(!file){
-        message(feedback,"Sélectionnez une image.",true);
-        return;
-      }
+  if(!file){
+   message(feedback,"Sélectionnez une image.",true);
+   return;
+  }
 
-      if(![
-        "image/png","image/jpeg","image/webp"
-      ].includes(file.type)){
-        message(feedback,"Format incorrect.",true);
-        return;
-      }
+  if(!["image/png","image/jpeg","image/webp"]
+   .includes(file.type)){
+   message(feedback,"Format incorrect.",true);
+   return;
+  }
 
-      if(file.size>3*1024*1024){
-        message(
-          feedback,"Fichier supérieur à 3 Mo.",true
-        );
-        return;
-      }
+  if(file.size>3*1024*1024){
+   message(feedback,"Fichier supérieur à 3 Mo.",true);
+   return;
+  }
 
-      save.disabled=true;
+  save.disabled=true;
 
-      try{
-        await refreshMember();
+  try{
+   await refreshMember();
+   if(!isManager())throw new Error(
+    "Accès non autorisé."
+   );
 
-        if(!isManager()){
-          throw new Error("Accès non autorisé.");
-        }
+   const ext={
+    "image/png":"png",
+    "image/jpeg":"jpg",
+    "image/webp":"webp"
+   }[file.type];
 
-        const ext={
-          "image/png":"png",
-          "image/jpeg":"jpg",
-          "image/webp":"webp"
-        }[file.type];
+   const unique=crypto.randomUUID();
+   const path=state.club.id+"/logo-"+unique+"."+ext;
 
-        const unique=crypto.randomUUID();
-        const path=
-          state.club.id+"/logo-"+unique+"."+ext;
-
-        const upload=await state.sb.storage
-          .from("eah-club-logos")
-          .upload(path,file,{
-            contentType:file.type,
-            upsert:false
-          });
-
-        if(upload.error)throw upload.error;
-
-        const publicUrl=state.sb.storage
-          .from("eah-club-logos")
-          .getPublicUrl(path).data.publicUrl;
-
-        const update=await state.sb
-          .from("eah_club_site_config")
-          .update({logo_url:publicUrl})
-          .eq("club_id",state.club.id)
-          .select("club_id,logo_url");
-
-        if(update.error)throw update.error;
-
-        if(!update.data?.length){
-          throw new Error(
-            "Mise à jour refusée. Vérifiez les autorisations RLS."
-          );
-        }
-
-        state.config.logo_url=publicUrl;
-        renderHeader();
-        message(
-          feedback,"Logo enregistré avec succès."
-        );
-
-      }catch(error){
-        message(feedback,error.message,true);
-      }finally{
-        save.disabled=false;
-      }
-    },
-    true
-  );
-
-  box.append(input,preview,save,feedback);
-  section.appendChild(box);
-
-  const admin=el("div","panel");
-  admin.style.marginTop="20px";
-
-  admin.appendChild(
-    el("h3","","Administration du club")
-  );
-
-  description(
-    admin,
-    "Articles publics : "+state.products.length
-  );
-
-  const orders=el("div");
-  orders.appendChild(
-    el("h4","","Dernières commandes")
-  );
-
-  admin.appendChild(orders);
-  section.appendChild(admin);
-
-  state.sb
-    .from("eah_club_orders")
-    .select(
-      "id,customer_name,total,status,payment_status,created_at"
-    )
-    .eq("club_id",state.club.id)
-    .order("created_at",{ascending:false})
-    .limit(20)
-    .then(result=>{
-      if(result.error){
-        orders.appendChild(
-          el("p","status error",result.error.message)
-        );
-        return;
-      }
-
-      if(!result.data?.length){
-        orders.appendChild(
-          el("p","muted","Aucune commande.")
-        );
-        return;
-      }
-
-      result.data.forEach(order=>{
-        orders.appendChild(
-          el("p","",
-            new Date(order.created_at)
-              .toLocaleDateString("fr-FR")+
-            " — "+order.customer_name+
-            " — "+money(order.total)+
-            " — "+order.status
-          )
-        );
-      });
+   const upload=await state.sb.storage
+    .from("eah-club-logos")
+    .upload(path,file,{
+     contentType:file.type,upsert:false
     });
+
+   if(upload.error)throw upload.error;
+
+   const publicUrl=state.sb.storage
+    .from("eah-club-logos")
+    .getPublicUrl(path).data.publicUrl;
+
+   const update=await state.sb
+    .from("eah_club_site_config")
+    .update({logo_url:publicUrl})
+    .eq("club_id",state.club.id)
+    .select("club_id,logo_url");
+
+   if(update.error)throw update.error;
+   if(!update.data?.length)throw new Error(
+    "Mise à jour refusée. Vérifiez RLS."
+   );
+
+   state.config.logo_url=publicUrl;
+   renderHeader();
+   message(feedback,"Logo enregistré.");
+
+  }catch(error){
+   message(feedback,error.message,true);
+  }finally{
+   save.disabled=false;
+  }
+ },true);
+
+ box.append(input,preview,save,feedback);
+ section.appendChild(box);
+
+ const admin=el("div","panel");
+ admin.style.marginTop="20px";
+ admin.appendChild(
+  el("h3","","Administration du club")
+ );
+
+ description(
+  admin,"Articles publics : "+state.products.length
+ );
+
+ const orders=el("div");
+ orders.appendChild(
+  el("h4","","Dernières commandes")
+ );
+ admin.appendChild(orders);
+ section.appendChild(admin);
+
+ state.sb.from("eah_club_orders")
+  .select(
+   "id,customer_name,total,status,payment_status,created_at"
+  )
+  .eq("club_id",state.club.id)
+  .order("created_at",{ascending:false})
+  .limit(20)
+  .then(result=>{
+   if(result.error){
+    orders.appendChild(
+     el("p","status error",result.error.message)
+    );
+    return;
+   }
+
+   if(!result.data?.length){
+    orders.appendChild(
+     el("p","muted","Aucune commande.")
+    );
+    return;
+   }
+
+   result.data.forEach(order=>{
+    orders.appendChild(el("p","",
+     new Date(order.created_at)
+      .toLocaleDateString("fr-FR")+
+     " — "+order.customer_name+
+     " — "+money(order.total)+
+     " — "+order.status
+    ));
+   });
+  });
 }
 
 /* ==========================================
@@ -1382,1028 +1231,1073 @@ function renderManager(section){
 ========================================== */
 
 function renderStandard(page,section){
-  const s=object(page.settings);
+ const s=object(page.settings);
 
-  description(section,page.description);
+ description(section,page.description);
 
-  const illustration=safeImage(
-    s.illustration_url||
-    s.photo_illustration_url||
-    ""
+ const illustration=safeImage(
+  s.illustration_url||
+  s.photo_illustration_url||""
+ );
+
+ if(illustration){
+  image(section,illustration,page.title,"page-image");
+ }
+
+ video(section,s.video_v21||page.video_url);
+
+ const slug=String(page.slug||"").toLowerCase();
+
+ if(slug==="disciplines")
+  renderDisciplines(page,section);
+
+ if(slug==="blazons")
+  renderBadges(page,section);
+
+ if(slug==="actualites")
+  renderActualites(page,section);
+
+ if(!page.description&&!illustration&&
+  !["disciplines","blazons","actualites"].includes(slug)){
+  section.appendChild(
+   el("p","empty","Contenu bientôt disponible.")
   );
-
-  if(illustration){
-    image(
-      section,illustration,page.title,"page-image"
-    );
-  }
-
-  video(
-    section,s.video_v21||page.video_url
-  );
-
-  const slug=String(page.slug||"").toLowerCase();
-
-  if(slug==="disciplines"){
-    renderDisciplines(page,section);
-  }
-
-  if(slug==="blazons"){
-    renderBadges(page,section);
-  }
-
-  if(slug==="actualites"){
-    renderActualites(page,section);
-  }
-
-  if(
-    !page.description&&
-    !illustration&&
-    !["disciplines","blazons","actualites"].includes(slug)
-  ){
-    section.appendChild(
-      el("p","empty","Contenu bientôt disponible.")
-    );
-  }
+ }
 }
 
 /* ==========================================
-   MENU ET NAVIGATION
+   NAVIGATION
 ========================================== */
 
 function showPage(slug){
-  const target=String(slug||"").toLowerCase();
+ const target=String(slug||"").toLowerCase();
+ const exists=state.pages.some(
+  p=>String(p.slug).toLowerCase()===target
+ );
+ if(!exists)return;
 
-  const exists=state.pages.some(
-    p=>String(p.slug).toLowerCase()===target
+ state.currentPage=target;
+
+ document.querySelectorAll(".page").forEach(s=>{
+  s.classList.toggle(
+   "active",s.dataset.slug===target
   );
+ });
 
-  if(!exists)return;
+ document.querySelectorAll("#menu button").forEach(b=>{
+  b.classList.toggle(
+   "active",b.dataset.slug===target
+  );
+ });
 
-  state.currentPage=target;
+ renderHeader();
 
-  document.querySelectorAll(".page")
-    .forEach(section=>{
-      section.classList.toggle(
-        "active",section.dataset.slug===target
-      );
-    });
+ const hash="#"+encodeURIComponent(target);
 
-  document.querySelectorAll("#menu button")
-    .forEach(b=>{
-      b.classList.toggle(
-        "active",b.dataset.slug===target
-      );
-    });
+ if(location.hash!==hash){
+  history.replaceState(
+   null,"",
+   location.pathname+location.search+hash
+  );
+ }
 
-  renderHeader();
-
-  const hash="#"+encodeURIComponent(target);
-
-  if(location.hash!==hash){
-    history.replaceState(
-      null,"",
-      location.pathname+location.search+hash
-    );
-  }
-
-  window.scrollTo({
-    top:0,behavior:"smooth"
-  });
+ window.scrollTo({top:0,behavior:"smooth"});
 }
 
 function renderPages(preferred){
-  const menu=$("menu");
-  const pages=$("pages");
+ const menu=$("menu"),pages=$("pages");
+ menu.replaceChildren();
+ pages.replaceChildren();
 
-  menu.replaceChildren();
-  pages.replaceChildren();
+ state.pages.forEach(page=>{
+  const slug=String(page.slug||"").toLowerCase();
 
-  state.pages.forEach(page=>{
-    const slug=String(page.slug||"").toLowerCase();
+  const nav=button(
+   page.title||slug,()=>showPage(slug)
+  );
+  nav.dataset.slug=slug;
+  menu.appendChild(nav);
 
-    const nav=button(
-      page.title||slug,
-      ()=>showPage(slug)
-    );
-
-    nav.dataset.slug=slug;
-    menu.appendChild(nav);
-
-    const section=el("section","page");
-    section.dataset.slug=slug;
-
-    section.appendChild(
-      el("h2","",page.title||slug)
-    );
-
-    try{
-      if(slug==="boutique"){
-        renderBoutique(page,section);
-      }else if(slug==="espace-club"){
-        renderClubSpace(section);
-      }else{
-        renderStandard(page,section);
-      }
-    }catch(error){
-      console.error("Page :",slug,error);
-      section.appendChild(
-        el("p","status error",
-          "Erreur dans cette rubrique : "+error.message
-        )
-      );
-    }
-
-    pages.appendChild(section);
-  });
-
-  let requested=
-    preferred||
-    state.currentPage||
-    decodeURIComponent(location.hash.slice(1));
-
-  const exists=state.pages.some(
-    p=>String(p.slug).toLowerCase()===requested
+  const section=el("section","page");
+  section.dataset.slug=slug;
+  section.appendChild(
+   el("h2","",page.title||slug)
   );
 
-  if(!exists){
-    requested=String(
-      state.pages[0].slug
-    ).toLowerCase();
+  try{
+   if(slug==="boutique")
+    renderBoutique(page,section);
+   else if(slug==="espace-club")
+    renderClubSpace(section);
+   else
+    renderStandard(page,section);
+  }catch(error){
+   console.error("Page :",slug,error);
+   section.appendChild(
+    el("p","status error",
+     "Erreur : "+error.message)
+   );
   }
 
-  showPage(requested);
+  pages.appendChild(section);
+ });
+
+ let requested=
+  preferred||
+  state.currentPage||
+  decodeURIComponent(location.hash.slice(1));
+
+ const exists=state.pages.some(
+  p=>String(p.slug).toLowerCase()===requested
+ );
+
+ if(!exists)
+  requested=String(state.pages[0].slug).toLowerCase();
+
+ showPage(requested);
 }
 
 /* ==========================================
-   NFC - MODE AFFICHAGE
+   NFC - CONFIGURATION ET OUTILS
 ========================================== */
 
 function nfcMode(){
-  $("loading").hidden=true;
-  $("app").hidden=false;
+ $("loading").hidden=true;
+ $("app").hidden=false;
+ $("app").querySelector("header").hidden=true;
+ $("hero").hidden=true;
+ $("app").querySelector("footer").hidden=true;
 
-  $("app").querySelector("header").hidden=true;
-  $("hero").hidden=true;
-  $("app").querySelector("footer").hidden=true;
+ const pages=$("pages");
+ pages.replaceChildren();
+ pages.style.maxWidth="720px";
+ pages.style.margin="auto";
+ return pages;
+}
 
-  const pages=$("pages");
-  pages.replaceChildren();
-  pages.style.maxWidth="720px";
-  pages.style.margin="auto";
-
-  return pages;
+function nfcRedirect(){
+ const url=new URL(location.href);
+ url.hash="";
+ [
+  "code","error","error_description",
+  "access_token","refresh_token",
+  "type","token_hash"
+ ].forEach(k=>url.searchParams.delete(k));
+ return url.toString();
 }
 
 function nfcPhotoUrl(value){
-  const raw=String(value||"").trim();
-  if(!raw)return "";
+ const raw=String(value||"").trim();
+ if(!raw)return "";
 
-  const patterns=[
-    /drive\.google\.com\/file\/d\/([\w-]+)/i,
-    /drive\.google\.com\/open\?[^#]*[?&]id=([\w-]+)/i,
-    /drive\.google\.com\/uc\?[^#]*[?&]id=([\w-]+)/i,
-    /drive\.google\.com\/thumbnail\?[^#]*[?&]id=([\w-]+)/i
-  ];
+ const patterns=[
+  /drive\.google\.com\/file\/d\/([\w-]+)/i,
+  /drive\.google\.com\/open\?[^#]*[?&]id=([\w-]+)/i,
+  /drive\.google\.com\/uc\?[^#]*[?&]id=([\w-]+)/i,
+  /drive\.google\.com\/thumbnail\?[^#]*[?&]id=([\w-]+)/i
+ ];
 
-  let id="";
+ for(const pattern of patterns){
+  const match=raw.match(pattern);
+  if(match)return "https://drive.google.com/thumbnail?id="+
+   encodeURIComponent(match[1])+"&sz=w1000";
+ }
 
-  for(const pattern of patterns){
-    const match=raw.match(pattern);
-    if(match){
-      id=match[1];
-      break;
-    }
-  }
+ if(/^[\w-]{20,}$/.test(raw))
+  return "https://drive.google.com/thumbnail?id="+
+   encodeURIComponent(raw)+"&sz=w1000";
 
-  if(!id&&/^[\w-]{20,}$/.test(raw)){
-    id=raw;
-  }
-
-  if(id){
-    return "https://drive.google.com/thumbnail?id="+
-      encodeURIComponent(id)+"&sz=w1000";
-  }
-
-  try{
-    const url=new URL(raw);
-    if(url.protocol!=="https:")return "";
-    return url.href;
-  }catch(_){
-    return "";
-  }
+ try{
+  const url=new URL(raw);
+  return url.protocol==="https:"?url.href:"";
+ }catch(e){
+  return "";
+ }
 }
 
 /* ==========================================
-   NFC - SUPABASE RPC
+   NFC - FONCTIONS SQL EXISTANTES
 ========================================== */
 
 async function nfcLookup(){
-  const {data,error}=await state.sb.rpc(
-    "eah_nfc_lookup",{
-      p_club_slug:CLUB_SLUG,
-      p_token:NFC_TOKEN
-    }
-  );
-
-  if(error)throw error;
-  return Array.isArray(data)?data[0]:data;
-}
-
-async function nfcOptions(){
-  const {data,error}=await state.sb.rpc(
-    "eah_nfc_options_v7",{
-      p_club_slug:CLUB_SLUG
-    }
-  );
-
-  if(error)throw error;
-
-  return {
-    groups:Array.isArray(data?.groups)?data.groups:[],
-    coaches:Array.isArray(data?.coaches)?data.coaches:[]
-  };
+ const {data,error}=await state.sb.rpc(
+  "eah_nfc_lookup",{
+   p_club_slug:CLUB_SLUG,
+   p_token:NFC_TOKEN
+  }
+ );
+ if(error)throw error;
+ return Array.isArray(data)?data[0]:data;
 }
 
 async function nfcProfile(){
-  const {data,error}=await state.sb.rpc(
-    "eah_nfc_profile_v7",{
-      p_club_slug:CLUB_SLUG,
-      p_token:NFC_TOKEN
-    }
-  );
+ const {data,error}=await state.sb.rpc(
+  "eah_nfc_profile_v7",{
+   p_club_slug:CLUB_SLUG,
+   p_token:NFC_TOKEN
+  }
+ );
+ if(error)throw error;
+ return Array.isArray(data)?data[0]:data;
+}
 
-  if(error)throw error;
-  return Array.isArray(data)?data[0]:data;
+async function nfcOptions(){
+ const {data,error}=await state.sb.rpc(
+  "eah_nfc_options_v7",{
+   p_club_slug:CLUB_SLUG
+  }
+ );
+ if(error)throw error;
+ return {
+  groups:array(data?.groups),
+  coaches:array(data?.coaches)
+ };
 }
 
 async function nfcActivate(first,last,id){
-  const {data,error}=await state.sb.rpc(
-    "eah_nfc_activate",{
-      p_club_slug:CLUB_SLUG,
-      p_token:NFC_TOKEN,
-      p_first_name:first,
-      p_last_name:last,
-      p_eah_id:id||null
-    }
-  );
-
-  if(error)throw error;
-  return data;
+ const {data,error}=await state.sb.rpc(
+  "eah_nfc_activate",{
+   p_club_slug:CLUB_SLUG,
+   p_token:NFC_TOKEN,
+   p_first_name:first,
+   p_last_name:last,
+   p_eah_id:id||null
+  }
+ );
+ if(error)throw error;
+ return data;
 }
 
 async function nfcUploadPhoto(file){
-  if(!file)return null;
+ if(!file)return null;
 
-  const types={
-    "image/jpeg":"jpg",
-    "image/png":"png",
-    "image/webp":"webp"
-  };
+ const types={
+  "image/jpeg":"jpg",
+  "image/png":"png",
+  "image/webp":"webp"
+ };
 
-  if(!types[file.type]){
-    throw new Error("Utilisez JPG, PNG ou WebP.");
-  }
+ if(!types[file.type])
+  throw new Error("Utilisez JPG, PNG ou WebP.");
 
-  if(file.size>3*1024*1024){
-    throw new Error("Photo supérieure à 3 Mo.");
-  }
+ if(file.size>3*1024*1024)
+  throw new Error("Photo supérieure à 3 Mo.");
 
-  const {data:auth,error:authError}=
-    await state.sb.auth.getUser();
+ const {data:auth,error:authError}=
+  await state.sb.auth.getUser();
 
-  if(authError||!auth?.user){
-    throw new Error(
-      "Connexion nécessaire pour envoyer la photo."
-    );
-  }
+ if(authError||!auth?.user)
+  throw new Error("Connexion nécessaire.");
 
-  const unique=crypto.randomUUID();
-  const path=
-    auth.user.id+"/"+unique+"."+types[file.type];
+ const path=auth.user.id+"/"+crypto.randomUUID()+
+  "."+types[file.type];
 
-  const {error}=await state.sb.storage
-    .from("eah-nfc-profiles")
-    .upload(path,file,{
-      contentType:file.type,
-      upsert:false
-    });
+ const {error}=await state.sb.storage
+  .from("eah-nfc-profiles")
+  .upload(path,file,{
+   contentType:file.type,upsert:false
+  });
 
-  if(error)throw error;
+ if(error)throw error;
 
-  return state.sb.storage
-    .from("eah-nfc-profiles")
-    .getPublicUrl(path).data.publicUrl;
+ return state.sb.storage
+  .from("eah-nfc-profiles")
+  .getPublicUrl(path).data.publicUrl;
 }
 
-async function nfcSaveDetails(groupId,coachId,file,driveUrl){
-  let photoUrl=null;
+async function nfcSaveDetails(
+ groupId,coachId,file,driveUrl
+){
+ let photoUrl=null;
 
-  if(file){
-    photoUrl=await nfcUploadPhoto(file);
-  }else if(driveUrl){
-    photoUrl=nfcPhotoUrl(driveUrl);
-    if(!photoUrl){
-      throw new Error("Lien de photo invalide.");
-    }
+ if(file){
+  photoUrl=await nfcUploadPhoto(file);
+ }else if(driveUrl){
+  photoUrl=nfcPhotoUrl(driveUrl);
+  if(!photoUrl)
+   throw new Error("Lien photo invalide.");
+ }
+
+ const {error}=await state.sb.rpc(
+  "eah_nfc_details_v7",{
+   p_club_slug:CLUB_SLUG,
+   p_token:NFC_TOKEN,
+   p_group_id:groupId||null,
+   p_coach_id:coachId||null,
+   p_photo_url:photoUrl
   }
+ );
 
-  const {error}=await state.sb.rpc(
-    "eah_nfc_details_v7",{
-      p_club_slug:CLUB_SLUG,
-      p_token:NFC_TOKEN,
-      p_group_id:groupId||null,
-      p_coach_id:coachId||null,
-      p_photo_url:photoUrl
-    }
-  );
-
-  if(error)throw error;
+ if(error)throw error;
 }
 
 function nfcSelect(parent,title,items){
-  const label=el("label","",title);
-  const select=el("select");
+ const label=el("label","",title);
+ const select=el("select");
+ const empty=el("option","","Sélectionner...");
+ empty.value="";
+ select.appendChild(empty);
 
-  const empty=el("option","","Sélectionner...");
-  empty.value="";
-  select.appendChild(empty);
+ items.forEach(item=>{
+  const option=el(
+   "option","",item.name||"Sans nom"
+  );
+  option.value=item.id;
+  select.appendChild(option);
+ });
 
-  items.forEach(item=>{
-    const option=el(
-      "option","",item.name||"Sans nom"
-    );
-    option.value=item.id;
-    select.appendChild(option);
-  });
-
-  label.appendChild(select);
-  parent.appendChild(label);
-  return select;
+ label.appendChild(select);
+ parent.appendChild(label);
+ return select;
 }
 
 /* ==========================================
-   NFC - DONNEES TEMPORAIRES
-   Aucun mot de passe stocke localement
+   NFC - SAUVEGARDE TEMPORAIRE
 ========================================== */
 
 function nfcPendingKey(){
-  return "eah_nfc_pending_"+
-    CLUB_SLUG+"_"+NFC_TOKEN;
+ return "eah_nfc_pending_"+CLUB_SLUG+"_"+NFC_TOKEN;
 }
 
 function nfcSavePending(data){
-  try{
-    sessionStorage.setItem(
-      nfcPendingKey(),
-      JSON.stringify(data)
-    );
-  }catch(error){
-    console.warn("Sauvegarde NFC :",error);
-  }
+ /*
+  Aucune sauvegarde du mot de passe.
+  localStorage conserve uniquement les
+  informations du formulaire.
+ */
+ const safe={
+  first:data.first||"",
+  last:data.last||"",
+  id:data.id||"",
+  email:data.email||"",
+  groupId:data.groupId||"",
+  coachId:data.coachId||"",
+  driveUrl:data.driveUrl||""
+ };
+
+ localStorage.setItem(
+  nfcPendingKey(),JSON.stringify(safe)
+ );
 }
 
 function nfcReadPending(){
-  try{
-    const raw=sessionStorage.getItem(nfcPendingKey());
-    return raw?JSON.parse(raw):null;
-  }catch(error){
-    console.warn("Lecture NFC :",error);
-    return null;
-  }
+ try{
+  const raw=localStorage.getItem(nfcPendingKey())||
+   sessionStorage.getItem(nfcPendingKey());
+  return raw?JSON.parse(raw):null;
+ }catch(e){
+  return null;
+ }
 }
 
 function nfcClearPending(){
-  try{
-    sessionStorage.removeItem(nfcPendingKey());
-    localStorage.removeItem(nfcPendingKey());
-  }catch(error){}
+ localStorage.removeItem(nfcPendingKey());
+ sessionStorage.removeItem(nfcPendingKey());
 }
 
 /* ==========================================
-   NFC - ACTIVATION DU PROFIL
+   NFC - INFORMATIONS DEPUIS SUPABASE AUTH
 ========================================== */
 
-async function nfcFinishActivation(data,file){
-  const {data:auth,error:authError}=
-    await state.sb.auth.getUser();
+function nfcDataFromUser(user){
+ const m=object(user?.user_metadata);
 
-  if(authError||!auth?.user){
-    throw new Error(
-      "Le compte doit être connecté avant l'activation."
-    );
+ if(
+  m.nfc_club_slug!==CLUB_SLUG||
+  m.nfc_token!==NFC_TOKEN
+ ){
+  return null;
+ }
+
+ return {
+  first:String(m.first_name||"").trim(),
+  last:String(m.last_name||"").trim(),
+  id:String(m.eah_id_requested||"").trim(),
+  email:String(user.email||"").toLowerCase(),
+  groupId:m.nfc_group_id||null,
+  coachId:m.nfc_coach_id||null,
+  driveUrl:m.nfc_drive_url||""
+ };
+}
+
+function nfcGetActivationData(user){
+ /*
+  Les métadonnées du compte sont prioritaires.
+  Elles survivent au changement d'onglet
+  et au clic depuis une application e-mail.
+ */
+ const metadata=nfcDataFromUser(user);
+ if(metadata)return metadata;
+
+ const pending=nfcReadPending();
+ if(!pending)return null;
+
+ if(
+  String(pending.email||"").toLowerCase()!==
+  String(user.email||"").toLowerCase()
+ ){
+  return null;
+ }
+
+ return pending;
+}
+
+/* ==========================================
+   NFC - ACTIVATION APRES CONFIRMATION
+========================================== */
+
+let nfcActivationBusy=false;
+
+async function nfcFinishActivation(data,file=null){
+ if(nfcActivationBusy)return false;
+
+ nfcActivationBusy=true;
+
+ try{
+  const {data:auth,error:authError}=
+   await state.sb.auth.getUser();
+
+  if(authError||!auth?.user)
+   throw new Error("Compte non connecté.");
+
+  const user=auth.user;
+
+  if(!user.email_confirmed_at){
+   throw new Error(
+    "Confirmez d'abord votre adresse e-mail."
+   );
   }
 
   if(
-    auth.user.email?.toLowerCase()!==
-    data.email.toLowerCase()
+   String(user.email).toLowerCase()!==
+   String(data.email).toLowerCase()
   ){
-    throw new Error(
-      "Le compte connecté ne correspond pas à "+
-      "l'adresse e-mail du formulaire."
-    );
+   throw new Error(
+    "L'adresse e-mail ne correspond pas au compte connecté."
+   );
+  }
+
+  if(!data.first||!data.last)
+   throw new Error("Nom et prénom manquants.");
+
+  const before=await nfcProfile();
+
+  if(String(before?.status||"").toUpperCase()==="ACTIVE"){
+   nfcClearPending();
+   await renderNfc();
+   return true;
   }
 
   const eahId=await nfcActivate(
-    data.first,
-    data.last,
-    data.id
+   data.first,
+   data.last,
+   data.id
   );
 
   const profile=await nfcProfile();
 
-  if(
-    String(profile?.status||"").toUpperCase()!=="ACTIVE"
-  ){
-    throw new Error(
-      "L'attribution NFC n'a pas été confirmée."
-    );
+  if(String(profile?.status||"").toUpperCase()!=="ACTIVE"){
+   throw new Error(
+    "La carte NFC n'a pas été activée."
+   );
   }
 
-  console.info("Profil EAH activé :",eahId);
+  if(
+   data.id&&
+   String(profile.eah_id||"").toLowerCase()!==
+   data.id.toLowerCase()
+  ){
+   throw new Error(
+    "L'identifiant personnalisé n'a pas été enregistré."
+   );
+  }
 
   let detailsError=null;
 
   try{
-    await nfcSaveDetails(
-      data.groupId,
-      data.coachId,
-      file,
-      data.driveUrl
-    );
+   await nfcSaveDetails(
+    data.groupId,
+    data.coachId,
+    file,
+    data.driveUrl
+   );
   }catch(error){
-    detailsError=error;
-    console.warn(
-      "Informations complémentaires :",error
-    );
+   detailsError=error;
+   console.warn("Détails NFC :",error);
   }
 
   nfcClearPending();
+
+  console.info("EAH ID activé :",eahId);
+
   await renderNfc();
 
   if(detailsError){
-    const panel=document.querySelector(
-      "#pages .panel"
-    );
-    if(panel){
-      panel.appendChild(
-        el("p","status error",
-          "Profil activé, mais certaines informations "+
-          "complémentaires n'ont pas été enregistrées : "+
-          detailsError.message
-        )
-      );
-    }
+   const panel=document.querySelector("#pages .panel");
+   if(panel)panel.appendChild(
+    el("p","status error",
+     "Profil créé. Certaines informations complémentaires "+
+     "n'ont pas été enregistrées : "+detailsError.message
+    )
+   );
   }
 
-  return eahId;
+  return true;
+
+ }finally{
+  nfcActivationBusy=false;
+ }
 }
 
 /* ==========================================
-   NFC - AFFICHAGE PROFIL ACTIF
+   NFC - REPRISE AUTOMATIQUE
+========================================== */
+
+async function nfcResumeAfterConfirmation(){
+ if(!state.sb||!NFC_TOKEN||nfcActivationBusy)return;
+
+ const {data:auth,error}=await state.sb.auth.getUser();
+
+ if(error||!auth?.user)return;
+
+ const user=auth.user;
+
+ if(!user.email_confirmed_at)return;
+
+ const profile=await nfcProfile();
+
+ if(String(profile?.status||"").toUpperCase()==="ACTIVE"){
+  nfcClearPending();
+  return;
+ }
+
+ const data=nfcGetActivationData(user);
+
+ if(!data)return;
+
+ await nfcFinishActivation(data,null);
+}
+
+/* ==========================================
+   NFC - PROFIL ACTIF
 ========================================== */
 
 async function renderNfcActive(panel,heading,profile,card){
-  const name=
-    profile?.name||
-    card.profile_name||
-    "Profil EAH Diving";
+ heading.textContent=
+  profile?.name||card.profile_name||"Profil EAH Diving";
 
-  heading.textContent=name;
+ const photoUrl=nfcPhotoUrl(profile?.photo_url);
 
-  const photoUrl=nfcPhotoUrl(profile?.photo_url);
+ if(photoUrl){
+  image(panel,photoUrl,"Photo du profil","nfc-photo");
+ }
 
-  if(photoUrl){
-    const photo=image(
-      panel,photoUrl,"Photo du profil","nfc-photo"
-    );
-    if(photo){
-      photo.style.objectFit="cover";
-    }
-  }
+ description(
+  panel,profile?.club_name||card.club_name
+ );
 
-  description(
-    panel,profile?.club_name||card.club_name
-  );
+ panel.appendChild(
+  el("p","nfc-id",
+   "EAH ID : "+
+   (profile?.eah_id||card.profile_eah_id||"")
+  )
+ );
 
-  panel.appendChild(
-    el("p","nfc-id",
-      "EAH ID : "+
-      (profile?.eah_id||card.profile_eah_id||"")
-    )
-  );
+ if(profile?.group_name)panel.appendChild(
+  el("p","","Groupe : "+profile.group_name)
+ );
 
-  if(profile?.group_name){
-    panel.appendChild(
-      el("p","","Groupe : "+profile.group_name)
-    );
-  }
+ if(profile?.coach_name)panel.appendChild(
+  el("p","","Coach : "+profile.coach_name)
+ );
 
-  if(profile?.coach_name){
-    panel.appendChild(
-      el("p","","Coach : "+profile.coach_name)
-    );
-  }
+ panel.appendChild(
+  el("p","status success",
+   "Votre profil EAH Diving est actif ! "+
+   "Votre carte NFC est attribuée."
+  )
+ );
 
-  panel.appendChild(
-    el("p","status success",
-      "Profil EAH activé. Cette carte NFC est attribuée."
-    )
-  );
+ const actions=el("div","nfc-actions");
 
-  const actions=el("div","nfc-actions");
+ actions.appendChild(
+  button("Actualiser mon profil",()=>{
+   renderNfc().catch(console.error);
+  },true)
+ );
 
+ const {data:auth}=await state.sb.auth.getUser();
+
+ if(auth?.user){
   actions.appendChild(
-    button("Actualiser mon profil",()=>{
-      renderNfc().catch(console.error);
-    },true)
+   button("Se déconnecter",async()=>{
+    await state.sb.auth.signOut();
+    await renderNfc();
+   })
   );
+ }
 
-  const {data:auth}=await state.sb.auth.getUser();
-
-  if(auth?.user){
-    actions.appendChild(
-      button("Se déconnecter",async()=>{
-        await state.sb.auth.signOut();
-        await renderNfc();
-      })
-    );
-  }
-
-  panel.appendChild(actions);
+ panel.appendChild(actions);
 }
 
 /* ==========================================
-   NFC - FORMULAIRE DE CREATION
+   NFC - FORMULAIRE COMPLET
 ========================================== */
 
 async function renderNfc(){
-  const pages=nfcMode();
-  const panel=el("section","panel");
-  const heading=el(
-    "h2","","Carte NFC EAH Diving"
-  );
-  const feedback=el("div");
+ const pages=nfcMode();
+ const panel=el("section","panel");
+ const heading=el("h2","","Carte NFC EAH Diving");
+ const feedback=el("div");
 
-  panel.append(heading,feedback);
-  pages.appendChild(panel);
+ panel.append(heading,feedback);
+ pages.appendChild(panel);
 
-  if(!state.sb){
-    message(
-      feedback,"Connexion Supabase indisponible.",true
-    );
-    return;
+ if(!state.sb){
+  message(feedback,"Supabase indisponible.",true);
+  return;
+ }
+
+ try{
+  const card=await nfcLookup();
+  if(!card)throw new Error("Carte NFC introuvable.");
+
+  const profile=await nfcProfile();
+
+  if(
+   String(profile?.status||card.card_status)
+    .toUpperCase()==="ACTIVE"
+  ){
+   await renderNfcActive(
+    panel,heading,profile,card
+   );
+   return;
   }
+
+  const {data:auth}=await state.sb.auth.getUser();
+  const connectedUser=auth?.user||null;
+
+  let options={groups:[],coaches:[]};
 
   try{
-    const card=await nfcLookup();
+   options=await nfcOptions();
+  }catch(error){
+   console.warn("Options NFC :",error.message);
+  }
 
-    if(!card){
-      throw new Error("Carte NFC introuvable.");
-    }
+  heading.textContent="Créer mon profil EAH";
 
-    const profile=await nfcProfile();
+  description(
+   panel,
+   "Carte n° "+(card.card_number||"")+
+   " — "+(card.club_name||"")+
+   "\n\nComplétez le formulaire. "+
+   "Vous recevrez un e-mail de confirmation. "+
+   "Après confirmation, votre carte NFC sera "+
+   "automatiquement attribuée à votre profil."
+  );
 
-    if(
-      String(
-        profile?.status||card.card_status
-      ).toUpperCase()==="ACTIVE"
-    ){
-      await renderNfcActive(
-        panel,heading,profile,card
-      );
-      return;
-    }
+  const form=el("form","form");
 
-    let options={groups:[],coaches:[]};
+  const first=field(form,"Prénom","text");
+  const last=field(form,"Nom","text");
 
-    try{
-      options=await nfcOptions();
-    }catch(error){
-      console.warn("Options NFC :",error.message);
-    }
+  const id=field(
+   form,
+   "Identifiant EAH personnalisé (facultatif)",
+   "text",false
+  );
 
-    heading.textContent="Créer mon profil EAH";
+  id.placeholder=card.default_identifier||"";
+  id.pattern="[A-Za-z0-9_-]{4,32}";
+  id.maxLength=32;
 
-    description(
-      panel,
-      "Carte n° "+(card.card_number||"")+
-      " — "+(card.club_name||"")+
-      "\n\nComplétez le formulaire pour créer "+
-      "votre compte et attribuer définitivement "+
-      "cette carte NFC à votre profil."
-    );
+  const email=field(
+   form,"Adresse e-mail","email"
+  );
 
-    const form=el("form","form");
+  const password=field(
+   form,"Choisir un mot de passe","password"
+  );
+  password.minLength=8;
+  password.autocomplete="new-password";
 
-    const first=field(
-      form,"Prénom","text"
-    );
+  const confirmPassword=field(
+   form,"Confirmer le mot de passe","password"
+  );
+  confirmPassword.minLength=8;
+  confirmPassword.autocomplete="new-password";
 
-    const last=field(
-      form,"Nom","text"
-    );
+  const photoLabel=el(
+   "label","","Photo du profil (fichier)"
+  );
+  const photoInput=el("input");
+  photoInput.type="file";
+  photoInput.accept=
+   "image/jpeg,image/png,image/webp";
+  photoLabel.appendChild(photoInput);
 
-    const id=field(
-      form,
-      "Identifiant EAH personnalisé (facultatif)",
-      "text",
-      false
-    );
+  const driveLabel=el(
+   "label","","Ou lien Google Drive de la photo"
+  );
+  const driveInput=el("input");
+  driveInput.type="url";
+  driveInput.required=false;
+  driveInput.placeholder=
+   "https://drive.google.com/file/d/.../view";
+  driveLabel.appendChild(driveInput);
 
-    id.placeholder=card.default_identifier||"";
-    id.pattern="[A-Za-z0-9_-]{4,32}";
-    id.maxLength=32;
+  const preview=el("img");
+  preview.hidden=true;
+  preview.className="nfc-photo";
 
-    const email=field(
-      form,"Adresse e-mail","email"
-    );
+  let previewUrl=null;
 
-    const password=field(
-      form,"Choisir un mot de passe","password"
-    );
-    password.minLength=8;
-    password.autocomplete="new-password";
+  function updatePhotoPreview(){
+   if(previewUrl){
+    URL.revokeObjectURL(previewUrl);
+    previewUrl=null;
+   }
 
-    const confirmPassword=field(
-      form,"Confirmer le mot de passe","password"
-    );
-    confirmPassword.minLength=8;
-    confirmPassword.autocomplete="new-password";
+   const file=photoInput.files?.[0];
 
-    const photoLabel=el(
-      "label","","Photo du profil (fichier)"
-    );
+   if(file){
+    previewUrl=URL.createObjectURL(file);
+    preview.src=previewUrl;
+    preview.hidden=false;
+    return;
+   }
 
-    const photoInput=el("input");
-    photoInput.type="file";
-    photoInput.accept=
-      "image/jpeg,image/png,image/webp";
-    photoInput.required=false;
-    photoLabel.appendChild(photoInput);
+   const drive=nfcPhotoUrl(driveInput.value);
 
-    const driveLabel=el(
-      "label","","Ou lien Google Drive de la photo"
-    );
-
-    const driveInput=el("input");
-    driveInput.type="url";
-    driveInput.required=false;
-    driveInput.placeholder=
-      "https://drive.google.com/file/d/.../view";
-    driveLabel.appendChild(driveInput);
-
-    const preview=el("img");
+   if(drive){
+    preview.src=drive;
+    preview.hidden=false;
+   }else{
     preview.hidden=true;
-    preview.className="nfc-photo";
+   }
+  }
 
-    let previewUrl=null;
+  photoInput.addEventListener(
+   "change",updatePhotoPreview
+  );
+  driveInput.addEventListener(
+   "input",updatePhotoPreview
+  );
+  preview.onerror=()=>preview.hidden=true;
 
-    function updatePhotoPreview(){
-      if(previewUrl){
-        URL.revokeObjectURL(previewUrl);
-        previewUrl=null;
-      }
+  form.append(photoLabel,driveLabel,preview);
 
-      const file=photoInput.files?.[0];
+  const group=nfcSelect(
+   form,"Groupe d'affectation",options.groups
+  );
 
-      if(file){
-        previewUrl=URL.createObjectURL(file);
-        preview.src=previewUrl;
-        preview.hidden=false;
-        return;
-      }
+  const coach=nfcSelect(
+   form,"Coach associé au profil",options.coaches
+  );
 
-      const drive=nfcPhotoUrl(driveInput.value);
+  const submit=el(
+   "button","primary-button",
+   "Créer mon compte et recevoir le mail"
+  );
+  submit.type="submit";
 
-      if(drive){
-        preview.src=drive;
-        preview.hidden=false;
-      }else{
-        preview.hidden=true;
-      }
+  form.appendChild(submit);
+  panel.appendChild(form);
+
+  const pending=nfcReadPending();
+
+  if(pending){
+   first.value=pending.first||"";
+   last.value=pending.last||"";
+   id.value=pending.id||"";
+   email.value=pending.email||"";
+   group.value=pending.groupId||"";
+   coach.value=pending.coachId||"";
+   driveInput.value=pending.driveUrl||"";
+   updatePhotoPreview();
+  }
+
+  function collectForm(){
+   return {
+    first:first.value.trim(),
+    last:last.value.trim(),
+    id:id.value.trim(),
+    email:email.value.trim().toLowerCase(),
+    groupId:group.value||null,
+    coachId:coach.value||null,
+    driveUrl:driveInput.value.trim()
+   };
+  }
+
+  /* ======================================
+     CREATION DU COMPTE AVEC CONFIRMATION
+  ====================================== */
+
+  form.addEventListener("submit",async event=>{
+   event.preventDefault();
+   submit.disabled=true;
+   submit.textContent="Création en cours...";
+
+   try{
+    const data=collectForm();
+    const mdp=password.value;
+
+    if(!data.first||!data.last||!data.email)
+     throw new Error(
+      "Complétez les champs obligatoires."
+     );
+
+    if(mdp.length<8)
+     throw new Error(
+      "Le mot de passe doit contenir au moins 8 caractères."
+     );
+
+    if(mdp!==confirmPassword.value)
+     throw new Error(
+      "Les mots de passe ne correspondent pas."
+     );
+
+    if(data.id&&!/^[A-Za-z0-9_-]{4,32}$/.test(data.id))
+     throw new Error(
+      "Identifiant invalide : 4 à 32 caractères."
+     );
+
+    nfcSavePending(data);
+
+    const {data:current}=await state.sb.auth.getUser();
+
+    if(current?.user){
+     if(
+      current.user.email?.toLowerCase()!==
+      data.email
+     ){
+      throw new Error(
+       "Un autre compte est connecté. "+
+       "Déconnectez-vous avant de continuer."
+      );
+     }
+
+     await nfcFinishActivation(
+      data,photoInput.files?.[0]||null
+     );
+     return;
     }
 
-    photoInput.addEventListener(
-      "change",updatePhotoPreview
-    );
-    driveInput.addEventListener(
-      "input",updatePhotoPreview
+    const redirect=nfcRedirect();
+
+    const {data:signup,error}=await state.sb.auth.signUp({
+     email:data.email,
+     password:mdp,
+     options:{
+      emailRedirectTo:redirect,
+      data:{
+       first_name:data.first,
+       last_name:data.last,
+       eah_id_requested:data.id,
+       nfc_club_slug:CLUB_SLUG,
+       nfc_token:NFC_TOKEN,
+       nfc_group_id:data.groupId,
+       nfc_coach_id:data.coachId,
+       nfc_drive_url:data.driveUrl
+      }
+     }
+    });
+
+    if(error)throw error;
+
+    if(signup.session){
+     await nfcFinishActivation(
+      data,photoInput.files?.[0]||null
+     );
+     return;
+    }
+
+    message(
+     feedback,
+     "Votre demande d'inscription a été enregistrée.\n\n"+
+     "Un e-mail de confirmation a été demandé pour : "+
+     data.email+
+     "\n\nCliquez sur le bouton de confirmation "+
+     "dans le mail pour accéder à votre profil.\n\n"+
+     "Votre nom, votre prénom et votre identifiant "+
+     "EAH ont été transmis à Supabase.\n\n"+
+     "Vérifiez aussi les courriers indésirables.\n\n"+
+     "Si cette adresse possède déjà un compte, "+
+     "utilisez la connexion existante."
     );
 
-    preview.onerror=()=>{
-      preview.hidden=true;
+   }catch(error){
+    console.error("Création EAH :",error);
+    message(
+     feedback,
+     "Création impossible : "+error.message,
+     true
+    );
+   }finally{
+    submit.disabled=false;
+    submit.textContent=
+     "Créer mon compte et recevoir le mail";
+   }
+  });
+
+  /* ======================================
+     COMPTE DEJA CONNECTE
+  ====================================== */
+
+  if(connectedUser){
+   const connected=el(
+    "div","status",
+    "Compte connecté : "+connectedUser.email
+   );
+
+   panel.insertBefore(connected,form);
+
+   panel.insertBefore(
+    button("Changer de compte",async()=>{
+     await state.sb.auth.signOut();
+     await renderNfc();
+    }),
+    form
+   );
+  }
+
+  /* ======================================
+     CONNEXION EXISTANTE
+  ====================================== */
+
+  panel.appendChild(el("hr","nfc-divider"));
+
+  const details=el("details");
+  details.appendChild(
+   el("summary","","Déjà inscrit ? Se connecter")
+  );
+
+  const login=el("form","form");
+
+  const loginIdentifier=field(
+   login,"E-mail ou identifiant EAH","text"
+  );
+
+  const loginPassword=field(
+   login,"Mot de passe","password"
+  );
+
+  const loginButton=el(
+   "button","primary-button",
+   "Se connecter et activer ma carte"
+  );
+  loginButton.type="submit";
+
+  const loginFeedback=el("div");
+
+  login.append(loginButton,loginFeedback);
+  details.appendChild(login);
+  panel.appendChild(details);
+
+  login.addEventListener("submit",async event=>{
+   event.preventDefault();
+   loginButton.disabled=true;
+
+   try{
+    await eahSignIn(
+     loginIdentifier.value,
+     loginPassword.value
+    );
+
+    const {data:auth,error}=await state.sb.auth.getUser();
+
+    if(error||!auth?.user)
+     throw new Error("Connexion non confirmée.");
+
+    const user=auth.user;
+
+    const saved=nfcGetActivationData(user)||{};
+    const entered=collectForm();
+
+    const data={
+     first:entered.first||
+      saved.first||
+      user.user_metadata?.first_name||"",
+     last:entered.last||
+      saved.last||
+      user.user_metadata?.last_name||"",
+     id:entered.id||
+      saved.id||
+      user.user_metadata?.eah_id_requested||"",
+     email:user.email.toLowerCase(),
+     groupId:entered.groupId||saved.groupId||null,
+     coachId:entered.coachId||saved.coachId||null,
+     driveUrl:entered.driveUrl||saved.driveUrl||""
     };
 
-    form.append(
-      photoLabel,driveLabel,preview
-    );
-
-    const group=nfcSelect(
-      form,
-      "Groupe d'affectation",
-      options.groups
-    );
-
-    const coach=nfcSelect(
-      form,
-      "Coach associé au profil",
-      options.coaches
-    );
-
-    const submit=el(
-      "button","primary-button","Créer mon profil"
-    );
-    submit.type="submit";
-
-    form.appendChild(submit);
-    panel.appendChild(form);
-
-    const pending=nfcReadPending();
-
-    if(pending){
-      first.value=pending.first||"";
-      last.value=pending.last||"";
-      id.value=pending.id||"";
-      email.value=pending.email||"";
-      group.value=pending.groupId||"";
-      coach.value=pending.coachId||"";
-      driveInput.value=pending.driveUrl||"";
-      updatePhotoPreview();
+    if(!data.first||!data.last){
+     throw new Error(
+      "Renseignez votre nom et votre prénom "+
+      "dans le formulaire."
+     );
     }
 
-    function collectForm(){
-      return {
-        first:first.value.trim(),
-        last:last.value.trim(),
-        id:id.value.trim(),
-        email:email.value.trim().toLowerCase(),
-        groupId:group.value||null,
-        coachId:coach.value||null,
-        driveUrl:driveInput.value.trim()
-      };
-    }
+    await nfcFinishActivation(
+     data,photoInput.files?.[0]||null
+    );
 
-    /* ======================================
-       CREATION COMPTE ET ACTIVATION DIRECTE
-    ====================================== */
+   }catch(error){
+    message(loginFeedback,error.message,true);
+   }finally{
+    loginButton.disabled=false;
+   }
+  });
 
-    form.addEventListener("submit",async event=>{
-      event.preventDefault();
+  /* ======================================
+     RENVOI CONFIRMATION
+  ====================================== */
 
-      submit.disabled=true;
-      submit.textContent="Création en cours...";
+  const resend=button(
+   "Renvoyer le mail de confirmation",
+   async()=>{
+    resend.disabled=true;
 
-      try{
-        const data=collectForm();
-        const mdp=password.value;
+    try{
+     const address=email.value.trim().toLowerCase();
 
-        if(!data.first||!data.last||!data.email){
-          throw new Error(
-            "Complétez les champs obligatoires."
-          );
-        }
+     if(!address)
+      throw new Error(
+       "Indiquez votre adresse e-mail."
+      );
 
-        if(mdp.length<8){
-          throw new Error(
-            "Le mot de passe doit contenir "+
-            "au moins 8 caractères."
-          );
-        }
-
-        if(mdp!==confirmPassword.value){
-          throw new Error(
-            "Les deux mots de passe sont différents."
-          );
-        }
-
-        if(
-          data.id&&
-          !/^[A-Za-z0-9_-]{4,32}$/.test(data.id)
-        ){
-          throw new Error(
-            "Identifiant invalide : "+
-            "4 à 32 caractères sans espace."
-          );
-        }
-
-        nfcSavePending(data);
-
-        const {data:current,error:currentError}=
-          await state.sb.auth.getUser();
-
-        if(
-          currentError&&
-          currentError.name!=="AuthSessionMissingError"
-        ){
-          throw currentError;
-        }
-
-        if(current?.user){
-          if(
-            current.user.email?.toLowerCase()!==
-            data.email
-          ){
-            throw new Error(
-              "Un autre compte est connecté. "+
-              "Déconnectez-vous avant de continuer."
-            );
-          }
-        }else{
-          const signup=await state.sb.auth.signUp({
-            email:data.email,
-            password:mdp,
-            options:{
-              data:{
-                first_name:data.first,
-                last_name:data.last,
-                eah_id_requested:data.id,
-                nfc_club_slug:CLUB_SLUG
-              }
-            }
-          });
-
-          if(signup.error)throw signup.error;
-
-          if(!signup.data?.session){
-            throw new Error(
-              "Compte non connecté après inscription. "+
-              "Désactivez Confirm email dans "+
-              "Supabase Auth > Providers > Email "+
-              "pour une activation immédiate. "+
-              "Si le compte existe déjà, "+
-              "utilisez la connexion."
-            );
-          }
-        }
-
-        await nfcFinishActivation(
-          data,
-          photoInput.files?.[0]||null
-        );
-
-      }catch(error){
-        console.error("Création NFC :",error);
-        message(
-          feedback,
-          "Création impossible : "+error.message,
-          true
-        );
-      }finally{
-        submit.disabled=false;
-        submit.textContent="Créer mon profil";
+     const {error}=await state.sb.auth.resend({
+      type:"signup",
+      email:address,
+      options:{
+       emailRedirectTo:nfcRedirect()
       }
-    });
+     });
 
-    /* ======================================
-       CONNEXION COMPTE EXISTANT
-    ====================================== */
+     if(error)throw error;
 
-    panel.appendChild(el("hr","nfc-divider"));
-
-    const details=el("details");
-    details.style.marginTop="15px";
-
-    details.appendChild(
-      el(
-        "summary","",
-        "Déjà inscrit ? Se connecter"
-      )
-    );
-
-    const login=el("form","form");
-
-    const loginIdentifier=field(
-      login,
-      "E-mail ou identifiant EAH",
-      "text"
-    );
-
-    const loginPassword=field(
-      login,
-      "Mot de passe",
-      "password"
-    );
-
-    const loginButton=el(
-      "button",
-      "primary-button",
-      "Se connecter et activer ma carte"
-    );
-    loginButton.type="submit";
-
-    const loginFeedback=el("div");
-
-    login.append(
-      loginButton,loginFeedback
-    );
-
-    details.appendChild(login);
-    panel.appendChild(details);
-
-    login.addEventListener("submit",async event=>{
-      event.preventDefault();
-      loginButton.disabled=true;
-
-      try{
-        await eahSignIn(
-          loginIdentifier.value,
-          loginPassword.value
-        );
-
-        const {data:auth,error:authError}=
-          await state.sb.auth.getUser();
-
-        if(authError||!auth?.user){
-          throw new Error(
-            "Connexion non confirmée."
-          );
-        }
-
-        const data=collectForm();
-        data.email=auth.user.email.toLowerCase();
-
-        if(!data.first||!data.last){
-          const saved=nfcReadPending()||{};
-
-          data.first=data.first||
-            saved.first||
-            auth.user.user_metadata?.first_name||
-            "";
-
-          data.last=data.last||
-            saved.last||
-            auth.user.user_metadata?.last_name||
-            "";
-
-          data.id=data.id||
-            saved.id||
-            auth.user.user_metadata?.eah_id_requested||
-            "";
-        }
-
-        if(!data.first||!data.last){
-          throw new Error(
-            "Indiquez votre prénom et votre nom "+
-            "dans le formulaire de création avant "+
-            "d'activer cette carte."
-          );
-        }
-
-        await nfcFinishActivation(
-          data,
-          photoInput.files?.[0]||null
-        );
-
-      }catch(error){
-        message(
-          loginFeedback,error.message,true
-        );
-      }finally{
-        loginButton.disabled=false;
-      }
-    });
-
-    /* ======================================
-       COMPTE DEJA CONNECTE
-    ====================================== */
-
-    const {data:currentAuth}=
-      await state.sb.auth.getUser();
-
-    if(currentAuth?.user){
-      const connected=el(
-        "div","status",
-        "Compte connecté : "+
-        currentAuth.user.email
-      );
-
-      panel.insertBefore(
-        connected,form
-      );
-
-      const disconnect=button(
-        "Changer de compte",
-        async()=>{
-          await state.sb.auth.signOut();
-          nfcClearPending();
-          await renderNfc();
-        }
-      );
-
-      panel.insertBefore(
-        disconnect,form
-      );
-    }
-
-  }catch(error){
-    console.error("Erreur NFC :",error);
-    message(
+     message(
       feedback,
-      "Erreur NFC : "+error.message,
-      true
-    );
-  }
+      "Demande de renvoi effectuée. "+
+      "Consultez votre boîte mail et vos spams."
+     );
+
+    }catch(error){
+     message(feedback,error.message,true);
+    }finally{
+     resend.disabled=false;
+    }
+   }
+  );
+
+  panel.appendChild(resend);
+
+ }catch(error){
+  console.error("NFC :",error);
+  message(
+   feedback,"Erreur NFC : "+error.message,true
+  );
+ }
 }
 
 /* ==========================================
@@ -2411,123 +2305,152 @@ async function renderNfc(){
 ========================================== */
 
 async function renderNfcRecovery(){
-  const pages=nfcMode();
-  const panel=el("section","panel");
+ const pages=nfcMode();
+ const panel=el("section","panel");
 
-  panel.appendChild(
-    el("h2","","Définir mon nouveau mot de passe")
-  );
+ panel.appendChild(
+  el("h2","","Définir mon nouveau mot de passe")
+ );
 
-  const form=el("form","form");
+ const form=el("form","form");
+ const password=field(
+  form,"Nouveau mot de passe","password"
+ );
+ password.minLength=8;
 
-  const password=field(
-    form,"Nouveau mot de passe","password"
-  );
-  password.minLength=8;
+ const confirm=field(
+  form,"Confirmer le mot de passe","password"
+ );
+ confirm.minLength=8;
 
-  const confirm=field(
-    form,"Confirmer le mot de passe","password"
-  );
-  confirm.minLength=8;
+ const submit=el(
+  "button","primary-button","Enregistrer"
+ );
+ submit.type="submit";
 
-  const submit=el(
-    "button","primary-button","Enregistrer"
-  );
-  submit.type="submit";
+ const feedback=el("div");
+ form.append(password,confirm,submit,feedback);
+ panel.appendChild(form);
+ pages.appendChild(panel);
 
-  const feedback=el("div");
+ form.addEventListener("submit",async event=>{
+  event.preventDefault();
+  submit.disabled=true;
 
-  form.append(
-    password,confirm,submit,feedback
-  );
+  try{
+   if(password.value!==confirm.value)
+    throw new Error(
+     "Les mots de passe sont différents."
+    );
 
-  panel.appendChild(form);
-  pages.appendChild(panel);
+   if(password.value.length<8)
+    throw new Error("Minimum 8 caractères.");
 
-  form.addEventListener("submit",async event=>{
-    event.preventDefault();
-    submit.disabled=true;
+   const {error}=await state.sb.auth.updateUser({
+    password:password.value
+   });
 
-    try{
-      if(password.value!==confirm.value){
-        throw new Error(
-          "Les mots de passe sont différents."
-        );
-      }
+   if(error)throw error;
 
-      if(password.value.length<8){
-        throw new Error(
-          "Minimum 8 caractères."
-        );
-      }
+   message(
+    feedback,"Mot de passe modifié avec succès."
+   );
 
-      const {error}=await state.sb.auth.updateUser({
-        password:password.value
-      });
+   form.reset();
 
-      if(error)throw error;
+   panel.appendChild(
+    button("Retour à mon profil",()=>renderNfc())
+   );
 
-      message(
-        feedback,
-        "Mot de passe modifié avec succès."
-      );
-
-      form.reset();
-
-      const back=button(
-        "Retour à mon profil",
-        ()=>renderNfc()
-      );
-
-      panel.appendChild(back);
-
-    }catch(error){
-      message(
-        feedback,error.message,true
-      );
-    }finally{
-      submit.disabled=false;
-    }
-  });
+  }catch(error){
+   message(feedback,error.message,true);
+  }finally{
+   submit.disabled=false;
+  }
+ });
 }
 
 function nfcIsRecovery(){
-  const hash=new URLSearchParams(
-    location.hash.slice(1)
-  );
-  return hash.get("type")==="recovery";
+ const hash=new URLSearchParams(
+  location.hash.slice(1)
+ );
+ return hash.get("type")==="recovery";
 }
 
 /* ==========================================
-   ACTUALISATION
+   TRAITEMENT DU RETOUR EMAIL
+========================================== */
+
+async function nfcHandleAuthReturn(){
+ /*
+  Avec la configuration client ci-dessous,
+  Supabase traite automatiquement les liens
+  de confirmation au format implicite.
+
+  La session est récupérée avant de tenter
+  l'activation du profil.
+ */
+
+ const url=new URL(location.href);
+ const code=url.searchParams.get("code");
+
+ if(code){
+  const {error}=await state.sb.auth
+   .exchangeCodeForSession(code);
+
+  if(error)throw error;
+
+  url.searchParams.delete("code");
+  history.replaceState(null,"",url.toString());
+ }
+
+ const hashParams=new URLSearchParams(
+  location.hash.slice(1)
+ );
+
+ const authError=
+  url.searchParams.get("error_description")||
+  hashParams.get("error_description");
+
+ if(authError){
+  throw new Error(
+   "Confirmation du compte : "+authError
+  );
+ }
+
+ const {data,error}=await state.sb.auth.getSession();
+
+ if(error)throw error;
+
+ return data?.session||null;
+}
+
+/* ==========================================
+   ACTUALISATION PUBLIQUE
 ========================================== */
 
 let refreshBusy=false;
 
 async function refreshPublic(){
-  if(
-    refreshBusy||
-    NFC_TOKEN||
-    !state.club||
-    state.cart.length||
-    document.activeElement?.matches(
-      "input,textarea,select"
-    )
-  )return;
+ if(
+  refreshBusy||NFC_TOKEN||!state.club||
+  state.cart.length||
+  document.activeElement?.matches(
+   "input,textarea,select"
+  )
+ )return;
 
-  refreshBusy=true;
+ refreshBusy=true;
 
-  try{
-    const page=state.currentPage;
-    await loadClub();
-    renderPages(page);
-  }catch(error){
-    console.warn(
-      "Actualisation impossible :",error.message
-    );
-  }finally{
-    refreshBusy=false;
-  }
+ try{
+  const page=state.currentPage;
+  await loadClub();
+  renderPages(page);
+ }catch(error){
+  console.warn("Actualisation :",error.message);
+ }finally{
+  refreshBusy=false;
+ }
 }
 
 /* ==========================================
@@ -2535,115 +2458,133 @@ async function refreshPublic(){
 ========================================== */
 
 async function start(){
-  try{
-    if(window.supabase?.createClient){
-      state.sb=window.supabase.createClient(
-        SUPABASE_URL,
-        PUBLIC_KEY,
-        {
-          auth:{
-            persistSession:true,
-            autoRefreshToken:true,
-            detectSessionInUrl:true
-          }
-        }
-      );
-    }else{
-      throw new Error(
-        "Bibliothèque Supabase indisponible."
-      );
-    }
-
-    /* MODE NFC PRIORITAIRE */
-
-    if(NFC_TOKEN){
-      if(nfcIsRecovery()){
-        await renderNfcRecovery();
-      }else{
-        await renderNfc();
-      }
-
-      state.sb.auth.onAuthStateChange(event=>{
-        if(event==="PASSWORD_RECOVERY"){
-          setTimeout(()=>{
-            renderNfcRecovery()
-              .catch(console.error);
-          },0);
-        }
-      });
-
-      return;
-    }
-
-    /* CHARGEMENT DU CLUB */
-
-    await loadClub();
-
-    $("loading").hidden=true;
-    $("app").hidden=false;
-
-    renderPages();
-
-    if(state.sb){
-      refreshMember()
-        .then(()=>{
-          if(state.currentPage==="espace-club"){
-            renderPages("espace-club");
-          }
-        })
-        .catch(error=>{
-          console.warn(
-            "Authentification :",error
-          );
-        });
-    }
-
-    setInterval(()=>{
-      if(!document.hidden){
-        refreshPublic();
-      }
-    },60000);
-
-    document.addEventListener(
-      "visibilitychange",
-      ()=>{
-        if(!document.hidden){
-          refreshPublic();
-        }
-      }
-    );
-
-    window.addEventListener(
-      "hashchange",
-      ()=>{
-        const slug=decodeURIComponent(
-          location.hash.slice(1)
-        );
-        if(slug)showPage(slug);
-      }
-    );
-
-    console.info(
-      "EAH Diving Club : démarrage terminé."
-    );
-
-  }catch(error){
-    console.error(
-      "EAH démarrage :",error
-    );
-
-    $("loading").replaceChildren(
-      el(
-        "div","status error",
-        "Impossible de charger le club.\n"+
-        (error.message||"Erreur inconnue")+
-        "\nVérifiez le slug, Supabase et les autorisations RLS."
-      )
-    );
+ try{
+  if(!window.supabase?.createClient){
+   throw new Error(
+    "Bibliothèque Supabase indisponible."
+   );
   }
+
+  state.sb=window.supabase.createClient(
+   SUPABASE_URL,
+   PUBLIC_KEY,
+   {
+    auth:{
+     persistSession:true,
+     autoRefreshToken:true,
+     detectSessionInUrl:true,
+     flowType:"implicit"
+    }
+   }
+  );
+
+  /* ======================================
+     MODE NFC
+  ====================================== */
+
+  if(NFC_TOKEN){
+   let authReturnError=null;
+
+   try{
+    await nfcHandleAuthReturn();
+   }catch(error){
+    authReturnError=error;
+    console.error("Retour e-mail :",error);
+   }
+
+   if(nfcIsRecovery()){
+    await renderNfcRecovery();
+   }else{
+    await renderNfc();
+
+    if(authReturnError){
+     const panel=document.querySelector(
+      "#pages .panel"
+     );
+     if(panel)panel.prepend(
+      el("div","status error",
+       authReturnError.message
+      )
+     );
+    }else{
+     try{
+      await nfcResumeAfterConfirmation();
+     }catch(error){
+      console.error("Activation NFC :",error);
+
+      const panel=document.querySelector(
+       "#pages .panel"
+      );
+
+      if(panel)panel.prepend(
+       el("div","status error",
+        "Compte confirmé, mais activation "+
+        "du profil impossible : "+error.message
+       )
+      );
+     }
+    }
+   }
+
+   state.sb.auth.onAuthStateChange(event=>{
+    if(event==="PASSWORD_RECOVERY"){
+     setTimeout(()=>{
+      renderNfcRecovery().catch(console.error);
+     },0);
+    }
+   });
+
+   return;
+  }
+
+  /* ======================================
+     SITE CLUB
+  ====================================== */
+
+  await loadClub();
+
+  $("loading").hidden=true;
+  $("app").hidden=false;
+
+  renderPages();
+
+  refreshMember().then(()=>{
+   if(state.currentPage==="espace-club")
+    renderPages("espace-club");
+  }).catch(console.warn);
+
+  setInterval(()=>{
+   if(!document.hidden)refreshPublic();
+  },60000);
+
+  document.addEventListener(
+   "visibilitychange",()=>{
+    if(!document.hidden)refreshPublic();
+   }
+  );
+
+  window.addEventListener("hashchange",()=>{
+   const slug=decodeURIComponent(
+    location.hash.slice(1)
+   );
+   if(slug)showPage(slug);
+  });
+
+  console.info("EAH Diving Club démarré.");
+
+ }catch(error){
+  console.error("Démarrage EAH :",error);
+
+  $("loading").replaceChildren(
+   el("div","status error",
+    "Impossible de charger le club.\n"+
+    (error.message||"Erreur inconnue")
+   )
+  );
+ }
 }
 
-/* LANCEMENT EFFECTIF */
+/* LANCEMENT */
 
 start();
 
