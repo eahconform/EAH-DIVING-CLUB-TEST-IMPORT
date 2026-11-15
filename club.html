@@ -4031,5 +4031,598 @@ EAH CLUB PREMIUM — ANNONCES DU CLUB
 })();
 </script>
 
+<!-- ==================================================
+EAH DIVING CLUB — COACH PREMIUM V1
+================================================== -->
+
+<style>
+#eah-coach-premium {
+  display:none;
+  max-width:1100px;
+  margin:25px auto;
+  padding:20px;
+  color:#e8f6ff;
+  background:#0c263b;
+  border:1px solid #315a76;
+  border-radius:20px;
+  font-family:Arial,sans-serif;
+}
+
+#eah-coach-premium * {
+  box-sizing:border-box;
+}
+
+#eah-coach-premium h2 {
+  color:#80ddff;
+  margin:0 0 10px;
+}
+
+.eah-coach-card {
+  padding:20px;
+  margin:16px 0;
+  background:#16384f;
+  border:1px solid #315b77;
+  border-radius:16px;
+}
+
+.eah-coach-card h3 {
+  color:#a4e7ff;
+  margin:0 0 12px;
+}
+
+.eah-coach-card label {
+  display:block;
+  margin:12px 0 6px;
+  color:#d4e8f4;
+}
+
+.eah-coach-card input,
+.eah-coach-card textarea {
+  display:block;
+  width:100%;
+  padding:12px;
+  border:1px solid #47718a;
+  border-radius:10px;
+  background:#0b2335;
+  color:#fff;
+  font:inherit;
+}
+
+.eah-coach-card button,
+#eah-coach-open,
+#eah-coach-close {
+  padding:12px 18px;
+  border:0;
+  border-radius:10px;
+  background:#118bc9;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.eah-coach-card button:disabled {
+  opacity:.5;
+  cursor:wait;
+}
+
+.eah-coach-card a {
+  color:#8ce0ff;
+}
+
+#eah-coach-open {
+  display:none;
+  margin:15px auto;
+}
+
+#eah-coach-feedback {
+  margin-top:12px;
+  white-space:pre-wrap;
+  color:#a7e5ff;
+}
+</style>
+
+<button
+  id="eah-coach-open"
+  type="button">
+  Espace Coach
+</button>
+
+<section id="eah-coach-premium">
+
+  <button
+    id="eah-coach-close"
+    type="button">
+    Fermer
+  </button>
+
+  <h2>EAH DIVING · COACH PREMIUM</h2>
+
+  <p>
+    Vidéos reçues et évaluations
+    des adhérents de mon club.
+  </p>
+
+  <div id="eah-coach-feedback"></div>
+
+  <div id="eah-coach-requests">
+    Chargement...
+  </div>
+
+</section>
+
+<script>
+(function () {
+  "use strict";
+
+  const openButton =
+    document.getElementById(
+      "eah-coach-open"
+    );
+
+  const closeButton =
+    document.getElementById(
+      "eah-coach-close"
+    );
+
+  const panel =
+    document.getElementById(
+      "eah-coach-premium"
+    );
+
+  const list =
+    document.getElementById(
+      "eah-coach-requests"
+    );
+
+  const feedback =
+    document.getElementById(
+      "eah-coach-feedback"
+    );
+
+  let currentClubId = null;
+  let verifiedUserId = null;
+
+  function el(tag, text) {
+    const item =
+      document.createElement(tag);
+
+    if (text != null) {
+      item.textContent =
+        String(text);
+    }
+
+    return item;
+  }
+
+  function showMessage(message) {
+    feedback.textContent =
+      String(message || "");
+  }
+
+  function getClient() {
+    if (
+      typeof state === "undefined" ||
+      !state.sb
+    ) {
+      throw new Error(
+        "Client Supabase indisponible."
+      );
+    }
+
+    return state.sb;
+  }
+
+  async function checkCoachAccess() {
+
+    const sb = getClient();
+
+    const {
+      data: authData,
+      error: authError
+    } = await sb.auth.getUser();
+
+    if (
+      authError ||
+      !authData?.user
+    ) {
+      openButton.style.display =
+        "none";
+      return false;
+    }
+
+    const user =
+      authData.user;
+
+    const slug = new URLSearchParams(
+      location.search
+    ).get("club");
+
+    if (!slug) {
+      return false;
+    }
+
+    const {
+      data: clubs,
+      error: clubError
+    } = await sb
+      .from("clubs")
+      .select("id")
+      .eq("slug", slug)
+      .eq("active", true)
+      .limit(1);
+
+    if (
+      clubError ||
+      !clubs?.length
+    ) {
+      return false;
+    }
+
+    const clubId =
+      clubs[0].id;
+
+    /*
+      La fonction serveur vérifie
+      les droits réels du coach.
+    */
+
+    const {
+      data: allowed,
+      error: accessError
+    } = await sb.rpc(
+      "eah_is_club_staff",
+      {
+        p_club_id: clubId
+      }
+    );
+
+    if (
+      accessError ||
+      allowed !== true
+    ) {
+      openButton.style.display =
+        "none";
+      return false;
+    }
+
+    currentClubId = clubId;
+    verifiedUserId = user.id;
+
+    openButton.style.display =
+      "block";
+
+    return true;
+  }
+
+  async function loadRequests() {
+
+    list.textContent =
+      "Chargement des vidéos...";
+
+    const sb = getClient();
+
+    const allowed =
+      await checkCoachAccess();
+
+    if (!allowed) {
+      list.textContent =
+        "Accès coach non autorisé.";
+      return;
+    }
+
+    const {
+      data,
+      error
+    } = await sb
+      .from("eah_video_requests")
+      .select(
+        "id,diver_id,discipline," +
+        "dive_name,height_m,video_url," +
+        "comment,status,coach_score," +
+        "coach_comment,created_at"
+      )
+      .eq("club_id", currentClubId)
+      .order(
+        "created_at",
+        { ascending:false }
+      )
+      .limit(100);
+
+    if (error) {
+      list.textContent =
+        "Erreur : " + error.message;
+      return;
+    }
+
+    list.replaceChildren();
+
+    if (!data?.length) {
+      list.textContent =
+        "Aucune vidéo reçue.";
+      return;
+    }
+
+    for (const request of data) {
+
+      const card =
+        el("article");
+
+      card.className =
+        "eah-coach-card";
+
+      const title =
+        el(
+          "h3",
+          request.dive_name ||
+          "Vidéo de plongeon"
+        );
+
+      card.appendChild(title);
+
+      card.appendChild(
+        el(
+          "p",
+          "Discipline : " +
+          (request.discipline || "—")
+        )
+      );
+
+      card.appendChild(
+        el(
+          "p",
+          "Hauteur : " +
+          (request.height_m ?? "—") +
+          " m"
+        )
+      );
+
+      card.appendChild(
+        el(
+          "p",
+          "Statut : " +
+          (request.status || "—")
+        )
+      );
+
+      if (request.comment) {
+        card.appendChild(
+          el(
+            "p",
+            "Adhérent : " +
+            request.comment
+          )
+        );
+      }
+
+      /*
+        Afficher un lien vidéo uniquement
+        si son protocole est autorisé.
+      */
+
+      try {
+        const videoUrl =
+          new URL(request.video_url);
+
+        if (
+          videoUrl.protocol === "https:" ||
+          videoUrl.protocol === "http:"
+        ) {
+          const link =
+            el("a", "Voir la vidéo");
+
+          link.href =
+            videoUrl.href;
+
+          link.target =
+            "_blank";
+
+          link.rel =
+            "noopener noreferrer";
+
+          card.appendChild(link);
+        }
+      } catch (_) {}
+
+      const scoreLabel =
+        el("label", "Note / 10");
+
+      card.appendChild(scoreLabel);
+
+      const score =
+        el("input");
+
+      score.type = "number";
+      score.min = "0";
+      score.max = "10";
+      score.step = "0.1";
+
+      if (
+        request.coach_score != null
+      ) {
+        score.value =
+          request.coach_score;
+      }
+
+      card.appendChild(score);
+
+      const commentLabel =
+        el(
+          "label",
+          "Commentaire technique"
+        );
+
+      card.appendChild(commentLabel);
+
+      const comment =
+        el("textarea");
+
+      comment.rows = 4;
+      comment.maxLength = 5000;
+      comment.value =
+        request.coach_comment || "";
+
+      card.appendChild(comment);
+
+      const save =
+        el(
+          "button",
+          "Enregistrer l'évaluation"
+        );
+
+      save.type = "button";
+
+      save.addEventListener(
+        "click",
+        async function () {
+
+          const numericScore =
+            Number(score.value);
+
+          if (
+            !score.value.trim() ||
+            !Number.isFinite(numericScore) ||
+            numericScore < 0 ||
+            numericScore > 10
+          ) {
+            alert(
+              "Saisissez une note " +
+              "entre 0 et 10."
+            );
+            return;
+          }
+
+          save.disabled = true;
+
+          try {
+
+            const {
+              data: authData
+            } = await sb.auth.getUser();
+
+            if (
+              authData?.user?.id !==
+              verifiedUserId
+            ) {
+              throw new Error(
+                "Session expirée."
+              );
+            }
+
+            const {
+              data: result,
+              error: gradeError
+            } = await sb.rpc(
+              "eah_coach_grade_video",
+              {
+                p_video_id:
+                  request.id,
+                p_score:
+                  numericScore,
+                p_comment:
+                  comment.value,
+                p_difficulty: null,
+                p_technique: null,
+                p_execution: null
+              }
+            );
+
+            if (gradeError) {
+              throw gradeError;
+            }
+
+            showMessage(
+              "Évaluation enregistrée."
+            );
+
+            await loadRequests();
+
+          } catch (error) {
+
+            alert(
+              "Enregistrement impossible : " +
+              error.message
+            );
+
+          } finally {
+            save.disabled = false;
+          }
+        }
+      );
+
+      card.appendChild(save);
+
+      list.appendChild(card);
+    }
+  }
+
+  openButton.addEventListener(
+    "click",
+    async function () {
+      panel.style.display =
+        "block";
+
+      await loadRequests();
+
+      panel.scrollIntoView({
+        behavior:"smooth"
+      });
+    }
+  );
+
+  closeButton.addEventListener(
+    "click",
+    function () {
+      panel.style.display =
+        "none";
+    }
+  );
+
+  /*
+    Le site peut terminer son initialisation
+    après ce module. Le contrôle est relancé
+    lorsque la session Supabase change.
+  */
+
+  async function initialize() {
+    try {
+      await checkCoachAccess();
+
+      const sb = getClient();
+
+      sb.auth.onAuthStateChange(
+        function () {
+          setTimeout(
+            () => {
+              checkCoachAccess()
+                .catch(console.error);
+            },
+            0
+          );
+        }
+      );
+
+    } catch (error) {
+      console.warn(
+        "EAH Coach Premium :",
+        error.message
+      );
+    }
+  }
+
+  if (
+    document.readyState === "loading"
+  ) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initialize,
+      { once:true }
+    );
+  } else {
+    initialize();
+  }
+
+})();
+</script>
+
 </body>
 </html>
