@@ -2991,23 +2991,20 @@ async function renderNfc(){
       affichage du profil public.
     */
 
-    if(
-      String(
-        profile?.status ||
-        card.card_status ||
-        ""
-      ).toUpperCase() === "ACTIVE"
-    ){
-      nfcClearPending();
+if(
+  String(
+    profile?.status ||
+    card.card_status ||
+    ""
+  ).toUpperCase() === "ACTIVE"
+){
 
-      nfcRenderProfile(
-        panel,
-        profile,
-        card
-      );
+  // La carte possède déjà un profil actif.
+  // Afficher directement ce profil.
+  nfcRenderProfile(panel,profile,card);
 
-      return;
-    }
+  return;
+}
 
     /*
       Si l'utilisateur revient d'un email,
@@ -3924,65 +3921,80 @@ async function start(){
     */
 
     if(NFC_TOKEN){
-      let authReturnError = null;
 
-      try{
-        await handleAuthReturn();
-      }catch(error){
-        authReturnError = error;
+  let authReturnError = null;
 
-        console.error(
-          "Retour authentification :",
-          error
-        );
+  try{
+    await handleAuthReturn();
+  }catch(error){
+    authReturnError = error;
+    console.error("Retour authentification :",error);
+  }
+
+  // Attendre la restauration de la session
+  // avant de tenter l'activation NFC.
+
+  const {data:sessionData,error:sessionError} =
+    await state.sb.auth.getSession();
+
+  if(sessionError){
+    console.warn("Session :",sessionError);
+  }
+
+  if(sessionData?.session?.user){
+    console.info(
+      "Compte connecté :",
+      sessionData.session.user.email
+    );
+  }
+
+  if(nfcIsRecovery()){
+    await renderNfcRecovery();
+  }else{
+    await renderNfc();
+  }
+
+  if(authReturnError){
+    const warning = el(
+      "p",
+      "status error",
+      "Le lien d'authentification n'a pas " +
+      "pu être validé : " +
+      errorText(authReturnError)
+    );
+
+    $("pages").prepend(warning);
+  }
+
+  state.sb.auth.onAuthStateChange(
+    (event,session) => {
+
+      if(event === "PASSWORD_RECOVERY"){
+        setTimeout(() => {
+          renderNfcRecovery().catch(console.error);
+        },0);
+        return;
       }
 
-      if(nfcIsRecovery()){
-        await renderNfcRecovery();
-      }else{
-        await renderNfc();
+      if(
+        event === "SIGNED_IN" &&
+        session?.user &&
+        !state.nfcBusy
+      ){
+        setTimeout(() => {
+          renderNfc().catch(console.error);
+        },0);
       }
-
-      if(authReturnError){
-        const pages = $("pages");
-
-        const warning = el(
-          "p",
-          "status error",
-          "Le lien d'authentification " +
-          "n'a pas pu être validé : " +
-          errorText(authReturnError)
-        );
-
-        pages.prepend(warning);
-      }
-
-      /*
-        Ecouter les événements Supabase.
-
-        setTimeout évite de faire des appels
-        Supabase bloquants dans le callback.
-      */
-
-      state.sb.auth.onAuthStateChange(
-        (event) => {
-          if(event === "PASSWORD_RECOVERY"){
-            setTimeout(() => {
-              renderNfcRecovery().catch(
-                console.error
-              );
-            },0);
-          }
-        }
-      );
-
-      console.info(
-        "EAH NFC : démarrage terminé.",
-        CLUB_SLUG
-      );
-
-      return;
     }
+  );
+
+  console.info(
+    "EAH NFC : démarrage terminé.",
+    CLUB_SLUG
+  );
+
+  return;
+}
 
     /*
       MODE SITE PUBLIC.
