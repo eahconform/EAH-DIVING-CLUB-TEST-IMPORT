@@ -59,7 +59,7 @@ header{
   height:52px;
   object-fit:contain;
 }
-nav,.actions{
+nav,.actions,.nfc-actions{
   display:flex;
   flex-wrap:wrap;
   gap:8px;
@@ -301,13 +301,49 @@ footer{
   line-height:1.6;
 }
 .nfc-actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
   margin-top:15px;
 }
 .nfc-actions button{
   flex:1 1 180px;
+}
+.nfc-logo{
+  text-align:center;
+  font-size:30px;
+  font-weight:900;
+  color:#70d9ff;
+  margin-bottom:22px;
+}
+.nfc-card-number{
+  display:inline-block;
+  border:1px solid #70d9ff70;
+  border-radius:30px;
+  padding:7px 14px;
+  color:#70d9ff;
+}
+.nfc-profile{
+  text-align:center;
+}
+.nfc-profile .nfc-id{
+  margin:20px 0;
+}
+.nfc-profile h2{
+  font-size:clamp(26px,5vw,42px);
+}
+.nfc-info{
+  background:#ffffff0b;
+  border-radius:12px;
+  padding:15px;
+  margin:15px 0;
+}
+.nfc-info p{
+  margin:8px 0;
+}
+.nfc-preview{
+  width:150px;
+  height:150px;
+  object-fit:cover;
+  border-radius:50%;
+  margin:12px auto;
 }
 details{
   margin-top:20px;
@@ -378,21 +414,20 @@ details .form{margin-top:18px}
 
 /* =====================================================
    EAH DIVING CLUB
-   VERSION MULTI-CLUB + NFC + AUTHENTIFICATION EMAIL
+   VERSION NFC SANS EMAIL
 
-   Fonctionnalités :
-   - Sites publics
+   - Site multi-club
+   - Pages publiques
    - Disciplines
    - Blazons
    - Actualités
    - Boutique
    - Espace club
    - Administration
-   - Profils NFC
-   - Confirmation email
-   - Connexion mot de passe
-   - Connexion lien magique
-   - Plusieurs cartes par utilisateur
+   - Création directe des profils NFC
+   - Identifiant personnalisé
+   - Photo Google Drive / URL
+   - Affichage automatique du profil
 ===================================================== */
 
 const SUPABASE_URL =
@@ -439,13 +474,10 @@ const state = {
 
 function el(tag,cls="",value){
   const element = document.createElement(tag);
-
   if(cls) element.className = cls;
-
   if(value !== undefined){
     element.textContent = String(value ?? "");
   }
-
   return element;
 }
 
@@ -455,13 +487,8 @@ function button(label,handler,primary=false){
     primary ? "primary-button" : "",
     label
   );
-
   b.type = "button";
-
-  if(handler){
-    b.addEventListener("click",handler);
-  }
-
+  if(handler) b.addEventListener("click",handler);
   return b;
 }
 
@@ -478,10 +505,7 @@ function message(parent,text,error=false){
 function money(value){
   return Number(value || 0).toLocaleString(
     "fr-FR",
-    {
-      style:"currency",
-      currency:"EUR"
-    }
+    {style:"currency",currency:"EUR"}
   );
 }
 
@@ -499,15 +523,11 @@ function object(value){
 
 function description(parent,text){
   if(!text) return;
-
-  parent.appendChild(
-    el("p","description",text)
-  );
+  parent.appendChild(el("p","description",text));
 }
 
 function safeImage(value){
   if(!value) return "";
-
   const raw = String(value).trim();
 
   let match = raw.match(
@@ -515,9 +535,7 @@ function safeImage(value){
   );
 
   if(!match){
-    match = raw.match(
-      /[?&]id=([\w-]{20,})/
-    );
+    match = raw.match(/[?&]id=([\w-]{20,})/);
   }
 
   if(!match && /^[\w-]{20,}$/.test(raw)){
@@ -534,7 +552,6 @@ function safeImage(value){
 
   try{
     const url = new URL(raw,location.href);
-
     if(["https:","http:"].includes(url.protocol)){
       return url.href;
     }
@@ -545,44 +562,32 @@ function safeImage(value){
 
 function image(parent,url,alt,cls=""){
   const src = safeImage(url);
-
   if(!src) return null;
 
   const img = el("img",cls);
-
   img.src = src;
   img.alt = alt || "";
   img.loading = "lazy";
-
-  img.onerror = () => {
-    img.hidden = true;
-  };
-
+  img.onerror = () => { img.hidden = true; };
   parent.appendChild(img);
-
   return img;
 }
 
 function video(parent,url){
   const src = safeImage(url);
-
   if(!src) return;
 
   if(/\.(mp4|webm|ogg)([?#]|$)/i.test(src)){
     const v = el("video","page-video");
-
     v.src = src;
     v.controls = true;
     v.preload = "metadata";
-
     parent.appendChild(v);
   }else{
     const a = el("a","","Voir la vidéo");
-
     a.href = src;
     a.target = "_blank";
     a.rel = "noopener noreferrer";
-
     parent.appendChild(a);
   }
 }
@@ -615,7 +620,6 @@ function safeColor(value,fallback){
 
 function numeric(value,fallback,min,max){
   const n = Number(value);
-
   return value !== "" &&
     value != null &&
     Number.isFinite(n) &&
@@ -628,26 +632,15 @@ function numeric(value,fallback,min,max){
 function field(parent,title,type,required=true){
   const label = el("label","",title);
   const input = el("input");
-
   input.type = type;
   input.required = required;
-
   label.appendChild(input);
   parent.appendChild(label);
-
   return input;
 }
 
 function normalizeEmail(value){
-  return String(value || "")
-    .trim()
-    .toLowerCase();
-}
-
-function validateEmail(value){
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-    normalizeEmail(value)
-  );
+  return String(value || "").trim().toLowerCase();
 }
 
 function errorText(error){
@@ -655,23 +648,22 @@ function errorText(error){
     String(error || "Erreur inconnue");
 }
 
-function setBusy(buttonElement,busy,text){
-  if(!buttonElement) return;
+function setBusy(element,busy,text){
+  if(!element) return;
 
-  if(!buttonElement.dataset.originalText){
-    buttonElement.dataset.originalText =
-      buttonElement.textContent;
+  if(!element.dataset.originalText){
+    element.dataset.originalText =
+      element.textContent;
   }
 
-  buttonElement.disabled = busy;
-
-  buttonElement.textContent = busy
+  element.disabled = busy;
+  element.textContent = busy
     ? (text || "Veuillez patienter...")
-    : buttonElement.dataset.originalText;
+    : element.dataset.originalText;
 }
 
 /* =====================================================
-   SUPABASE PUBLIC
+   SUPABASE
 ===================================================== */
 
 async function publicQuery(table,extra=""){
@@ -683,10 +675,8 @@ async function publicQuery(table,extra=""){
     extra;
 
   const controller = new AbortController();
-
   const timeout = setTimeout(
-    () => controller.abort(),
-    12000
+    () => controller.abort(),12000
   );
 
   try{
@@ -702,18 +692,14 @@ async function publicQuery(table,extra=""){
 
     if(!response.ok){
       const body = await response.text();
-
       throw new Error(
-        table +
-        " : HTTP " +
-        response.status +
-        " " +
+        table + " : HTTP " +
+        response.status + " " +
         body.slice(0,150)
       );
     }
 
     return await response.json();
-
   }finally{
     clearTimeout(timeout);
   }
@@ -734,33 +720,20 @@ async function loadClub(){
   }
 
   const club = clubs[0];
-
   const id = encodeURIComponent(club.id);
 
   const requests = [
-    [
-      "config",
-      "eah_club_site_config",
-      "&club_id=eq." + id
-    ],
-    [
-      "pages",
-      "eah_club_pages",
+    ["config","eah_club_site_config",
+      "&club_id=eq." + id],
+    ["pages","eah_club_pages",
       "&club_id=eq." + id +
-      "&active=eq.true&order=sort_order.asc"
-    ],
-    [
-      "badges",
-      "eah_club_badges",
+      "&active=eq.true&order=sort_order.asc"],
+    ["badges","eah_club_badges",
       "&club_id=eq." + id +
-      "&active=eq.true&order=sort_order.asc"
-    ],
-    [
-      "products",
-      "eah_club_products",
+      "&active=eq.true&order=sort_order.asc"],
+    ["products","eah_club_products",
       "&club_id=eq." + id +
-      "&active=eq.true&order=sort_order.asc"
-    ]
+      "&active=eq.true&order=sort_order.asc"]
   ];
 
   const results = await Promise.allSettled(
@@ -775,11 +748,7 @@ async function loadClub(){
     if(result.status === "fulfilled"){
       data[key] = result.value;
     }else{
-      console.warn(
-        "Chargement " + key,
-        result.reason
-      );
-
+      console.warn(key,result.reason);
       data[key] = [];
     }
   });
@@ -803,7 +772,7 @@ async function loadClub(){
 }
 
 /* =====================================================
-   PERSONNALISATION DU SITE
+   PERSONNALISATION
 ===================================================== */
 
 function applyTheme(){
@@ -812,26 +781,16 @@ function applyTheme(){
   const c = state.club || {};
 
   const themes = {
-    1:[
-      "#1478ff","#071725","#10243a",
-      "#e8f2ff","#ffffff","#15324c"
-    ],
-    2:[
-      "#c7a466","#101010","#171717",
-      "#ede5d7","#f1d394","#24211c"
-    ],
-    3:[
-      "#087e8b","#f3f6f8","#ffffff",
-      "#263746","#183044","#ffffff"
-    ],
-    4:[
-      "#a855f7","#140d1f","#21152f",
-      "#f5efff","#ffffff","#302041"
-    ],
-    5:[
-      "#7bc99c","#0d211e","#102c28",
-      "#e6f5e9","#ffffff","#193b34"
-    ]
+    1:["#1478ff","#071725","#10243a",
+       "#e8f2ff","#ffffff","#15324c"],
+    2:["#c7a466","#101010","#171717",
+       "#ede5d7","#f1d394","#24211c"],
+    3:["#087e8b","#f3f6f8","#ffffff",
+       "#263746","#183044","#ffffff"],
+    4:["#a855f7","#140d1f","#21152f",
+       "#f5efff","#ffffff","#302041"],
+    5:["#7bc99c","#0d211e","#102c28",
+       "#e6f5e9","#ffffff","#193b34"]
   };
 
   const theme =
@@ -844,21 +803,17 @@ function applyTheme(){
     "--primary":safeColor(
       s.PRIMARY_COLOR ||
       cfg.primary_color ||
-      c.primary_color,
-      theme[0]
+      c.primary_color,theme[0]
     ),
     "--secondary":safeColor(
       s.BACKGROUND_COLOR ||
-      cfg.secondary_color,
-      theme[1]
+      cfg.secondary_color,theme[1]
     ),
     "--text":safeColor(
-      s.TEXT_COLOR,
-      theme[3]
+      s.TEXT_COLOR,theme[3]
     ),
     "--card":safeColor(
-      s.CARD_COLOR,
-      theme[5]
+      s.CARD_COLOR,theme[5]
     ),
     "--radius":
       numeric(s.CARD_RADIUS,14,0,40) + "px",
@@ -922,8 +877,7 @@ function applyTheme(){
   );
 
   const heroSize = numeric(
-    s.HERO_TITLE_SIZE ||
-    s.COVER_TEXT_SIZE,
+    s.HERO_TITLE_SIZE || s.COVER_TEXT_SIZE,
     52,24,100
   );
 
@@ -961,7 +915,6 @@ function renderHeader(){
     "EAH Diving Club";
 
   document.title = title;
-
   $("club-brand").textContent = title;
   $("footer-name").textContent = title;
 
@@ -974,11 +927,8 @@ function renderHeader(){
   );
 
   const logoEl = $("club-logo");
-
   logoEl.hidden = !logo;
-
   if(logo) logoEl.src = logo;
-
   logoEl.onerror = () => {
     logoEl.hidden = true;
   };
@@ -1053,7 +1003,6 @@ function openModal(title,builder){
   const escapeHandler = event => {
     if(event.key === "Escape"){
       overlay.remove();
-
       document.removeEventListener(
         "keydown",escapeHandler
       );
@@ -1069,9 +1018,7 @@ function openModal(title,builder){
 
 function gallery(parent,photos,title){
   const urls = [...new Set(
-    array(photos)
-      .map(safeImage)
-      .filter(Boolean)
+    array(photos).map(safeImage).filter(Boolean)
   )];
 
   if(!urls.length) return;
@@ -1087,18 +1034,11 @@ function gallery(parent,photos,title){
   urls.forEach((url,index) => {
     const b = button(
       "Photo " + (index+1),
-      () => {
-        main.src = url;
-      }
+      () => { main.src = url; }
     );
 
     b.textContent = "";
-
-    image(
-      b,url,
-      "Photo " + (index+1)
-    );
-
+    image(b,url,"Photo " + (index+1));
     thumbs.appendChild(b);
   });
 
@@ -1142,8 +1082,7 @@ function renderDisciplines(page,section){
 
         description(
           box,
-          d.description_longue ||
-          d.description
+          d.description_longue || d.description
         );
 
         const tarifs = array(d.tarifs).length
@@ -1159,7 +1098,6 @@ function renderDisciplines(page,section){
           if(!t.prix && !t.description) return;
 
           const line = el("div","detail-line");
-
           line.appendChild(
             el("h3","",t.titre || "Tarif")
           );
@@ -1176,10 +1114,8 @@ function renderDisciplines(page,section){
 
         if(d.tarif || d.prix){
           box.appendChild(
-            el(
-              "p","price",
-              "Tarif : " + (d.tarif || d.prix)
-            )
+            el("p","price",
+              "Tarif : " + (d.tarif || d.prix))
           );
         }
 
@@ -1244,8 +1180,7 @@ function renderBadges(page,section){
       detail.name || badge.name || "Blazon";
 
     const picture =
-      detail.image_url ||
-      badge.image_url;
+      detail.image_url || badge.image_url;
 
     const card = el("article","card");
 
@@ -1406,10 +1341,7 @@ function addToCart(product,size){
 
   const already = state.cart
     .filter(x => x.id === id)
-    .reduce(
-      (sum,x) => sum + x.quantity,
-      0
-    );
+    .reduce((sum,x) => sum + x.quantity,0);
 
   if(already >= available){
     alert("Stock disponible atteint.");
@@ -1437,10 +1369,7 @@ function addToCart(product,size){
 
 function renderCart(container){
   container.replaceChildren();
-
-  container.appendChild(
-    el("h3","","Mon panier")
-  );
+  container.appendChild(el("h3","","Mon panier"));
 
   if(!state.cart.length){
     container.appendChild(
@@ -1453,14 +1382,11 @@ function renderCart(container){
     const line = el("div","cart-line");
 
     line.appendChild(
-      el(
-        "span","",
+      el("span","",
         item.name +
         (item.size ? " — " + item.size : "") +
         " × " + item.quantity +
-        " : " + money(
-          item.price * item.quantity
-        )
+        " : " + money(item.price * item.quantity)
       )
     );
 
@@ -1475,29 +1401,23 @@ function renderCart(container){
   });
 
   const total = state.cart.reduce(
-    (sum,x) => sum + x.price*x.quantity,
-    0
+    (sum,x) => sum + x.price*x.quantity,0
   );
 
   container.appendChild(
-    el(
-      "h3","",
-      "Total indicatif : " + money(total)
-    )
+    el("h3","",
+      "Total indicatif : " + money(total))
   );
 
   container.appendChild(
-    el(
-      "p","muted",
+    el("p","muted",
       "La validation des commandes nécessite " +
-      "un contrôle serveur des prix et des stocks."
-    )
+      "un contrôle serveur des prix et des stocks.")
   );
 }
 
 function renderBoutique(page,section){
   const s = object(page.settings);
-
   const enriched = array(s.products_v27);
 
   const products = enriched.length
@@ -1523,7 +1443,6 @@ function renderBoutique(page,section){
     const open = () => {
       openModal(name,box => {
         gallery(box,photos,name);
-
         description(box,product.description);
 
         box.appendChild(
@@ -1533,7 +1452,6 @@ function renderBoutique(page,section){
         video(box,product.video_url);
 
         const sizes = array(product.sizes);
-
         const select = el("select");
 
         sizes.forEach(size => {
@@ -1550,10 +1468,8 @@ function renderBoutique(page,section){
         }
 
         box.appendChild(
-          el(
-            "p","muted",
-            "Stock : " + (product.stock ?? 0)
-          )
+          el("p","muted",
+            "Stock : " + (product.stock ?? 0))
         );
 
         const add = button(
@@ -1579,9 +1495,7 @@ function renderBoutique(page,section){
       });
     };
 
-    const img = image(
-      card,photos[0],name
-    );
+    const img = image(card,photos[0],name);
 
     if(img){
       img.style.cursor = "pointer";
@@ -1589,11 +1503,9 @@ function renderBoutique(page,section){
     }
 
     card.appendChild(el("h3","",name));
-
     card.appendChild(
       el("p","price",money(product.price))
     );
-
     card.appendChild(
       button("Voir le produit",open,true)
     );
@@ -1614,7 +1526,7 @@ function renderBoutique(page,section){
 }
 
 /* =====================================================
-   AUTHENTIFICATION CLUB
+   AUTHENTIFICATION ESPACE CLUB
 ===================================================== */
 
 async function refreshMember(){
@@ -1637,8 +1549,7 @@ async function refreshMember(){
 
   if(response.error){
     console.warn(
-      "Accès club :",
-      response.error.message
+      "Accès club :",response.error.message
     );
     return;
   }
@@ -1650,9 +1561,7 @@ function isManager(){
   return Boolean(
     state.member &&
     MANAGER_ROLES.includes(
-      String(
-        state.member.role || ""
-      ).toLowerCase()
+      String(state.member.role || "").toLowerCase()
     )
   );
 }
@@ -1663,9 +1572,7 @@ function renderClubSpace(section){
 
   if(!state.sb){
     message(
-      box,
-      "Service de connexion indisponible.",
-      true
+      box,"Service de connexion indisponible.",true
     );
     return;
   }
@@ -1673,7 +1580,8 @@ function renderClubSpace(section){
   if(!state.user){
     description(
       box,
-      "Connectez-vous avec vos identifiants EAH Diving."
+      "Connexion réservée aux comptes " +
+      "EAH Diving autorisés par le club."
     );
 
     const form = el("form","form");
@@ -1701,7 +1609,6 @@ function renderClubSpace(section){
       "submit",
       async event => {
         event.preventDefault();
-
         setBusy(submit,true);
 
         try{
@@ -1711,17 +1618,13 @@ function renderClubSpace(section){
               password:password.value
             });
 
-          if(result.error){
-            throw result.error;
-          }
+          if(result.error) throw result.error;
 
           await refreshMember();
           renderPages("espace-club");
 
         }catch(error){
-          message(
-            feedback,errorText(error),true
-          );
+          message(feedback,errorText(error),true);
         }finally{
           setBusy(submit,false);
         }
@@ -1751,8 +1654,7 @@ function renderClubSpace(section){
   }
 
   box.appendChild(
-    el(
-      "h3","",
+    el("h3","",
       "Bienvenue " +
       (
         state.member.display_name ||
@@ -1810,11 +1712,18 @@ function renderManager(section){
 
   const feedback = el("div");
 
+  let previewUrl = null;
+
   input.addEventListener("change",() => {
     const file = input.files?.[0];
     if(!file) return;
 
-    preview.src = URL.createObjectURL(file);
+    if(previewUrl){
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    previewUrl = URL.createObjectURL(file);
+    preview.src = previewUrl;
     preview.hidden = false;
   });
 
@@ -1824,9 +1733,7 @@ function renderManager(section){
       const file = input.files?.[0];
 
       if(!file){
-        message(
-          feedback,"Sélectionnez une image.",true
-        );
+        message(feedback,"Sélectionnez une image.",true);
         return;
       }
 
@@ -1835,16 +1742,12 @@ function renderManager(section){
         "image/jpeg",
         "image/webp"
       ].includes(file.type)){
-        message(
-          feedback,"Format incorrect.",true
-        );
+        message(feedback,"Format incorrect.",true);
         return;
       }
 
       if(file.size > 3*1024*1024){
-        message(
-          feedback,"Fichier supérieur à 3 Mo.",true
-        );
+        message(feedback,"Fichier supérieur à 3 Mo.",true);
         return;
       }
 
@@ -1879,9 +1782,7 @@ function renderManager(section){
             upsert:false
           });
 
-        if(upload.error){
-          throw upload.error;
-        }
+        if(upload.error) throw upload.error;
 
         const publicUrl = state.sb.storage
           .from("eah-club-logos")
@@ -1893,9 +1794,7 @@ function renderManager(section){
           .eq("club_id",state.club.id)
           .select("club_id,logo_url");
 
-        if(update.error){
-          throw update.error;
-        }
+        if(update.error) throw update.error;
 
         if(!update.data?.length){
           throw new Error(
@@ -1919,10 +1818,7 @@ function renderManager(section){
     true
   );
 
-  box.append(
-    input,preview,save,feedback
-  );
-
+  box.append(input,preview,save,feedback);
   section.appendChild(box);
 
   const admin = el("div","panel");
@@ -1957,10 +1853,7 @@ function renderManager(section){
     .then(result => {
       if(result.error){
         orders.appendChild(
-          el(
-            "p","status error",
-            result.error.message
-          )
+          el("p","status error",result.error.message)
         );
         return;
       }
@@ -1974,11 +1867,9 @@ function renderManager(section){
 
       result.data.forEach(order => {
         orders.appendChild(
-          el(
-            "p","",
-            new Date(
-              order.created_at
-            ).toLocaleDateString("fr-FR") +
+          el("p","",
+            new Date(order.created_at)
+              .toLocaleDateString("fr-FR") +
             " — " + order.customer_name +
             " — " + money(order.total) +
             " — " + order.status
@@ -2005,10 +1896,7 @@ function renderStandard(page,section){
 
   if(illustration){
     image(
-      section,
-      illustration,
-      page.title,
-      "page-image"
+      section,illustration,page.title,"page-image"
     );
   }
 
@@ -2036,15 +1924,11 @@ function renderStandard(page,section){
   if(
     !page.description &&
     !illustration &&
-    ![
-      "disciplines","blazons","actualites"
-    ].includes(slug)
+    !["disciplines","blazons","actualites"]
+      .includes(slug)
   ){
     section.appendChild(
-      el(
-        "p","empty",
-        "Contenu bientôt disponible."
-      )
+      el("p","empty","Contenu bientôt disponible.")
     );
   }
 }
@@ -2054,9 +1938,7 @@ function renderStandard(page,section){
 ===================================================== */
 
 function showPage(slug){
-  const target = String(
-    slug || ""
-  ).toLowerCase();
+  const target = String(slug || "").toLowerCase();
 
   const exists = state.pages.some(
     p => String(p.slug).toLowerCase() === target
@@ -2138,11 +2020,9 @@ function renderPages(preferred){
       console.error("Page :",slug,error);
 
       section.appendChild(
-        el(
-          "p","status error",
+        el("p","status error",
           "Erreur dans cette rubrique : " +
-          errorText(error)
-        )
+          errorText(error))
       );
     }
 
@@ -2170,7 +2050,7 @@ function renderPages(preferred){
 }
 
 /* =====================================================
-   NFC - OUTILS ET CONTEXTE
+   NFC - MODE INDEPENDANT
 ===================================================== */
 
 function nfcMode(){
@@ -2182,107 +2062,14 @@ function nfcMode(){
   $("app").querySelector("footer").hidden = true;
 
   const pages = $("pages");
-
   pages.replaceChildren();
   pages.className = "nfc-container";
 
   return pages;
 }
 
-/*
-  Le lien de retour conserve le club et le NFC.
-  Il ne doit jamais contenir le mot de passe.
-*/
-
-function nfcRedirect(){
-  const url = new URL(location.href);
-
-  url.hash = "";
-
-  [
-    "code",
-    "error",
-    "error_code",
-    "error_description",
-    "access_token",
-    "refresh_token",
-    "token_type",
-    "expires_in"
-  ].forEach(key => {
-    url.searchParams.delete(key);
-  });
-
-  return url.toString();
-}
-
-function nfcPendingKey(){
-  return (
-    "eah_nfc_pending_v12_" +
-    CLUB_SLUG +
-    "_" +
-    NFC_TOKEN
-  );
-}
-
-function nfcSavePending(data){
-  const payload = {
-    ...data,
-    clubSlug:CLUB_SLUG,
-    token:NFC_TOKEN,
-    savedAt:Date.now()
-  };
-
-  localStorage.setItem(
-    nfcPendingKey(),
-    JSON.stringify(payload)
-  );
-}
-
-function nfcReadPending(){
-  try{
-    const raw = localStorage.getItem(
-      nfcPendingKey()
-    );
-
-    if(!raw) return null;
-
-    const data = JSON.parse(raw);
-
-    if(
-      data.clubSlug !== CLUB_SLUG ||
-      data.token !== NFC_TOKEN
-    ){
-      return null;
-    }
-
-    if(
-      data.savedAt &&
-      Date.now() - data.savedAt >
-        7 * 24 * 60 * 60 * 1000
-    ){
-      nfcClearPending();
-      return null;
-    }
-
-    return data;
-
-  }catch(error){
-    console.warn(
-      "Données NFC en attente :",
-      error
-    );
-
-    return null;
-  }
-}
-
-function nfcClearPending(){
-  localStorage.removeItem(nfcPendingKey());
-}
-
 function nfcPhotoUrl(value){
   const raw = String(value || "").trim();
-
   if(!raw) return "";
 
   const patterns = [
@@ -2296,7 +2083,6 @@ function nfcPhotoUrl(value){
 
   for(const pattern of patterns){
     const match = raw.match(pattern);
-
     if(match){
       id = match[1];
       break;
@@ -2317,20 +2103,15 @@ function nfcPhotoUrl(value){
 
   try{
     const url = new URL(raw);
-
-    if(url.protocol !== "https:"){
-      return "";
-    }
-
+    if(url.protocol !== "https:") return "";
     return url.href;
-
   }catch(error){
     return "";
   }
 }
 
 /* =====================================================
-   NFC - FONCTIONS SUPABASE EXISTANTES
+   NFC - LECTURE CARTE
 ===================================================== */
 
 async function nfcLookup(){
@@ -2347,9 +2128,13 @@ async function nfcLookup(){
   return Array.isArray(data) ? data[0] : data;
 }
 
+/* =====================================================
+   NFC - LECTURE PROFIL
+===================================================== */
+
 async function nfcProfile(){
   const {data,error} = await state.sb.rpc(
-    "eah_nfc_profile_v7",
+    "eah_nfc_public_profile_v1",
     {
       p_club_slug:CLUB_SLUG,
       p_token:NFC_TOKEN
@@ -2361,379 +2146,51 @@ async function nfcProfile(){
   return Array.isArray(data) ? data[0] : data;
 }
 
-async function nfcOptions(){
-  const {data,error} = await state.sb.rpc(
-    "eah_nfc_options_v7",
-    {
-      p_club_slug:CLUB_SLUG
-    }
-  );
+/* =====================================================
+   NFC - CREATION PROFIL
+===================================================== */
 
-  if(error) throw error;
-
-  return {
-    groups:Array.isArray(data?.groups)
-      ? data.groups
-      : [],
-    coaches:Array.isArray(data?.coaches)
-      ? data.coaches
-      : []
-  };
-}
-
-async function nfcActivate(first,last,id){
-  const {data,error} = await state.sb.rpc(
-    "eah_nfc_activate",
+async function nfcCreateProfile(data){
+  const {data:result,error} = await state.sb.rpc(
+    "eah_nfc_create_profile_v1",
     {
       p_club_slug:CLUB_SLUG,
       p_token:NFC_TOKEN,
-      p_first_name:first,
-      p_last_name:last,
-      p_eah_id:id || null
+      p_first_name:data.first,
+      p_last_name:data.last,
+      p_eah_id:data.id || null,
+      p_photo_url:data.photoUrl || null
     }
   );
 
   if(error) throw error;
 
-  return data;
-}
-
-async function nfcUploadPhoto(file){
-  if(!file) return null;
-
-  const types = {
-    "image/jpeg":"jpg",
-    "image/png":"png",
-    "image/webp":"webp"
-  };
-
-  if(!types[file.type]){
+  if(!result?.success){
     throw new Error(
-      "Utilisez JPG, PNG ou WebP."
+      "La création du profil n'a pas été confirmée."
     );
   }
 
-  if(file.size > 3 * 1024 * 1024){
-    throw new Error(
-      "Photo supérieure à 3 Mo."
-    );
-  }
-
-  const {data,error} =
-    await state.sb.auth.getUser();
-
-  if(error || !data?.user){
-    throw new Error(
-      "Connexion nécessaire pour envoyer la photo."
-    );
-  }
-
-  const unique =
-    typeof crypto.randomUUID === "function"
-      ? crypto.randomUUID()
-      : String(Date.now());
-
-  const path =
-    data.user.id +
-    "/" +
-    unique +
-    "." +
-    types[file.type];
-
-  const upload = await state.sb.storage
-    .from("eah-nfc-profiles")
-    .upload(path,file,{
-      contentType:file.type,
-      upsert:false
-    });
-
-  if(upload.error){
-    throw upload.error;
-  }
-
-  return state.sb.storage
-    .from("eah-nfc-profiles")
-    .getPublicUrl(path).data.publicUrl;
-}
-
-async function nfcSaveDetails(
-  groupId,
-  coachId,
-  file,
-  driveUrl
-){
-  let photoUrl = null;
-
-  if(file){
-    photoUrl = await nfcUploadPhoto(file);
-  }else if(driveUrl){
-    photoUrl = nfcPhotoUrl(driveUrl);
-
-    if(!photoUrl){
-      throw new Error(
-        "Lien de photo invalide."
-      );
-    }
-  }
-
-  const {error} = await state.sb.rpc(
-    "eah_nfc_details_v7",
-    {
-      p_club_slug:CLUB_SLUG,
-      p_token:NFC_TOKEN,
-      p_group_id:groupId || null,
-      p_coach_id:coachId || null,
-      p_photo_url:photoUrl
-    }
-  );
-
-  if(error) throw error;
-}
-
-function nfcSelect(parent,title,items){
-  const label = el("label","",title);
-  const select = el("select");
-
-  const empty = el(
-    "option","","Sélectionner..."
-  );
-
-  empty.value = "";
-  select.appendChild(empty);
-
-  items.forEach(item => {
-    const option = el(
-      "option","",item.name || "Sans nom"
-    );
-
-    option.value = item.id;
-    select.appendChild(option);
-  });
-
-  label.appendChild(select);
-  parent.appendChild(label);
-
-  return select;
+  return result;
 }
 
 /* =====================================================
-   NFC - IDENTIFICATION DE L'UTILISATEUR
-===================================================== */
-
-async function nfcCurrentUser(){
-  const {data,error} =
-    await state.sb.auth.getUser();
-
-  if(error){
-    if(
-      error.name === "AuthSessionMissingError" ||
-      /session missing/i.test(error.message || "")
-    ){
-      return null;
-    }
-
-    throw error;
-  }
-
-  return data?.user || null;
-}
-
-/*
-  Les données du formulaire sont conservées
-  localement et, pour les nouvelles inscriptions,
-  également dans les métadonnées du compte.
-
-  Cela permet de reprendre la création du profil
-  après confirmation, même si la page est rechargée.
-
-  Les métadonnées ne constituent pas une autorisation
-  de modifier une carte déjà attribuée.
-*/
-
-function nfcPendingFromUser(user){
-  const meta = object(user?.user_metadata);
-
-  if(
-    meta.eah_nfc_club_slug !== CLUB_SLUG ||
-    meta.eah_nfc_token !== NFC_TOKEN
-  ){
-    return null;
-  }
-
-  return {
-    first:meta.eah_first_name || "",
-    last:meta.eah_last_name || "",
-    id:meta.eah_id_requested || "",
-    email:normalizeEmail(user.email),
-    groupId:meta.eah_group_id || "",
-    coachId:meta.eah_coach_id || "",
-    driveUrl:meta.eah_drive_url || "",
-    clubSlug:CLUB_SLUG,
-    token:NFC_TOKEN
-  };
-}
-
-function nfcActivationData(user){
-  const pending = nfcReadPending();
-
-  if(
-    pending &&
-    normalizeEmail(pending.email) ===
-      normalizeEmail(user?.email)
-  ){
-    return pending;
-  }
-
-  return nfcPendingFromUser(user);
-}
-
-/* =====================================================
-   NFC - ACTIVATION APRES AUTHENTIFICATION
-===================================================== */
-
-async function nfcFinishActivation(file=null){
-  if(state.nfcBusy){
-    throw new Error(
-      "Activation déjà en cours."
-    );
-  }
-
-  state.nfcBusy = true;
-
-  try{
-    const user = await nfcCurrentUser();
-
-    if(!user){
-      throw new Error(
-        "Vous devez confirmer votre adresse e-mail " +
-        "ou vous connecter avant d'activer la carte."
-      );
-    }
-
-    if(!user.email_confirmed_at){
-      throw new Error(
-        "Adresse e-mail non confirmée. " +
-        "Consultez votre messagerie."
-      );
-    }
-
-    const saved = nfcActivationData(user);
-
-    if(!saved){
-      throw new Error(
-        "Les informations d'activation ne sont " +
-        "pas disponibles. Reprenez le formulaire " +
-        "de cette carte NFC."
-      );
-    }
-
-    const first = String(
-      saved.first || ""
-    ).trim();
-
-    const last = String(
-      saved.last || ""
-    ).trim();
-
-    const id = String(
-      saved.id || ""
-    ).trim();
-
-    if(!first || !last){
-      throw new Error(
-        "Nom et prénom obligatoires."
-      );
-    }
-
-    if(
-      id &&
-      !/^[A-Za-z0-9_-]{4,32}$/.test(id)
-    ){
-      throw new Error(
-        "Identifiant EAH invalide : " +
-        "4 à 32 caractères."
-      );
-    }
-
-    /*
-      Attribution transactionnelle de la carte.
-
-      La fonction Supabase vérifie :
-      - le compte connecté
-      - le club
-      - le token NFC
-      - la disponibilité de la carte
-      - l'unicité de l'identifiant
-    */
-
-    const assignedId = await nfcActivate(
-      first,
-      last,
-      id
-    );
-
-    console.info(
-      "Carte NFC attribuée :",
-      assignedId
-    );
-
-    let detailsError = null;
-
-    try{
-      await nfcSaveDetails(
-        saved.groupId || null,
-        saved.coachId || null,
-        file,
-        saved.driveUrl || null
-      );
-    }catch(error){
-      detailsError = error;
-
-      console.warn(
-        "Informations complémentaires :",
-        error
-      );
-    }
-
-    const profile = await nfcProfile();
-
-    if(
-      String(profile?.status || "").toUpperCase()
-      !== "ACTIVE"
-    ){
-      throw new Error(
-        "L'activation n'a pas été confirmée " +
-        "par Supabase."
-      );
-    }
-
-    nfcClearPending();
-
-    return {
-      profile,
-      assignedId,
-      detailsError
-    };
-
-  }finally{
-    state.nfcBusy = false;
-  }
-}
-
-/* =====================================================
-   NFC - PROFIL PUBLIC
+   NFC - AFFICHAGE PROFIL
 ===================================================== */
 
 function nfcRenderProfile(panel,profile,card){
   panel.replaceChildren();
-
-  const name =
-    profile?.name ||
-    card?.profile_name ||
-    "Profil EAH Diving";
+  panel.classList.add("nfc-profile");
 
   panel.appendChild(
-    el("h2","nfc-title",name)
+    el("div","nfc-logo","EAH DIVING")
+  );
+
+  panel.appendChild(
+    el("h2","nfc-title",
+      profile?.name ||
+      card?.profile_name ||
+      "Profil EAH Diving")
   );
 
   if(profile?.photo_url){
@@ -2745,11 +2202,13 @@ function nfcRenderProfile(panel,profile,card){
     );
   }
 
-  description(
-    panel,
-    profile?.club_name ||
-    card?.club_name ||
-    ""
+  const info = el("div","nfc-info");
+
+  info.appendChild(
+    el("p","",
+      profile?.club_name ||
+      card?.club_name ||
+      "")
   );
 
   const eahId =
@@ -2757,210 +2216,70 @@ function nfcRenderProfile(panel,profile,card){
     card?.profile_eah_id ||
     "";
 
+  panel.appendChild(info);
+
   panel.appendChild(
-    el(
-      "div",
-      "nfc-id",
-      "EAH ID : " + eahId
-    )
+    el("div","nfc-id","EAH ID : " + eahId)
   );
 
   if(profile?.group_name){
     panel.appendChild(
-      el(
-        "p","",
-        "Groupe : " + profile.group_name
-      )
+      el("p","","Groupe : " + profile.group_name)
     );
   }
 
-  if(profile?.coach_name){
+  if(profile?.blazon){
     panel.appendChild(
-      el(
-        "p","",
-        "Coach : " + profile.coach_name
-      )
+      el("p","","Blazon : " + profile.blazon)
     );
   }
 
   panel.appendChild(
-    el(
-      "p",
-      "status success",
-      "Profil EAH Diving actif."
-    )
+    el("p","status success",
+      "Profil EAH Diving actif.")
   );
 
   const actions = el("div","nfc-actions");
 
-  const copy = button(
-    "Copier le lien de mon profil",
-    async () => {
+  actions.appendChild(
+    button("Copier le lien du profil",async () => {
       try{
         await navigator.clipboard.writeText(
-          nfcRedirect()
+          location.href.split("#")[0]
         );
-
         alert("Lien copié.");
       }catch(error){
-        alert(
-          "Impossible de copier automatiquement le lien."
-        );
+        alert("Copie impossible.");
       }
-    }
+    })
   );
 
-  actions.appendChild(copy);
-
   panel.appendChild(actions);
+
+  panel.appendChild(
+    el("p","nfc-help",
+      "Cette carte NFC est associée à ce profil. " +
+      "Chaque nouveau scan ouvre cette page.")
+  );
 }
 
 /* =====================================================
-   NFC - ENVOI DES EMAILS
-===================================================== */
-
-/*
-  NOUVEL UTILISATEUR
-
-  signUp :
-  - crée le compte Auth
-  - demande la confirmation email
-  - transmet les informations nécessaires
-    à l'activation NFC
-*/
-
-
-async function nfcSignUp(data, password){
-
-  const email = normalizeEmail(data.email);
-
-  if(!validateEmail(email)){
-    throw new Error("Adresse e-mail invalide.");
-  }
-
-  const {data:result,error} =
-    await state.sb.auth.signInWithOtp({
-      email,
-      options:{
-        shouldCreateUser:true,
-        emailRedirectTo:nfcRedirect(),
-        data:{
-          first_name:data.first,
-          last_name:data.last,
-          eah_first_name:data.first,
-          eah_last_name:data.last,
-          eah_id_requested:data.id || "",
-          eah_nfc_club_slug:CLUB_SLUG,
-          eah_nfc_token:NFC_TOKEN,
-          eah_group_id:data.groupId || "",
-          eah_coach_id:data.coachId || "",
-          eah_drive_url:data.driveUrl || ""
-        }
-      }
-    });
-
-  if(error){
-    throw error;
-  }
-
-  return {
-    ...result,
-    session:result?.session || null
-  };
-}
-
-
-/*
-  UTILISATEUR EXISTANT
-
-  signInWithOtp :
-  - envoie un lien de connexion
-  - ne crée jamais de nouveau compte
-  - conserve le lien NFC dans la redirection
-*/
-
-async function nfcSendMagicLink(email){
-  const adresse = normalizeEmail(email);
-
-  if(!validateEmail(adresse)){
-    throw new Error(
-      "Adresse e-mail invalide."
-    );
-  }
-
-  const {error} =
-    await state.sb.auth.signInWithOtp({
-      email:adresse,
-      options:{
-        shouldCreateUser:false,
-        emailRedirectTo:nfcRedirect()
-      }
-    });
-
-  if(error){
-    throw error;
-  }
-
-  return true;
-}
-
-/* =====================================================
-   NFC - REPRISE AUTOMATIQUE
-===================================================== */
-
-async function nfcTryAutoActivation(){
-  const user = await nfcCurrentUser();
-
-  if(!user){
-    return {
-      activated:false,
-      reason:"not_authenticated"
-    };
-  }
-
-  if(!user.email_confirmed_at){
-    return {
-      activated:false,
-      reason:"not_confirmed"
-    };
-  }
-
-  const saved = nfcActivationData(user);
-
-  if(!saved){
-    return {
-      activated:false,
-      reason:"no_pending_data"
-    };
-  }
-
-  const result = await nfcFinishActivation();
-
-  return {
-    activated:true,
-    result
-  };
-}
-
-/* =====================================================
-   NFC - FORMULAIRE PRINCIPAL
+   NFC - FORMULAIRE SANS EMAIL
 ===================================================== */
 
 async function renderNfc(){
   const pages = nfcMode();
 
   const panel = el("section","panel");
-
-  const heading = el(
-    "h2",
-    "nfc-title",
-    "Carte NFC EAH Diving"
-  );
+  pages.appendChild(panel);
 
   const feedback = el("div");
 
-  panel.append(heading,feedback);
-  pages.appendChild(panel);
+  panel.appendChild(
+    el("div","nfc-logo","EAH DIVING")
+  );
+
+  panel.appendChild(feedback);
 
   if(!state.sb){
     message(
@@ -2972,120 +2291,49 @@ async function renderNfc(){
   }
 
   try{
-    /*
-      Vérifier d'abord la carte.
-    */
-
     const card = await nfcLookup();
 
     if(!card){
       throw new Error(
-        "Carte NFC introuvable."
+        "Carte NFC introuvable. Vérifiez le lien."
       );
     }
 
     const profile = await nfcProfile();
 
-    /*
-      Carte déjà activée :
-      affichage du profil public.
-    */
+    if(
+      String(
+        profile?.status ||
+        card.card_status ||
+        ""
+      ).toUpperCase() === "ACTIVE"
+    ){
+      nfcRenderProfile(panel,profile,card);
+      return;
+    }
 
-if(
-  String(
-    profile?.status ||
-    card.card_status ||
-    ""
-  ).toUpperCase() === "ACTIVE"
-){
+    panel.appendChild(
+      el("h2","nfc-title","Créer mon profil EAH")
+    );
 
-  // La carte possède déjà un profil actif.
-  // Afficher directement ce profil.
-  nfcRenderProfile(panel,profile,card);
-
-  return;
-}
-
-    /*
-      Si l'utilisateur revient d'un email,
-      on tente automatiquement l'activation.
-    */
-
-    let autoError = null;
-
-    try{
-      const automatic =
-        await nfcTryAutoActivation();
-
-      if(automatic.activated){
-        const updated = await nfcProfile();
-
-        nfcRenderProfile(
-          panel,
-          updated,
-          card
-        );
-
-        if(automatic.result.detailsError){
-          panel.appendChild(
-            el(
-              "p",
-              "status error",
-              "Profil créé, mais certaines " +
-              "informations complémentaires " +
-              "n'ont pas été enregistrées : " +
-              errorText(
-                automatic.result.detailsError
-              )
-            )
-          );
-        }
-
-        return;
-      }
-    }catch(error){
-      autoError = error;
-
-      console.warn(
-        "Activation automatique :",
-        error
+    if(card.card_number){
+      panel.appendChild(
+        el("p","nfc-card-number",
+          "Carte NFC n° " + card.card_number)
       );
     }
 
-    /*
-      Carte disponible :
-      formulaire de création.
-    */
-
-    const options = await nfcOptions();
-
-    heading.textContent =
-      "Créer mon profil EAH";
-
     description(
       panel,
-      "Carte n° " +
-      (card.card_number || "") +
-      " — " +
-      (card.club_name || "")
+      "Club : " + (card.club_name || "")
     );
 
     description(
       panel,
-      "Complétez le formulaire pour créer " +
-      "votre compte. Après confirmation " +
-      "de votre adresse e-mail, cette carte " +
-      "NFC sera attribuée à votre profil."
+      "Complétez ce formulaire pour créer " +
+      "votre profil EAH Diving. Votre carte NFC " +
+      "sera activée immédiatement, sans e-mail."
     );
-
-    if(autoError){
-      message(
-        feedback,
-        "La carte n'a pas encore été activée : " +
-        errorText(autoError),
-        true
-      );
-    }
 
     const form = el("form","form");
 
@@ -3093,9 +2341,15 @@ if(
       form,"Prénom","text"
     );
 
+    first.maxLength = 80;
+    first.autocomplete = "given-name";
+
     const last = field(
       form,"Nom","text"
     );
+
+    last.maxLength = 80;
+    last.autocomplete = "family-name";
 
     const id = field(
       form,
@@ -3110,295 +2364,141 @@ if(
     id.pattern = "[A-Za-z0-9_-]{4,32}";
     id.maxLength = 32;
 
-    const email = field(
-      form,"Adresse e-mail","email"
+    description(
+      form,
+      "Vous pouvez choisir votre identifiant " +
+      "personnalisé. Si vous laissez ce champ vide, " +
+      "l'identifiant de la carte sera utilisé."
     );
-
-
-    /*
-      Photo.
-    */
-
-    const photoLabel = el(
-      "label",
-      "",
-      "Photo du profil (fichier)"
-    );
-
-    const photoInput = el("input");
-
-    photoInput.type = "file";
-    photoInput.accept =
-      "image/jpeg,image/png,image/webp";
-
-    photoLabel.appendChild(photoInput);
 
     const driveLabel = el(
       "label",
       "",
-      "Ou lien Google Drive de la photo"
+      "Lien de photo (facultatif)"
     );
 
     const driveInput = el("input");
-
     driveInput.type = "url";
     driveInput.required = false;
     driveInput.placeholder =
       "https://drive.google.com/file/d/.../view";
 
     driveLabel.appendChild(driveInput);
+    form.appendChild(driveLabel);
 
-    const preview = el("img");
-
+    const preview = el("img","nfc-preview");
     preview.hidden = true;
-    preview.style.width = "150px";
-    preview.style.height = "150px";
-    preview.style.objectFit = "cover";
-    preview.style.borderRadius = "50%";
+    form.appendChild(preview);
 
-    let previewUrl = null;
+    driveInput.addEventListener("input",() => {
+      const src = nfcPhotoUrl(driveInput.value);
 
-    function updatePhotoPreview(){
-      if(previewUrl){
-        URL.revokeObjectURL(previewUrl);
-        previewUrl = null;
-      }
-
-      const file = photoInput.files?.[0];
-
-      if(file){
-        previewUrl = URL.createObjectURL(file);
-        preview.src = previewUrl;
-        preview.hidden = false;
-        return;
-      }
-
-      const drive = nfcPhotoUrl(
-        driveInput.value
-      );
-
-      if(drive){
-        preview.src = drive;
+      if(src){
+        preview.src = src;
         preview.hidden = false;
       }else{
         preview.hidden = true;
       }
-    }
-
-    photoInput.addEventListener(
-      "change",updatePhotoPreview
-    );
-
-    driveInput.addEventListener(
-      "input",updatePhotoPreview
-    );
+    });
 
     preview.onerror = () => {
       preview.hidden = true;
     };
 
-    form.append(
-      photoLabel,
-      driveLabel,
-      preview
-    );
-
-    const group = nfcSelect(
-      form,
-      "Groupe d'affectation",
-      options.groups
-    );
-
-    const coach = nfcSelect(
-      form,
-      "Coach associé au profil",
-      options.coaches
-    );
-
     const submit = el(
       "button",
       "primary-button",
-      "Créer mon profil EAH et recevoir mon lien"
+      "Créer mon profil et activer ma carte NFC"
     );
 
     submit.type = "submit";
-
     form.appendChild(submit);
     panel.appendChild(form);
-
-    /*
-      Restaurer les données précédemment saisies.
-    */
-
-    const pending = nfcReadPending();
-
-    if(pending){
-      first.value = pending.first || "";
-      last.value = pending.last || "";
-      id.value = pending.id || "";
-      email.value = pending.email || "";
-      group.value = pending.groupId || "";
-      coach.value = pending.coachId || "";
-      driveInput.value = pending.driveUrl || "";
-
-      updatePhotoPreview();
-    }
-
-    function getFormData(){
-      return {
-        first:first.value.trim(),
-        last:last.value.trim(),
-        id:id.value.trim(),
-        email:normalizeEmail(email.value),
-        groupId:group.value || "",
-        coachId:coach.value || "",
-        driveUrl:driveInput.value.trim()
-      };
-    }
-
-    function validateFormData(data){
-      if(!data.first || !data.last){
-        throw new Error(
-          "Indiquez votre prénom et votre nom."
-        );
-      }
-
-      if(!validateEmail(data.email)){
-        throw new Error(
-          "Indiquez une adresse e-mail valide."
-        );
-      }
-
-      if(
-        data.id &&
-        !/^[A-Za-z0-9_-]{4,32}$/.test(data.id)
-      ){
-        throw new Error(
-          "L'identifiant EAH doit contenir " +
-          "4 à 32 caractères : lettres, " +
-          "chiffres, tirets ou underscores."
-        );
-      }
-
-      if(
-        data.driveUrl &&
-        !nfcPhotoUrl(data.driveUrl)
-      ){
-        throw new Error(
-          "Lien de photo invalide."
-        );
-      }
-    }
-
-    function saveFormData(){
-      const data = getFormData();
-
-      validateFormData(data);
-
-      nfcSavePending(data);
-
-      return data;
-    }
-
-    /*
-      CREATION DU COMPTE.
-    */
 
     form.addEventListener(
       "submit",
       async event => {
         event.preventDefault();
 
+        if(state.nfcBusy) return;
+
+        state.nfcBusy = true;
+
         setBusy(
           submit,
           true,
-          "Inscription en cours..."
+          "Création du profil..."
         );
 
         try{
-          const data = saveFormData();
+          const firstName = first.value.trim();
+          const lastName = last.value.trim();
+          const identifier = id.value.trim();
 
-          const current =
-            await nfcCurrentUser();
-
-          /*
-            Compte déjà connecté :
-            on ne crée pas un second compte.
-          */
-
-          if(current){
-            if(
-              normalizeEmail(current.email) !==
-              data.email
-            ){
-              throw new Error(
-                "Un autre compte est connecté. " +
-                "Déconnectez-vous avant de " +
-                "créer ce profil."
-              );
-            }
-
-            const result =
-              await nfcFinishActivation(
-                photoInput.files?.[0] || null
-              );
-
-            await renderNfc();
-
-            return;
+          if(
+            firstName.length < 2 ||
+            lastName.length < 2
+          ){
+            throw new Error(
+              "Le prénom et le nom sont obligatoires."
+            );
           }
 
-          /*
-            Nouvelle inscription Supabase.
-          */
-
-          const result = await nfcSignUp(data);
-
-          /*
-            Si la confirmation email est activée,
-            Supabase ne fournit normalement pas
-            de session immédiatement.
-          */
-
-          if(result.session){
-            const activation =
-              await nfcFinishActivation(
-                photoInput.files?.[0] || null
-              );
-
-            await renderNfc();
-
-            return;
+          if(
+            identifier &&
+            !/^[A-Za-z0-9_-]{4,32}$/.test(identifier)
+          ){
+            throw new Error(
+              "Identifiant EAH invalide : " +
+              "4 à 32 caractères."
+            );
           }
 
-          /*
-            ATTENTION :
-            signUp peut également retourner une
-            réponse non concluante si l'adresse
-            possède déjà un compte.
+          const rawPhoto = driveInput.value.trim();
 
-            On ne prétend donc jamais que le mail
-            a effectivement été délivré.
-          */
+          const photoUrl = rawPhoto
+            ? nfcPhotoUrl(rawPhoto)
+            : null;
 
-          message(
-            feedback,
-            "Demande d'inscription acceptée.\n\n" +
-            "Si cette adresse est nouvelle, " +
-            "Supabase doit envoyer un e-mail " +
-            "de confirmation.\n\n" +
-            "Cliquez sur le lien reçu pour " +
-            "confirmer votre compte et " +
-            "activer cette carte NFC.\n\n" +
-            "Si vous possédez déjà un compte " +
-            "EAH Diving, utilisez la rubrique " +
-            "« Déjà inscrit ? » ci-dessous.\n\n" +
-            "Vérifiez également les spams."
+          if(rawPhoto && !photoUrl){
+            throw new Error(
+              "Le lien de photo est invalide."
+            );
+          }
+
+          const result = await nfcCreateProfile({
+            first:firstName,
+            last:lastName,
+            id:identifier,
+            photoUrl:photoUrl
+          });
+
+          console.info(
+            "Profil EAH créé :",
+            result.eah_id
+          );
+
+          const updated = await nfcProfile();
+
+          if(
+            String(updated?.status || "")
+              .toUpperCase() !== "ACTIVE"
+          ){
+            throw new Error(
+              "Le profil a été enregistré, " +
+              "mais son affichage n'a pas été confirmé."
+            );
+          }
+
+          nfcRenderProfile(
+            panel,
+            updated,
+            card
           );
 
         }catch(error){
           console.error(
-            "Inscription NFC :",
+            "Création NFC :",
             error
           );
 
@@ -3410,235 +2510,22 @@ if(
           );
 
         }finally{
+          state.nfcBusy = false;
           setBusy(submit,false);
         }
       }
     );
-
-    /*
-      CONNEXION DES COMPTES EXISTANTS.
-    */
-
-    const details = el("details");
-
-    const summary = el(
-      "summary",
-      "",
-      "Déjà inscrit ? Se connecter"
-    );
-
-    details.appendChild(summary);
-
-    description(
-      details,
-      "Utilisez votre compte EAH Diving " +
-      "existant pour activer cette nouvelle " +
-      "carte NFC, même si elle appartient " +
-      "à un autre club."
-    );
-
-    const login = el("form","form");
-
-    const loginEmail = field(
-      login,
-      "Adresse e-mail du compte",
-      "email"
-    );
-
-    const loginPassword = field(
-      login,
-      "Mot de passe",
-      "password"
-    );
-
-    const loginButton = el(
-      "button",
-      "primary-button",
-      "Se connecter et activer ma carte"
-    );
-
-    loginButton.type = "submit";
-
-    const loginFeedback = el("div");
-
-    login.append(
-      loginButton,
-      loginFeedback
-    );
-
-    details.appendChild(login);
-
-    /*
-      CONNEXION PAR MOT DE PASSE.
-    */
-
-    login.addEventListener(
-      "submit",
-      async event => {
-        event.preventDefault();
-
-        setBusy(loginButton,true);
-
-        try{
-          const data = saveFormData();
-
-          const adresse = normalizeEmail(
-            loginEmail.value
-          );
-
-          if(!validateEmail(adresse)){
-            throw new Error(
-              "Adresse e-mail invalide."
-            );
-          }
-
-          if(data.email !== adresse){
-            throw new Error(
-              "L'adresse du formulaire doit " +
-              "correspondre au compte utilisé " +
-              "pour activer la carte."
-            );
-          }
-
-          const {error} =
-            await state.sb.auth.signInWithPassword({
-              email:adresse,
-              password:loginPassword.value
-            });
-
-          if(error){
-            throw error;
-          }
-
-          await nfcFinishActivation(
-            photoInput.files?.[0] || null
-          );
-
-          await renderNfc();
-
-        }catch(error){
-          message(
-            loginFeedback,
-            errorText(error),
-            true
-          );
-
-        }finally{
-          setBusy(loginButton,false);
-        }
-      }
-    );
-
-    /*
-      LIEN MAGIQUE POUR COMPTE EXISTANT.
-    */
-
-    const magicButton = button(
-      "Recevoir un lien de connexion par e-mail",
-      async () => {
-        setBusy(
-          magicButton,
-          true,
-          "Demande d'envoi..."
-        );
-
-        try{
-          const data = saveFormData();
-
-          const adresse = normalizeEmail(
-            loginEmail.value ||
-            data.email
-          );
-
-          if(adresse !== data.email){
-            throw new Error(
-              "Utilisez la même adresse " +
-              "dans le formulaire et pour " +
-              "la connexion."
-            );
-          }
-
-          await nfcSendMagicLink(adresse);
-
-          message(
-            loginFeedback,
-            "Demande de lien de connexion " +
-            "acceptée pour : " + adresse +
-            "\n\nOuvrez le message EAH Diving " +
-            "et cliquez sur le bouton " +
-            "de connexion.\n\n" +
-            "Le lien vous ramènera vers " +
-            "cette carte NFC.\n\n" +
-            "Si le message n'arrive pas, " +
-            "vérifiez les spams et la " +
-            "configuration SMTP."
-          );
-
-        }catch(error){
-          message(
-            loginFeedback,
-            "Envoi impossible : " +
-            errorText(error),
-            true
-          );
-
-        }finally{
-          setBusy(magicButton,false);
-        }
-      }
-    );
-
-    details.appendChild(magicButton);
-
-    /*
-      DECONNEXION POUR CHANGER DE COMPTE.
-    */
-
-    const current = await nfcCurrentUser();
-
-    if(current){
-      const connected = el(
-        "p",
-        "status",
-        "Compte actuellement connecté : " +
-        current.email
-      );
-
-      panel.appendChild(connected);
-
-      panel.appendChild(
-        button(
-          "Changer de compte",
-          async () => {
-            await state.sb.auth.signOut();
-            await renderNfc();
-          }
-        )
-      );
-    }
-
-    panel.appendChild(details);
-
-    /*
-      INFORMATIONS DE SECURITE.
-    */
 
     panel.appendChild(
       el("hr","nfc-divider")
     );
 
     panel.appendChild(
-      el(
-        "p",
-        "nfc-help",
-        "Chaque carte NFC est attribuée " +
-        "à un compte authentifié. " +
-        "Un même compte peut posséder " +
-        "plusieurs cartes et être membre " +
-        "de plusieurs clubs. " +
-        "L'identifiant EAH de chaque carte " +
-        "doit être unique."
-      )
+      el("p","nfc-help",
+        "Chaque carte NFC possède un lien unique. " +
+        "Une fois le profil créé, cette carte est " +
+        "définitivement attribuée. " +
+        "Les scans suivants affichent le profil.")
     );
 
   }catch(error){
@@ -3653,200 +2540,6 @@ if(
       true
     );
   }
-}
-
-/* =====================================================
-   RECUPERATION DE MOT DE PASSE
-===================================================== */
-
-function nfcIsRecovery(){
-  const hash = new URLSearchParams(
-    location.hash.slice(1)
-  );
-
-  return (
-    hash.get("type") === "recovery"
-  );
-}
-
-async function renderNfcRecovery(){
-  const pages = nfcMode();
-
-  const panel = el("section","panel");
-
-  panel.appendChild(
-    el(
-      "h2",
-      "",
-      "Définir mon nouveau mot de passe"
-    )
-  );
-
-  const form = el("form","form");
-
-  const password = field(
-    form,
-    "Nouveau mot de passe",
-    "password"
-  );
-
-  password.minLength = 8;
-
-  const confirm = field(
-    form,
-    "Confirmer le mot de passe",
-    "password"
-  );
-
-  confirm.minLength = 8;
-
-  const submit = el(
-    "button",
-    "primary-button",
-    "Enregistrer mon mot de passe"
-  );
-
-  submit.type = "submit";
-
-  const feedback = el("div");
-
-  form.append(
-    password,
-    confirm,
-    submit,
-    feedback
-  );
-
-  panel.appendChild(form);
-  pages.appendChild(panel);
-
-  form.addEventListener(
-    "submit",
-    async event => {
-      event.preventDefault();
-
-      setBusy(submit,true);
-
-      try{
-        if(password.value.length < 8){
-          throw new Error(
-            "Mot de passe trop court."
-          );
-        }
-
-        if(password.value !== confirm.value){
-          throw new Error(
-            "Les mots de passe ne correspondent pas."
-          );
-        }
-
-        const {error} =
-          await state.sb.auth.updateUser({
-            password:password.value
-          });
-
-        if(error){
-          throw error;
-        }
-
-        message(
-          feedback,
-          "Mot de passe enregistré."
-        );
-
-        const url = new URL(location.href);
-        url.hash = "";
-
-        history.replaceState(
-          null,
-          "",
-          url.toString()
-        );
-
-        const back = button(
-          "Accéder à ma carte NFC",
-          async () => {
-            await renderNfc();
-          },
-          true
-        );
-
-        panel.appendChild(back);
-
-      }catch(error){
-        message(
-          feedback,
-          errorText(error),
-          true
-        );
-
-      }finally{
-        setBusy(submit,false);
-      }
-    }
-  );
-}
-
-/* =====================================================
-   RECUPERATION AUTHENTIFICATION EMAIL
-===================================================== */
-
-/*
-  Supabase peut retourner :
-  - un code PKCE dans ?code=
-  - une session dans le fragment URL
-  - une erreur de confirmation
-
-  Le client Supabase est initialisé avec
-  detectSessionInUrl:true.
-
-  Pour le flux PKCE, le code est échangé
-  explicitement si nécessaire.
-*/
-
-async function handleAuthReturn(){
-
-  const query = new URLSearchParams(
-    location.search
-  );
-
-  const hash = new URLSearchParams(
-    location.hash.slice(1)
-  );
-
-  const errorDescription =
-    query.get("error_description") ||
-    hash.get("error_description");
-
-  if(errorDescription){
-    throw new Error(errorDescription);
-  }
-
-  // En mode implicit, Supabase traite
-  // automatiquement les jetons de l'URL.
-  // Aucun échange PKCE manuel.
-
-  const {data,error} =
-    await state.sb.auth.getSession();
-
-  if(error){
-    throw error;
-  }
-
-  if(data?.session){
-    return true;
-  }
-
-  // Si un ancien lien PKCE est encore utilisé,
-  // il faut demander un nouveau lien.
-  if(query.has("code")){
-    throw new Error(
-      "Ce lien utilise l'ancien système PKCE. " +
-      "Demandez un nouveau lien de connexion EAH."
-    );
-  }
-
-  return false;
 }
 
 /* =====================================================
@@ -3888,113 +2581,46 @@ async function refreshPublic(){
 }
 
 /* =====================================================
-   DEMARRAGE GENERAL
+   DEMARRAGE
 ===================================================== */
 
 async function start(){
   try{
-    /*
-      Initialisation Supabase.
-    */
-
-    if(window.supabase?.createClient){
-      state.sb = window.supabase.createClient(
-        SUPABASE_URL,
-        PUBLIC_KEY,
-        {
-          auth:{
-  persistSession:true,
-  autoRefreshToken:true,
-  detectSessionInUrl:true,
-  flowType:"implicit"
-}
-        }
-      );
-    }else{
+    if(!window.supabase?.createClient){
       throw new Error(
         "Bibliothèque Supabase indisponible."
       );
     }
 
+    state.sb = window.supabase.createClient(
+      SUPABASE_URL,
+      PUBLIC_KEY,
+      {
+        auth:{
+          persistSession:true,
+          autoRefreshToken:true,
+          detectSessionInUrl:true,
+          flowType:"implicit"
+        }
+      }
+    );
+
     /*
-      MODE NFC PRIORITAIRE.
+      MODE NFC :
+      Prioritaire sur le site public.
+      Aucune connexion email demandée.
     */
 
     if(NFC_TOKEN){
+      await renderNfc();
 
-  let authReturnError = null;
+      console.info(
+        "EAH NFC : démarrage terminé.",
+        CLUB_SLUG
+      );
 
-  try{
-    await handleAuthReturn();
-  }catch(error){
-    authReturnError = error;
-    console.error("Retour authentification :",error);
-  }
-
-  // Attendre la restauration de la session
-  // avant de tenter l'activation NFC.
-
-  const {data:sessionData,error:sessionError} =
-    await state.sb.auth.getSession();
-
-  if(sessionError){
-    console.warn("Session :",sessionError);
-  }
-
-  if(sessionData?.session?.user){
-    console.info(
-      "Compte connecté :",
-      sessionData.session.user.email
-    );
-  }
-
-  if(nfcIsRecovery()){
-    await renderNfcRecovery();
-  }else{
-    await renderNfc();
-  }
-
-  if(authReturnError){
-    const warning = el(
-      "p",
-      "status error",
-      "Le lien d'authentification n'a pas " +
-      "pu être validé : " +
-      errorText(authReturnError)
-    );
-
-    $("pages").prepend(warning);
-  }
-
-  state.sb.auth.onAuthStateChange(
-    (event,session) => {
-
-      if(event === "PASSWORD_RECOVERY"){
-        setTimeout(() => {
-          renderNfcRecovery().catch(console.error);
-        },0);
-        return;
-      }
-
-      if(
-        event === "SIGNED_IN" &&
-        session?.user &&
-        !state.nfcBusy
-      ){
-        setTimeout(() => {
-          renderNfc().catch(console.error);
-        },0);
-      }
+      return;
     }
-  );
-
-  console.info(
-    "EAH NFC : démarrage terminé.",
-    CLUB_SLUG
-  );
-
-  return;
-}
 
     /*
       MODE SITE PUBLIC.
@@ -4007,10 +2633,6 @@ async function start(){
 
     renderPages();
 
-    /*
-      Connexion non bloquante.
-    */
-
     refreshMember()
       .then(() => {
         if(
@@ -4021,14 +2643,9 @@ async function start(){
       })
       .catch(error => {
         console.warn(
-          "Authentification :",
-          error
+          "Authentification :",error
         );
       });
-
-    /*
-      Actualisation toutes les 60 secondes.
-    */
 
     setInterval(() => {
       if(!document.hidden){
@@ -4064,18 +2681,14 @@ async function start(){
 
   }catch(error){
     console.error(
-      "EAH démarrage :",
-      error
+      "EAH démarrage :",error
     );
 
     $("loading").replaceChildren(
-      el(
-        "div",
-        "status error",
+      el("div","status error",
         "Impossible de charger le club.\n" +
         errorText(error) +
-        "\nVérifiez Supabase et les autorisations RLS."
-      )
+        "\nVérifiez Supabase et les autorisations RLS.")
     );
   }
 }
