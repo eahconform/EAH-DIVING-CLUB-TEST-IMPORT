@@ -2829,53 +2829,44 @@ function nfcRenderProfile(panel,profile,card){
     à l'activation NFC
 */
 
-async function nfcSignUp(data,password){
+
+async function nfcSignUp(data, password) {
+
   const email = normalizeEmail(data.email);
 
-  if(!validateEmail(email)){
-    throw new Error(
-      "Adresse e-mail invalide."
-    );
+  if (!validateEmail(email)) {
+    throw new Error("Adresse e-mail invalide.");
   }
 
-  if(password.length < 8){
-    throw new Error(
-      "Le mot de passe doit contenir " +
-      "au moins 8 caractères."
-    );
-  }
-
-  const {data:result,error} =
-    await state.sb.auth.signUp({
-      email,
-      password,
-      options:{
-        emailRedirectTo:nfcRedirect(),
-        data:{
-          first_name:data.first,
-          last_name:data.last,
-
-          eah_first_name:data.first,
-          eah_last_name:data.last,
-
-          eah_id_requested:data.id || "",
-
-          eah_nfc_club_slug:CLUB_SLUG,
-          eah_nfc_token:NFC_TOKEN,
-
-          eah_group_id:data.groupId || "",
-          eah_coach_id:data.coachId || "",
-          eah_drive_url:data.driveUrl || ""
+  const { data: result, error } =
+    await state.sb.auth.signInWithOtp({
+      email: email,
+      options: {
+        shouldCreateUser: true,
+        emailRedirectTo: nfcRedirect(),
+        data: {
+          first_name: data.first,
+          last_name: data.last,
+          eah_first_name: data.first,
+          eah_last_name: data.last,
+          eah_id_requested: data.id || "",
+          eah_nfc_club_slug: CLUB_SLUG,
+          eah_nfc_token: NFC_TOKEN,
+          eah_group_id: data.groupId || "",
+          eah_coach_id: data.coachId || "",
+          eah_drive_url: data.driveUrl || ""
         }
       }
     });
 
-  if(error){
+  if (error) {
+    console.error("EAH AUTH ERROR:", error);
     throw error;
   }
 
   return result;
 }
+
 
 /*
   UTILISATEUR EXISTANT
